@@ -12,13 +12,17 @@
 
 # testing
 /coverage
+.nyc_output
 
 # next.js
 /.next/
 /out/
+.next/
+next-env.d.ts
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -31,7 +35,12 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
 
 # vercel
 .vercel
@@ -39,3 +48,76 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE - JetBrains
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# IDE - WebStorm
+.idea/
+*.iws
+*.iml
+.idea_modules/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.lnk
+
+# Misc
+*.log
+*.pid
+*.seed
+*.pid.lock
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js.map
+
+# Optional
+# /public/images  # Uncomment if you want to ignore images
+# /docs  # Uncomment if you want to ignore documentation
+# /.github  # Uncomment if you want to ignore GitHub specific files
+
+# Mac
+**/.DS_Store
+.DS_Store
+
+# Cursor
+.cursorrules
+.cursorignore
+
+# Shadnc doc json
+**/src/lib/shadcn-docs.json
