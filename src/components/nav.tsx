@@ -1,11 +1,22 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { UserNav } from "@/components/user-nav"
 import { useEffect, useState } from "react"
 import { Images } from "@/constants/images"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
+import { cn } from "@/lib/utils"
 
 interface User {
   id: string
@@ -48,18 +59,54 @@ export function Nav() {
           priority
         />
         <div className="hidden md:flex gap-8 items-center">
-          <Link href="#" className="hover:text-blue-400 transition">Home</Link>
-          <Link href="#" className="hover:text-blue-400 transition">Standings</Link>
-          <Link href="#" className="hover:text-blue-400 transition">Schedule</Link>
-          <Link href="#" className="hover:text-blue-400 transition">Teams</Link>
-          <Link href="#" className="hover:text-blue-400 transition">News</Link>
-          {user ? (
-            <UserNav user={user} />
-          ) : (
-            <Button asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-          )}
+          <NavigationMenu>
+            <NavigationMenuList className="gap-6">
+              <NavigationMenuItem>
+                <Link href="/" legacyBehavior passHref>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "cursor-pointer hover:text-blue-400")}>
+                    Home
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="#" legacyBehavior passHref>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "cursor-pointer hover:text-blue-400")}>
+                    Standings
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="#" legacyBehavior passHref>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "cursor-pointer hover:text-blue-400")}>
+                    Schedule
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="#" legacyBehavior passHref>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "cursor-pointer hover:text-blue-400")}>
+                    Teams
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="#" legacyBehavior passHref>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "cursor-pointer hover:text-blue-400")}>
+                    News
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                {user ? (
+                  <UserNav user={user} />
+                ) : (
+                  <Button asChild>
+                    <Link href="/sign-in">Sign In</Link>
+                  </Button>
+                )}
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
       </div>
     </nav>
