@@ -1,32 +1,12 @@
 import Image from "next/image";
 import { Images } from "@/constants/images";
 import Link from "next/link";
+import { Nav } from "@/components/nav";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="nav-blur sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Image
-            src={Images.LOGO_MAIN.path}
-            alt="OVHL Logo"
-            width={120}
-            height={60}
-            priority
-          />
-          <div className="hidden md:flex gap-8 items-center">
-            <a href="#" className="hover:text-blue-400 transition">Home</a>
-            <a href="#" className="hover:text-blue-400 transition">Standings</a>
-            <a href="#" className="hover:text-blue-400 transition">Schedule</a>
-            <a href="#" className="hover:text-blue-400 transition">Teams</a>
-            <a href="#" className="hover:text-blue-400 transition">News</a>
-            <Link href="/sign-in" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">

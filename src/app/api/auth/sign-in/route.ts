@@ -4,6 +4,10 @@ import bcrypt from "bcryptjs"
 import { sign } from "jsonwebtoken"
 import { cookies } from "next/headers"
 
+// Disable Next.js caching for this route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * Prisma client instance for database operations
  * @constant
@@ -44,17 +48,20 @@ const prisma = new PrismaClient()
  */
 export async function POST(request: Request) {
   try {
+    console.log("SignInAPI: Starting sign-in process...")
     // Parse and validate request body
     const body = await request.json()
     const { email, password, rememberMe } = body
 
     if (!email || !password) {
+      console.log("SignInAPI: Missing credentials")
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
       )
     }
 
+    console.log("SignInAPI: Finding user by email...")
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
@@ -62,21 +69,25 @@ export async function POST(request: Request) {
 
     // Return same error for invalid email or password
     if (!user) {
+      console.log("SignInAPI: User not found")
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
       )
     }
 
+    console.log("SignInAPI: Verifying password...")
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, user.password)
     if (!isValidPassword) {
+      console.log("SignInAPI: Invalid password")
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
       )
     }
 
+    console.log("SignInAPI: Generating JWT...")
     // Generate JWT with appropriate expiration
     const token = sign(
       { userId: user.id, email: user.email },
@@ -84,6 +95,7 @@ export async function POST(request: Request) {
       { expiresIn: rememberMe ? "30d" : "24h" }
     )
 
+    console.log("SignInAPI: Creating response with user data...")
     // Create response with user data (excluding sensitive fields)
     const response = NextResponse.json({
       user: {
@@ -92,19 +104,23 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log("SignInAPI: Setting JWT cookie...")
     // Set secure cookie with JWT
-    response.cookies.set("token", token, {
-      httpOnly: true, // Prevents JavaScript access
-      secure: process.env.NODE_ENV === "production", // HTTPS only in production
-      sameSite: "lax", // CSRF protection
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 24 hours
-      path: "/", // Available across all routes
+    response.cookies.set({
+      name: "token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
+      path: "/",
     })
 
+    console.log("SignInAPI: Sign-in successful")
     return response
   } catch (error) {
     // Log error but don't expose details to client
-    console.error("Sign in error:", error)
+    console.error("SignInAPI: Error during sign-in:", error)
     return NextResponse.json(
       { error: "An error occurred while signing in" },
       { status: 500 }

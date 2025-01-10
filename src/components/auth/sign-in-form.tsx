@@ -84,6 +84,7 @@ export function SignInForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
+        credentials: 'include'
       })
 
       const data = await response.json()
@@ -92,8 +93,11 @@ export function SignInForm() {
         throw new Error(data.error || "Failed to sign in")
       }
 
-      // Redirect to dashboard on successful sign-in
-      router.push("/dashboard")
+      // Wait for cookie to be set
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Redirect to home and force a full page reload
+      window.location.href = "/"
     } catch (error) {
       console.error(error)
       setError(error instanceof Error ? error.message : "An error occurred")
