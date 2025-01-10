@@ -12,21 +12,48 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
 
+/**
+ * Props for the UserNav component
+ * @property {Object} user - The authenticated user object
+ * @property {string} user.email - The user's email address, used for display and avatar
+ */
 interface UserNavProps {
   user: {
     email: string
   }
 }
 
+/**
+ * User Navigation Component
+ * 
+ * A navigation menu specifically for authenticated users.
+ * Features:
+ * - Avatar display with email initial fallback
+ * - Dropdown menu for user-specific actions
+ * - Accessible navigation structure
+ * - Consistent styling with main navigation
+ * - Responsive design that works in both desktop and mobile contexts
+ * 
+ * @component
+ * @param {UserNavProps} props - Component props
+ * @returns {JSX.Element} Rendered user navigation menu
+ */
 export function UserNav({ user }: UserNavProps) {
   const initials = user.email.charAt(0).toUpperCase()
 
+  /**
+   * Handles user sign out
+   * - Clears the authentication cookie
+   * - Redirects to sign-in page
+   */
   const handleSignOut = () => {
-    // Delete the token cookie
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
     window.location.href = "/sign-in"
   }
 
+  /**
+   * Handles navigation to user profile
+   */
   const handleProfile = () => {
     window.location.href = "/profile"
   }

@@ -31,6 +31,17 @@ interface User {
   email: string
 }
 
+/**
+ * Navigation Component
+ * 
+ * A responsive navigation bar that adapts to desktop and mobile views.
+ * Features:
+ * - Responsive design with mobile hamburger menu
+ * - Authentication state management
+ * - Consistent styling across breakpoints
+ * - Accessible navigation for screen readers
+ * - Smooth hover effects and transitions
+ */
 export function Nav() {
   const [user, setUser] = useState<User | null>(null)
 
@@ -56,6 +67,14 @@ export function Nav() {
     checkAuth()
   }, [])
 
+  /**
+   * Navigation Links Configuration
+   * 
+   * Centralized array of navigation links used by both desktop and mobile views.
+   * Each link object contains:
+   * @property {string} href - The target URL for the link
+   * @property {string} label - The display text for the link
+   */
   const navigationLinks = [
     { href: "/", label: "Home" },
     { href: "#", label: "Standings" },
@@ -75,7 +94,7 @@ export function Nav() {
           priority
         />
         
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Shown on md screens and up */}
         <div className="hidden md:flex gap-8 items-center">
           <NavigationMenu>
             <NavigationMenuList className="gap-6">
@@ -101,7 +120,7 @@ export function Nav() {
           </NavigationMenu>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Sheet menu triggered by hamburger button */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>

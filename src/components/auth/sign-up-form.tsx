@@ -19,6 +19,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
+/**
+ * Props for the SignUpForm validation schema
+ * @property {string} email - User's email address
+ * @property {string} username - User's chosen username
+ * @property {string} password - User's password
+ */
 const signUpSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
@@ -33,6 +39,20 @@ const signUpSchema = z.object({
 
 type SignUpValues = z.infer<typeof signUpSchema>
 
+/**
+ * SignUpForm Component
+ * 
+ * A form component that handles new user registration.
+ * Features:
+ * - Email, username, and password validation
+ * - Real-time form validation with error messages
+ * - Loading states during submission
+ * - Error handling with visual feedback
+ * - Link to sign in for existing users
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered sign-up form
+ */
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")

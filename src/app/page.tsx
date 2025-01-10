@@ -3,6 +3,20 @@ import { Images } from "@/constants/images";
 import Link from "next/link";
 import { Nav } from "@/components/nav";
 
+/**
+ * Home Page Component
+ * 
+ * The main landing page of the OVHL application.
+ * Features:
+ * - Hero section with call-to-action buttons
+ * - Features grid showcasing league benefits
+ * - Latest news section
+ * - CTA section for registration
+ * - Responsive footer with navigation and social links
+ * 
+ * @component
+ * @returns {JSX.Element} Rendered home page
+ */
 export default function Home() {
   return (
     <div className="min-h-screen">
