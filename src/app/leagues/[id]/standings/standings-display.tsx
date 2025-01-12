@@ -40,8 +40,8 @@ interface TeamStats {
   penaltyKillPercentage: number;
 }
 
-interface StandingsData {
-  tierName: string;
+interface DivisionStandings {
+  division: string;
   teams: TeamStats[];
 }
 
@@ -50,7 +50,7 @@ interface StandingsDisplayProps {
 }
 
 export function StandingsDisplay({ league }: StandingsDisplayProps) {
-  const [standings, setStandings] = useState<StandingsData[]>([]);
+  const [standings, setStandings] = useState<DivisionStandings[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -99,9 +99,9 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
         {isLoading ? (
           <div>Loading standings...</div>
         ) : (
-          standings.map((tierStandings) => (
-            <div key={tierStandings.tierName} className="mb-10">
-              <h2 className="text-2xl font-bold mb-4">{tierStandings.tierName}</h2>
+          standings.map((divisionStandings) => (
+            <div key={divisionStandings.division} className="mb-10">
+              <h2 className="text-2xl font-bold mb-4">{divisionStandings.division} Division</h2>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -119,7 +119,7 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tierStandings.teams.map((team) => (
+                  {divisionStandings.teams.map((team) => (
                     <TableRow key={team.teamId}>
                       <TableCell className="font-medium">
                         <div>

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { NHL_TEAMS } from "@/lib/teams/nhl";
+import { AHL_TEAMS } from "@/lib/teams/ahl";
+import { ECHL_TEAMS } from "@/lib/teams/echl";
+import { CHL_TEAMS } from "@/lib/teams/chl";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +15,22 @@ const LEAGUE_LEVELS: Record<string, number> = {
   echl: 3,
   chl: 4,
 };
+
+// Helper function to get division for a team
+function getTeamDivision(teamIdentifier: string, leagueId: string) {
+  switch (leagueId) {
+    case 'nhl':
+      return NHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+    case 'ahl':
+      return AHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+    case 'echl':
+      return ECHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+    case 'chl':
+      return CHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+    default:
+      return null;
+  }
+}
 
 export async function GET(
   request: Request,
@@ -65,43 +85,63 @@ export async function GET(
       },
     });
 
-    // Calculate stats and sort teams
-    const teams = teamSeasons.map(ts => ({
-      teamId: ts.teamId,
-      teamName: ts.team.officialName,
-      teamIdentifier: ts.team.teamIdentifier,
-      gamesPlayed: ts.matchesPlayed,
-      wins: ts.wins,
-      losses: ts.losses,
-      otLosses: ts.otLosses,
-      points: (ts.wins * 2) + ts.otLosses,
-      goalsFor: ts.goalsFor,
-      goalsAgainst: ts.goalsAgainst,
-      goalDifferential: ts.goalsFor - ts.goalsAgainst,
-      powerplayGoals: ts.powerplayGoals,
-      powerplayOpportunities: ts.powerplayOpportunities,
-      powerplayPercentage: ts.powerplayOpportunities > 0 
-        ? (ts.powerplayGoals / ts.powerplayOpportunities) * 100 
-        : 0,
-      penaltyKillGoalsAgainst: ts.penaltyKillGoalsAgainst,
-      penaltyKillOpportunities: ts.penaltyKillOpportunities,
-      penaltyKillPercentage: ts.penaltyKillOpportunities > 0
-        ? ((ts.penaltyKillOpportunities - ts.penaltyKillGoalsAgainst) / ts.penaltyKillOpportunities) * 100
-        : 0,
-    })).sort((a, b) => {
-      // Sort by points first
-      if (b.points !== a.points) {
-        return b.points - a.points;
+    // Calculate stats and group teams by division
+    const teamsByDivision = new Map<string, any[]>();
+
+    teamSeasons.forEach(ts => {
+      const division = getTeamDivision(ts.team.teamIdentifier, leagueId);
+      if (!division) return;
+
+      const teamStats = {
+        teamId: ts.teamId,
+        teamName: ts.team.officialName,
+        teamIdentifier: ts.team.teamIdentifier,
+        gamesPlayed: ts.matchesPlayed,
+        wins: ts.wins,
+        losses: ts.losses,
+        otLosses: ts.otLosses,
+        points: (ts.wins * 2) + ts.otLosses,
+        goalsFor: ts.goalsFor,
+        goalsAgainst: ts.goalsAgainst,
+        goalDifferential: ts.goalsFor - ts.goalsAgainst,
+        powerplayGoals: ts.powerplayGoals,
+        powerplayOpportunities: ts.powerplayOpportunities,
+        powerplayPercentage: ts.powerplayOpportunities > 0 
+          ? (ts.powerplayGoals / ts.powerplayOpportunities) * 100 
+          : 0,
+        penaltyKillGoalsAgainst: ts.penaltyKillGoalsAgainst,
+        penaltyKillOpportunities: ts.penaltyKillOpportunities,
+        penaltyKillPercentage: ts.penaltyKillOpportunities > 0
+          ? ((ts.penaltyKillOpportunities - ts.penaltyKillGoalsAgainst) / ts.penaltyKillOpportunities) * 100
+          : 0,
+      };
+
+      if (!teamsByDivision.has(division)) {
+        teamsByDivision.set(division, []);
       }
-      // If points are tied, sort by team name
-      return a.teamName.localeCompare(b.teamName);
+      teamsByDivision.get(division)?.push(teamStats);
     });
 
+    // Sort teams within each division by points
+    for (const [division, teams] of teamsByDivision) {
+      teams.sort((a, b) => {
+        // Sort by points first
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+        // If points are tied, sort by team name
+        return a.teamName.localeCompare(b.teamName);
+      });
+    }
+
+    // Convert Map to array of divisions
+    const standings = Array.from(teamsByDivision.entries()).map(([division, teams]) => ({
+      division,
+      teams,
+    }));
+
     return NextResponse.json({
-      standings: [{
-        tierName: tier.name,
-        teams,
-      }],
+      standings,
     });
   } catch (error) {
     console.error("Failed to fetch standings:", error);
