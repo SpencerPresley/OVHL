@@ -3,6 +3,7 @@
 import { Nav } from "@/components/nav";
 import { LeagueNav } from "@/components/league-nav";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Table,
@@ -122,10 +123,12 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
                   {divisionStandings.teams.map((team) => (
                     <TableRow key={team.teamId}>
                       <TableCell className="font-medium">
-                        <div>
-                          <span className="font-bold">{team.teamIdentifier}</span>
-                          <span className="text-sm text-gray-500 ml-2">{team.teamName}</span>
-                        </div>
+                        <Link href={`/leagues/${league.id}/teams/${team.teamIdentifier}`} className="hover:opacity-75">
+                          <div>
+                            <span className="font-bold">{team.teamIdentifier}</span>
+                            <span className="text-sm text-gray-500 ml-2">{team.teamName}</span>
+                          </div>
+                        </Link>
                       </TableCell>
                       <TableCell className="text-right">{team.gamesPlayed}</TableCell>
                       <TableCell className="text-right">{team.wins}</TableCell>

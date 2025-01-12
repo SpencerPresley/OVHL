@@ -33,6 +33,8 @@ interface Team {
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
+  const [seasonId, setSeasonId] = useState("");
   const router = useRouter();
 
   // Fetch teams on component mount
@@ -96,6 +98,7 @@ export default function AdminPage() {
 
   async function createSeason(seasonId: string) {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/admin/seasons", {
         method: "POST",
         headers: {
@@ -105,23 +108,57 @@ export default function AdminPage() {
       });
       if (!response.ok) throw new Error("Failed to create season");
       alert("Season created successfully!");
+      router.refresh();
     } catch (error) {
       console.error("Error creating season:", error);
       alert("Failed to create season");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function insertTestData() {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/admin/test-data", {
         method: "POST",
       });
       if (!response.ok) throw new Error("Failed to insert test data");
       alert("Test data inserted successfully!");
+      router.refresh();
     } catch (error) {
       console.error("Error inserting test data:", error);
       alert("Failed to insert test data");
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  async function createTestPlayers() {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/test-data/players", {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to create test players");
+      alert("Test players created successfully!");
+      router.refresh();
+    } catch (error) {
+      console.error("Error creating test players:", error);
+      alert("Failed to create test players");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleCreateSeason() {
+    if (!seasonId) {
+      alert("Please enter a season ID");
+      return;
+    }
+    await createSeason(seasonId);
+    setSeasonDialogOpen(false);
+    setSeasonId("");
   }
 
   return (
@@ -159,7 +196,7 @@ export default function AdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Dialog>
+            <Dialog open={seasonDialogOpen} onOpenChange={setSeasonDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full">Create New Season</Button>
               </DialogTrigger>
@@ -174,34 +211,19 @@ export default function AdminPage() {
                   <div className="flex items-center gap-4">
                     <input
                       id="seasonId"
+                      value={seasonId}
+                      onChange={(e) => setSeasonId(e.target.value)}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="Enter season ID..."
-                      onChange={(e) => {
-                        // Store in a data attribute for the create button
-                        e.currentTarget.closest("div[role='dialog']")
-                          ?.querySelector("button[data-action='create']")
-                          ?.setAttribute("data-season-id", e.target.value);
-                      }}
                     />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button
-                    data-action="create"
-                    onClick={async (e) => {
-                      const seasonId = e.currentTarget.getAttribute("data-season-id");
-                      if (!seasonId) {
-                        alert("Please enter a season ID");
-                        return;
-                      }
-                      await createSeason(seasonId);
-                      const dialogButton = e.currentTarget
-                        .closest("div[role='dialog']")
-                        ?.querySelector("button[data-state='open']") as HTMLButtonElement;
-                      dialogButton?.click();
-                    }}
+                    onClick={handleCreateSeason}
+                    disabled={isLoading}
                   >
-                    Create Season
+                    {isLoading ? "Creating..." : "Create Season"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -211,8 +233,18 @@ export default function AdminPage() {
               variant="secondary" 
               className="w-full"
               onClick={insertTestData}
+              disabled={isLoading}
             >
-              Insert Test Data
+              {isLoading ? "Creating Test Data..." : "Insert Test Data"}
+            </Button>
+
+            <Button 
+              variant="secondary" 
+              className="w-full"
+              onClick={createTestPlayers}
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating Players..." : "Create Test Players"}
             </Button>
           </CardContent>
         </Card>
