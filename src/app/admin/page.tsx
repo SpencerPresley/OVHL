@@ -204,7 +204,7 @@ export default function AdminPage() {
                 <DialogHeader>
                   <DialogTitle>Create New Season</DialogTitle>
                   <DialogDescription>
-                    Enter the season ID (e.g., "2024" for the 2024 season)
+                    Enter the season ID (e.g., &ldquo;2024&rdquo; for the 2024 season)
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">

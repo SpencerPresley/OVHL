@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { verify } from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NHL_TEAMS } from "@/lib/teams/nhl";
 import { AHL_TEAMS } from "@/lib/teams/ahl";
 import { ECHL_TEAMS } from "@/lib/teams/echl";

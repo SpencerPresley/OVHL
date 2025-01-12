@@ -19,11 +19,6 @@ function generateGamertag(): string {
   return `${prefix}${noun}${numbers}`;
 }
 
-// Helper function to generate random position
-function generatePosition(): string {
-  const positions = ["C", "LW", "RW", "LD", "RD", "G"];
-  return positions[Math.floor(Math.random() * positions.length)];
-}
 
 export async function POST() {
   try {
