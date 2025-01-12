@@ -1,16 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import * as React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/navigation-menu";
+// import { cn } from "@/lib/utils"
 
 /**
  * Props for the UserNav component
@@ -19,13 +18,13 @@ import { cn } from "@/lib/utils"
  */
 interface UserNavProps {
   user: {
-    email: string
-  }
+    email: string;
+  };
 }
 
 /**
  * User Navigation Component
- * 
+ *
  * A navigation menu specifically for authenticated users.
  * Features:
  * - Avatar display with email initial fallback
@@ -33,13 +32,13 @@ interface UserNavProps {
  * - Accessible navigation structure
  * - Consistent styling with main navigation
  * - Responsive design that works in both desktop and mobile contexts
- * 
+ *
  * @component
  * @param {UserNavProps} props - Component props
  * @returns {JSX.Element} Rendered user navigation menu
  */
 export function UserNav({ user }: UserNavProps) {
-  const initials = user.email.charAt(0).toUpperCase()
+  const initials = user.email.charAt(0).toUpperCase();
 
   /**
    * Handles user sign out
@@ -47,16 +46,16 @@ export function UserNav({ user }: UserNavProps) {
    * - Redirects to sign-in page
    */
   const handleSignOut = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-    window.location.href = "/sign-in"
-  }
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.href = "/sign-in";
+  };
 
   /**
    * Handles navigation to user profile
    */
   const handleProfile = () => {
-    window.location.href = "/profile"
-  }
+    window.location.href = "/profile";
+  };
 
   return (
     <NavigationMenu>
@@ -92,5 +91,5 @@ export function UserNav({ user }: UserNavProps) {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  )
-} 
+  );
+}

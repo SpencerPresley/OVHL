@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,11 +13,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 /**
  * Props for the SignUpForm validation schema
@@ -35,13 +42,13 @@ const signUpSchema = z.object({
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
   }),
-})
+});
 
-type SignUpValues = z.infer<typeof signUpSchema>
+type SignUpValues = z.infer<typeof signUpSchema>;
 
 /**
  * SignUpForm Component
- * 
+ *
  * A form component that handles new user registration.
  * Features:
  * - Email, username, and password validation
@@ -49,14 +56,14 @@ type SignUpValues = z.infer<typeof signUpSchema>
  * - Loading states during submission
  * - Error handling with visual feedback
  * - Link to sign in for existing users
- * 
+ *
  * @component
  * @returns {JSX.Element} Rendered sign-up form
  */
 export function SignUpForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -65,11 +72,11 @@ export function SignUpForm() {
       username: "",
       password: "",
     },
-  })
+  });
 
   async function onSubmit(values: SignUpValues) {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -78,22 +85,22 @@ export function SignUpForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign up")
+        throw new Error(data.error || "Failed to sign up");
       }
 
       // Redirect to sign in after successful registration
-      router.push("/sign-in?registered=true")
-      router.refresh()
+      router.push("/sign-in?registered=true");
+      router.refresh();
     } catch (error) {
-      console.error(error)
-      setError(error instanceof Error ? error.message : "An error occurred")
+      console.error(error);
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -101,7 +108,9 @@ export function SignUpForm() {
     <Card className="w-[400px] card-gradient">
       <CardHeader>
         <CardTitle>Create Account</CardTitle>
-        <CardDescription>Enter your details to create a new account</CardDescription>
+        <CardDescription>
+          Enter your details to create a new account
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -144,7 +153,11 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Create a password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Create a password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,5 +178,5 @@ export function SignUpForm() {
         </Button>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

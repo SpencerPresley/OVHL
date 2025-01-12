@@ -14,13 +14,13 @@ export const PROTECTED_ROUTES = [
   "/dashboard/",
   "/dashboard/profile",
   "/dashboard/settings",
-  
+
   // API routes that need protection
   "/api/user",
   "/api/profile",
-  
+
   // Add more protected routes as needed
-] as const
+] as const;
 
 /**
  * Authentication-related routes
@@ -33,23 +33,20 @@ export const AUTH_ROUTES = [
   "/sign-up",
   "/forgot-password",
   "/reset-password",
-] as const
+] as const;
 
 /**
  * Public API routes that don't require authentication
  * @constant
  * @type {string[]}
  */
-export const PUBLIC_API_ROUTES = [
-  "/api/auth",
-  "/api/public",
-] as const
+export const PUBLIC_API_ROUTES = ["/api/auth", "/api/public"] as const;
 
 /**
  * Type for route categories
  */
 export type RouteCategory = {
-  protected: typeof PROTECTED_ROUTES
-  auth: typeof AUTH_ROUTES
-  publicApi: typeof PUBLIC_API_ROUTES
-} 
+  protected: typeof PROTECTED_ROUTES;
+  auth: typeof AUTH_ROUTES;
+  publicApi: typeof PUBLIC_API_ROUTES;
+};

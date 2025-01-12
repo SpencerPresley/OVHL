@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,13 +13,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { useRouter } from "next/navigation"
+import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /**
  * Zod schema for sign-in form validation
@@ -35,13 +42,13 @@ const signInSchema = z.object({
     message: "Password is required.",
   }),
   rememberMe: z.boolean().default(false),
-})
+});
 
-type SignInValues = z.infer<typeof signInSchema>
+type SignInValues = z.infer<typeof signInSchema>;
 
 /**
  * SignInForm Component
- * 
+ *
  * A form component that handles user authentication with email/password.
  * Features:
  * - Email and password validation
@@ -50,9 +57,9 @@ type SignInValues = z.infer<typeof signInSchema>
  * - Links to forgot password and sign up
  */
 export function SignInForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  // const router = useRouter()
 
   // Initialize form with zod validation
   const form = useForm<SignInValues>({
@@ -62,20 +69,20 @@ export function SignInForm() {
       password: "",
       rememberMe: false,
     },
-  })
+  });
 
   /**
    * Handle form submission
    * @param values - Form values containing email, password, and rememberMe
-   * 
+   *
    * On successful sign-in:
    * - Sets JWT in HTTP-only cookie
    * - Cookie expiration varies based on rememberMe
    * - Redirects to dashboard
    */
   async function onSubmit(values: SignInValues) {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       const response = await fetch("/api/auth/sign-in", {
@@ -84,25 +91,25 @@ export function SignInForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-        credentials: 'include'
-      })
+        credentials: "include",
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign in")
+        throw new Error(data.error || "Failed to sign in");
       }
 
       // Wait for cookie to be set
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Redirect to home and force a full page reload
-      window.location.href = "/"
+      window.location.href = "/";
     } catch (error) {
-      console.error(error)
-      setError(error instanceof Error ? error.message : "An error occurred")
+      console.error(error);
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -110,7 +117,9 @@ export function SignInForm() {
     <Card className="w-[400px] card-gradient">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your email and password to sign in</CardDescription>
+        <CardDescription>
+          Enter your email and password to sign in
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -121,7 +130,7 @@ export function SignInForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             {/* Email Field */}
             <FormField
               control={form.control}
@@ -130,11 +139,11 @@ export function SignInForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter your email" 
+                    <Input
+                      placeholder="Enter your email"
                       type="email"
                       autoComplete="email"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -150,11 +159,11 @@ export function SignInForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter your password" 
+                    <Input
+                      placeholder="Enter your password"
                       type="password"
                       autoComplete="current-password"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -183,7 +192,10 @@ export function SignInForm() {
 
             {/* Forgot Password Link */}
             <div className="text-sm text-right">
-              <Link href="/forgot-password" className="text-primary hover:underline">
+              <Link
+                href="/forgot-password"
+                className="text-primary hover:underline"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -199,12 +211,12 @@ export function SignInForm() {
       {/* Sign Up Link */}
       <CardFooter className="flex flex-col space-y-4">
         <div className="text-sm text-gray-400 text-center">
-          Don't have an account?
+          Don&#39;t have an account?
         </div>
         <Button variant="outline" className="w-full" asChild>
           <Link href="/sign-up">Create an account</Link>
         </Button>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

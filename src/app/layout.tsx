@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "OVHL - Online Virtual Hockey League",
-  description: "Welcome to the Online Virtual Hockey League - Where Competition Meets Community",
+  description:
+    "Welcome to the Online Virtual Hockey League - Where Competition Meets Community",
 };
 
 export default function RootLayout({
@@ -33,7 +34,9 @@ export default function RootLayout({
           });
         `}</Script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

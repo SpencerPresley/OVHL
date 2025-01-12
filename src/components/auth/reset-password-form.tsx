@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,12 +13,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useRouter, useSearchParams } from "next/navigation"
-import { toast } from "sonner"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 /**
  * @typedef {Object} ResetPasswordValues
@@ -30,29 +36,31 @@ import { toast } from "sonner"
  * Zod schema for password reset form validation
  * @type {z.ZodObject<{password: z.ZodString, confirmPassword: z.ZodString}>}
  */
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 /**
  * ResetPasswordForm Component
- * 
+ *
  * Handles password reset functionality with token validation.
- * 
+ *
  * @component
  * @example
  * ```tsx
  * <ResetPasswordForm />
  * ```
- * 
+ *
  * Features:
  * - Password validation and confirmation
  * - Token validation from URL
@@ -62,11 +70,11 @@ type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
  * - Security measures for password requirements
  */
 export function ResetPasswordForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token")
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   /**
    * Initialize form with Zod validation
@@ -78,15 +86,15 @@ export function ResetPasswordForm() {
       password: "",
       confirmPassword: "",
     },
-  })
+  });
 
   /**
    * Handles the form submission for password reset
-   * 
+   *
    * @async
    * @param {ResetPasswordValues} values - Form values containing new password
    * @throws {Error} When the API request fails
-   * 
+   *
    * On success:
    * - Updates password in database
    * - Clears reset token
@@ -95,12 +103,12 @@ export function ResetPasswordForm() {
    */
   async function onSubmit(values: ResetPasswordValues) {
     if (!token) {
-      setError("Reset token is missing")
-      return
+      setError("Reset token is missing");
+      return;
     }
 
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       const response = await fetch("/api/auth/reset-password", {
@@ -112,22 +120,22 @@ export function ResetPasswordForm() {
           token,
           password: values.password,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password")
+        throw new Error(data.error || "Failed to reset password");
       }
 
-      toast.success("Password reset successful")
-      router.push("/sign-in")
+      toast.success("Password reset successful");
+      router.push("/sign-in");
     } catch (error) {
-      console.error(error)
-      setError(error instanceof Error ? error.message : "An error occurred")
-      toast.error("Failed to reset password")
+      console.error(error);
+      setError(error instanceof Error ? error.message : "An error occurred");
+      toast.error("Failed to reset password");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -154,11 +162,11 @@ export function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter your new password" 
+                    <Input
+                      placeholder="Enter your new password"
                       type="password"
                       autoComplete="new-password"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -173,11 +181,11 @@ export function ResetPasswordForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Confirm your new password" 
+                    <Input
+                      placeholder="Confirm your new password"
                       type="password"
                       autoComplete="new-password"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -192,5 +200,5 @@ export function ResetPasswordForm() {
         </Form>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}
