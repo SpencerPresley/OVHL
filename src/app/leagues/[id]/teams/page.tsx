@@ -72,6 +72,7 @@ export default async function TeamsPage({ params }: { params: { id: string } }) 
                       gamertags: true,
                     },
                   },
+                  contract: true,
                 },
               },
             },

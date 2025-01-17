@@ -31,10 +31,13 @@ interface Player {
       }[];
     };
     position: string;
+    contract: {
+      amount: number;
+    } | null;
   };
   plusMinus: number;
-  goalsAgainst?: number;
-  saves?: number;
+  goalsAgainst: number | null;
+  saves: number | null;
 }
 
 interface TeamSeason {
@@ -158,16 +161,19 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
               className="card-gradient card-hover overflow-hidden"
             >
               <CardHeader className="border-b border-border">
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex flex-col">
                   <Link 
                     href={`/leagues/${league.id}/teams/${teamSeason.team.teamIdentifier}`}
                     className="text-2xl hover:opacity-75"
                   >
                     {teamSeason.team.officialName}
                   </Link>
-                  <span className="text-lg font-mono bg-secondary/50 px-3 py-1 rounded-md">
-                    {teamSeason.wins}-{teamSeason.losses}-{teamSeason.otLosses}
-                  </span>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-400">${teamSeason.players.reduce((total, player) => total + (player.playerSeason.contract?.amount || 500000), 0).toLocaleString()}</span>
+                    <span className="text-lg font-mono bg-secondary/50 px-3 py-1 rounded-md">
+                      {teamSeason.wins}-{teamSeason.losses}-{teamSeason.otLosses}
+                    </span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -201,13 +207,16 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex-1">
                         {getPositionPlayers(teamSeason.players, ["LW"]).map((player) => (
                           <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                            <Link 
-                              href={`/users/${player.playerSeason.player.id}`}
-                              className="hover:text-blue-400"
-                            >
-                              {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                            </Link>
-                            <span className={`px-2 py-0.5 rounded text-sm ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/users/${player.playerSeason.player.id}`}
+                                className="hover:text-blue-400"
+                              >
+                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                              </Link>
+                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -229,13 +238,16 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex-1">
                         {getPositionPlayers(teamSeason.players, ["C"]).map((player) => (
                           <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                            <Link 
-                              href={`/users/${player.playerSeason.player.id}`}
-                              className="hover:text-blue-400"
-                            >
-                              {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                            </Link>
-                            <span className={`px-2 py-0.5 rounded text-sm ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/users/${player.playerSeason.player.id}`}
+                                className="hover:text-blue-400"
+                              >
+                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                              </Link>
+                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -257,13 +269,16 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex-1">
                         {getPositionPlayers(teamSeason.players, ["RW"]).map((player) => (
                           <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                            <Link 
-                              href={`/users/${player.playerSeason.player.id}`}
-                              className="hover:text-blue-400"
-                            >
-                              {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                            </Link>
-                            <span className={`px-2 py-0.5 rounded text-sm ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/users/${player.playerSeason.player.id}`}
+                                className="hover:text-blue-400"
+                              >
+                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                              </Link>
+                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -302,13 +317,16 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex-1">
                         {getPositionPlayers(teamSeason.players, ["LD"]).map((player) => (
                           <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                            <Link 
-                              href={`/users/${player.playerSeason.player.id}`}
-                              className="hover:text-blue-400"
-                            >
-                              {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                            </Link>
-                            <span className={`px-2 py-0.5 rounded text-sm ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/users/${player.playerSeason.player.id}`}
+                                className="hover:text-blue-400"
+                              >
+                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                              </Link>
+                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -329,13 +347,16 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex-1">
                         {getPositionPlayers(teamSeason.players, ["RD"]).map((player) => (
                           <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                            <Link 
-                              href={`/users/${player.playerSeason.player.id}`}
-                              className="hover:text-blue-400"
-                            >
-                              {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                            </Link>
-                            <span className={`px-2 py-0.5 rounded text-sm ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/users/${player.playerSeason.player.id}`}
+                                className="hover:text-blue-400"
+                              >
+                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                              </Link>
+                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -386,12 +407,15 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
 
                           return (
                             <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
-                              <Link 
-                                href={`/users/${player.playerSeason.player.id}`}
-                                className="hover:text-blue-400"
-                              >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
-                              </Link>
+                              <div className="flex items-center gap-2">
+                                <Link 
+                                  href={`/users/${player.playerSeason.player.id}`}
+                                  className="hover:text-blue-400"
+                                >
+                                  {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                </Link>
+                                <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              </div>
                               <span className={`px-2 py-0.5 rounded text-sm ${savePercentageColor}`}>
                                 {totalShots === 0 ? '0.0%' : `${(savePercentage * 100).toFixed(1)}%`}
                               </span>

@@ -132,18 +132,30 @@ model TeamSeason {
 
 // --------- Player Season & Stats ---------
 model PlayerSeason {
-  id              String             @id @default(uuid())
-  playerId        String             @map("player_id")
-  seasonId        String             @map("season_id")
-  position        String             @db.VarChar(13)
-  isActiveManager Boolean            @default(false) @map("is_active_manager")
-  managerRole     String             @default("") @map("manager_role")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
-  player          Player             @relation(fields: [playerId], references: [id])
-  season          Season             @relation(fields: [seasonId], references: [id])
-  teamSeasons     PlayerTeamSeason[]
-  tierHistory     PlayerTierHistory[]
+  id            String              @id @default(uuid())
+  playerId      String              @map("player_id")
+  seasonId      String              @map("season_id")
+  position      String
+  gamesPlayed   Int?                @map("games_played")
+  goals         Int?
+  assists       Int?
+  plusMinus     Int?                @map("plus_minus")
+  shots         Int?
+  hits          Int?
+  takeaways     Int?
+  giveaways     Int?
+  penaltyMinutes Int?               @map("penalty_minutes")
+  saves         Int?
+  goalsAgainst  Int?                @map("goals_against")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+  player        Player              @relation(fields: [playerId], references: [id])
+  season        Season              @relation(fields: [seasonId], references: [id])
+  teamSeasons   PlayerTeamSeason[]
+  tierHistory   PlayerTierHistory[]
+  contract      Contract?           // One-to-one relation with Contract
+
+  @@map("player_seasons")
 }
 
 model PlayerTierHistory {
@@ -162,6 +174,7 @@ model PlayerTeamSeason {
   id             String        @id @default(uuid())
   playerSeasonId String        @map("player_season_id")
   teamSeasonId   String        @map("team_season_id")
+  // Stats for this specific team
   assists        Int           @default(0)
   gamesPlayed    Int           @default(0) @map("games_played")
   giveaways      Int           @default(0)
@@ -171,11 +184,47 @@ model PlayerTeamSeason {
   plusMinus      Int           @default(0) @map("plus_minus")
   shots          Int           @default(0)
   takeaways      Int           @default(0)
+  saves          Int?
+  goalsAgainst   Int?          @map("goals_against")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   playerSeason   PlayerSeason  @relation(fields: [playerSeasonId], references: [id])
   teamSeason     TeamSeason    @relation(fields: [teamSeasonId], references: [id])
   matches        PlayerMatch[]
+
+  @@map("player_team_seasons")
+}
+
+// New models for contracts and bidding
+model Contract {
+  id             String       @id @default(uuid())
+  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id])
+  playerSeasonId String       @unique @map("player_season_id")
+  amount         Int          // Contract amount in dollars
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  bids           Bid[]        // One-to-many relation with Bid
+
+  @@map("contracts")
+}
+
+model Bid {
+  id          String    @id @default(uuid())
+  contract    Contract  @relation(fields: [contractId], references: [id])
+  contractId  String    @map("contract_id")
+  teamId      String    @map("team_id") // ID of the team making the bid
+  amount      Int       // Bid amount in dollars
+  status      BidStatus @default(PENDING)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("bids")
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 // --------- Match Stats ---------

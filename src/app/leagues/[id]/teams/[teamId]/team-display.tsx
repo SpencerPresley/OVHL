@@ -33,6 +33,9 @@ interface PlayerCard {
   assists: number;
   points: number;
   plusMinus: number;
+  contract: {
+    amount: number;
+  } | null;
 }
 
 interface TeamDisplayProps {
@@ -54,6 +57,7 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
     assists: ps.assists,
     points: ps.goals + ps.assists,
     plusMinus: ps.plusMinus,
+    contract: ps.playerSeason.contract,
   }));
 
   console.log("All available colors:", POSITION_COLORS);
@@ -128,6 +132,7 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                   </CardTitle>
                   <CardDescription>
                     {player.system}: <Link href={`/users/${player.id}`} className="hover:underline">{player.gamertag}</Link>
+                    <div className="text-sm text-gray-400 mt-1">Contract: ${(player.contract?.amount || 500000).toLocaleString()}</div>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -173,6 +178,7 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                   </CardTitle>
                   <CardDescription>
                     {player.system}: <Link href={`/users/${player.id}`} className="hover:underline">{player.gamertag}</Link>
+                    <div className="text-sm text-gray-400 mt-1">Contract: ${(player.contract?.amount || 500000).toLocaleString()}</div>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -218,6 +224,7 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                   </CardTitle>
                   <CardDescription>
                     {player.system}: <Link href={`/users/${player.id}`} className="hover:underline">{player.gamertag}</Link>
+                    <div className="text-sm text-gray-400 mt-1">Contract: ${(player.contract?.amount || 500000).toLocaleString()}</div>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -21,47 +21,30 @@ export default async function UserProfilePage({ params }: { params: { id: string
         include: {
           gamertags: {
             orderBy: { createdAt: 'desc' },
-            take: 1
+            take: 1,
           },
           seasons: {
             include: {
+              contract: true,
               teamSeasons: {
-                select: {
+                include: {
                   teamSeason: {
                     include: {
-                      team: {
-                        select: {
-                          id: true,
-                          officialName: true,
-                          teamIdentifier: true,
-                          createdAt: true,
-                          updatedAt: true,
-                          ahlAffiliateId: true,
-                        },
-                      },
+                      team: true,
                       tier: {
                         select: {
                           name: true,
                         },
                       },
-                    }
+                    },
                   },
-                  gamesPlayed: true,
-                  goals: true,
-                  assists: true,
-                  plusMinus: true,
-                  shots: true,
-                  hits: true,
-                  takeaways: true,
-                  giveaways: true,
-                  penaltyMinutes: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!user) {

@@ -97,30 +97,45 @@ export async function POST() {
               },
             });
 
-            // Create player season
+            // Generate random stats that will be used for both total and team stats
+            const stats = {
+              gamesPlayed: Math.floor(Math.random() * 20) + 10,
+              goals: Math.floor(Math.random() * 15),
+              assists: Math.floor(Math.random() * 20),
+              plusMinus: Math.floor(Math.random() * 20) - 10,
+              shots: Math.floor(Math.random() * 50) + 20,
+              hits: Math.floor(Math.random() * 30),
+              takeaways: Math.floor(Math.random() * 20),
+              giveaways: Math.floor(Math.random() * 20),
+              penaltyMinutes: Math.floor(Math.random() * 30),
+              ...(pos === 'G' ? {
+                saves: Math.floor(Math.random() * 200) + 100,
+                goalsAgainst: Math.floor(Math.random() * 50) + 20,
+              } : {}),
+            };
+
+            // Create a player season with stats
             const playerSeason = await prisma.playerSeason.create({
               data: {
                 playerId: player.id,
                 seasonId: season.id,
                 position: pos,
-              },
+                ...stats,
+                contract: {
+                  create: {
+                    amount: 500000,
+                  }
+                }
+              }
             });
 
-            // Create player team season with random stats
-            await prisma.playerTeamSeason.create({
+            // Create player team season
+            const playerTeamSeason = await prisma.playerTeamSeason.create({
               data: {
                 playerSeasonId: playerSeason.id,
                 teamSeasonId: teamSeason.id,
-                gamesPlayed: Math.floor(Math.random() * 20) + 10,
-                goals: Math.floor(Math.random() * 15),
-                assists: Math.floor(Math.random() * 20),
-                plusMinus: Math.floor(Math.random() * 20) - 10,
-                shots: Math.floor(Math.random() * 50) + 20,
-                hits: Math.floor(Math.random() * 30),
-                takeaways: Math.floor(Math.random() * 20),
-                giveaways: Math.floor(Math.random() * 20),
-                penaltyMinutes: Math.floor(Math.random() * 30),
-              },
+                ...stats,
+              }
             });
           }
         }
