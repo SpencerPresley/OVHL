@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom'
 import { TextDecoder, TextEncoder } from 'util'
 import { server } from '@/mocks/server'
+import { enableFetchMocks } from 'jest-fetch-mock'
 
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder as any
@@ -53,4 +54,23 @@ jest.mock('next/navigation', () => ({
   usePathname() {
     return ''
   },
-})) 
+}))
+
+enableFetchMocks()
+
+// Mock Request and Response
+Object.defineProperty(globalThis, 'Request', {
+  writable: true,
+  value: Request,
+})
+
+Object.defineProperty(globalThis, 'Response', {
+  writable: true,
+  value: Response,
+})
+
+// Mock Headers
+Object.defineProperty(globalThis, 'Headers', {
+  writable: true,
+  value: Headers,
+}) 
