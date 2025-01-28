@@ -8,6 +8,14 @@ export async function POST(request: Request) {
   try {
     const { email, username, password } = await request.json();
 
+    // Validate required fields
+    if (!email || !username || !password) {
+      return NextResponse.json(
+        { error: "Email, username and password are required" },
+        { status: 400 },
+      );
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {

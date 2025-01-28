@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import crypto from "crypto";
+import { randomBytes } from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
 
 const prisma = new PrismaClient();
@@ -33,11 +33,14 @@ const prisma = new PrismaClient();
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const data = await request.json();
+    const { email } = data;
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
     }
 
     console.log("Looking up user:", email);
@@ -48,49 +51,40 @@ export async function POST(request: Request) {
 
     console.log("User found:", !!user);
 
-    // Always return success to prevent email enumeration
-    // But only generate and store token if user exists
-    if (user) {
-      try {
-        // Generate cryptographically secure reset token
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        const resetTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    // Always return success message to prevent email enumeration
+    const successResponse = NextResponse.json(
+      { message: "If an account exists with this email, you will receive password reset instructions" },
+      { status: 200 }
+    );
 
-        console.log("Updating user with reset token...");
-        // Update user with reset token and expiration
-        await prisma.user.update({
-          where: { email },
-          data: {
-            resetToken,
-            resetTokenExpiresAt,
-          },
-        });
-
-        // Generate reset link and send email
-        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
-        console.log("Sending reset email with link:", resetLink);
-        const emailResult = await sendPasswordResetEmail(email, resetLink);
-        console.log("Email sent result:", emailResult);
-      } catch (emailError) {
-        console.error("Error in email process:", emailError);
-        return NextResponse.json(
-          { error: "Failed to send reset email" },
-          { status: 500 },
-        );
-      }
+    // If no user found, return success message
+    if (!user) {
+      return successResponse;
     }
 
-    // Return success regardless of whether user exists
-    return NextResponse.json({
-      message:
-        "If an account exists with this email, you will receive password reset instructions.",
+    // Generate reset token
+    const resetToken = randomBytes(32).toString("hex");
+    const resetTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Update user with reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpiresAt,
+      },
     });
+
+    // Send reset email
+    await sendPasswordResetEmail(email, resetToken);
+
+    return successResponse;
   } catch (error) {
     // Log error but don't expose details to client
     console.error("Password reset error:", error);
     return NextResponse.json(
       { error: "An error occurred while processing your request" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
