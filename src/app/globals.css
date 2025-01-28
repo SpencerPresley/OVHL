@@ -41,6 +41,26 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.nav-button {
+  @apply px-3 py-1.5 text-sm font-medium rounded-md transition-colors;
+  @apply hover:bg-white/5;
+}
+
+.nav-menu-trigger {
+  @apply flex select-none items-center gap-1 px-3 py-2 text-sm font-medium outline-none;
+  @apply transition-colors relative;
+  background: transparent;
+}
+
+.nav-menu-trigger::after {
+  content: '';
+  @apply absolute left-0 bottom-0 w-0 h-[2px] bg-blue-400 transition-all duration-200;
+}
+
+.nav-menu-trigger:hover::after {
+  @apply w-full;
+}
+
 @layer base {
   :root {
     --background: 222 47% 11%;
@@ -62,6 +82,24 @@ body {
     --border: 223 47% 11%;
     --input: 223 47% 11%;
     --ring: 0 0% 83.1%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 

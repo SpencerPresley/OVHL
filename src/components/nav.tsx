@@ -127,8 +127,8 @@ export function Nav() {
                   <Link href={link.href} legacyBehavior passHref>
                     <NavigationMenuLink
                       className={cn(
-                        navigationMenuTriggerStyle(),
-                        "cursor-pointer hover:text-blue-400",
+                        "nav-menu-trigger",
+                        "cursor-pointer hover:text-blue-400"
                       )}
                     >
                       {link.label}
@@ -137,7 +137,7 @@ export function Nav() {
                 </NavigationMenuItem>
               ))}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="cursor-pointer hover:text-blue-400">
+                <NavigationMenuTrigger className="nav-menu-trigger cursor-pointer hover:text-blue-400">
                   Leagues
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>

@@ -21,37 +21,38 @@ export enum AHLDivision {
 
 // ECHL Division Enums
 export enum ECHLDivision {
-  NORTH = "North",
-  SOUTH = "South",
-  CENTRAL = "Central",
-  MOUNTAIN = "Mountain"
+  NORTH = "Eastern North",
+  SOUTH = "Eastern South",
+  CENTRAL = "Western Central",
+  MOUNTAIN = "Western Mountain"
 }
 
 // CHL League and Division Enums
 export enum CHLLeague {
+  NAJHL = "NAJHL",
   OHL = "OHL",
   QMJHL = "QMJHL",
   WHL = "WHL"
 }
 
-export enum OHLDivision {
+export enum NAJHLDivision {
   EAST = "East",
-  CENTRAL = "Central",
-  MIDWEST = "Midwest",
   WEST = "West"
 }
 
+export enum OHLDivision {
+  NORTH = "North",
+  SOUTH = "South"
+}
+
 export enum QMJHLDivision {
-  EAST = "East",
-  CENTRAL = "Central",
-  WEST = "West"
+  NORTH = "North",
+  SOUTH = "South"
 }
 
 export enum WHLDivision {
   EAST = "East",
-  CENTRAL = "Central",
-  BC = "B.C.",
-  US = "U.S."
+  WEST = "West"
 }
 
 // Team Interfaces
@@ -60,6 +61,10 @@ export interface NHLTeam {
   name: string;
   conference: NHLConference;
   division: NHLDivision;
+  colors: {
+    primary: string;
+    secondary: string;
+  };
 }
 
 export interface AHLTeam {
@@ -67,6 +72,10 @@ export interface AHLTeam {
   name: string;
   division: AHLDivision;
   nhlTeamId: string | null; // null for independent teams
+  colors: {
+    primary: string;
+    secondary: string;
+  };
 }
 
 export interface ECHLTeam {
@@ -75,11 +84,19 @@ export interface ECHLTeam {
   division: ECHLDivision;
   nhlTeamId: string;
   ahlTeamId: string;
+  colors: {
+    primary: string;
+    secondary: string;
+  };
 }
 
 export interface CHLTeam {
   id: string;
   name: string;
   league: CHLLeague;
-  division: OHLDivision | QMJHLDivision | WHLDivision;
+  division: NAJHLDivision | OHLDivision | QMJHLDivision | WHLDivision;
+  colors: {
+    primary: string;
+    secondary: string;
+  };
 } 
