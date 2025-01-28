@@ -32,14 +32,15 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
   const [position, setPosition] = useState<Position | "">("");
 
   const handleSignup = async () => {
+    // Validate first
+    if (!position) {
+      setError("Position is required");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-
-      if (!position) {
-        setError("Position is required");
-        return;
-      }
 
       const response = await fetch("/api/seasons/signup", {
         method: "POST",
@@ -101,7 +102,7 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
             {error && <p className="text-sm text-red-500">{error}</p>}
             <Button
               onClick={handleSignup}
-              disabled={loading || !position}
+              disabled={loading}
               className="w-full"
             >
               {loading ? "Signing up..." : "Sign up for Season"}
