@@ -8,17 +8,23 @@ export async function POST(request: Request) {
   try {
     const { token, password } = await request.json();
 
+    // Check for missing required fields
+    if (!token || !password) {
+      return NextResponse.json(
+        { error: "Invalid or expired reset token" },
+        { status: 400 },
+      );
+    }
+
     // Find user with valid reset token
     const user = await prisma.user.findFirst({
       where: {
         resetToken: token,
-        resetTokenExpiresAt: {
-          gt: new Date(),
-        },
       },
     });
 
-    if (!user) {
+    // Check if user exists and token is not expired
+    if (!user || !user.resetTokenExpiresAt || user.resetTokenExpiresAt < new Date()) {
       return NextResponse.json(
         { error: "Invalid or expired reset token" },
         { status: 400 },

@@ -21,10 +21,18 @@ export async function GET() {
 
     console.log("UserAPI: Verifying token...");
     const decoded = verify(token.value, process.env.JWT_SECRET || "") as {
-      id: string;
-      email: string;
+      id?: string;
+      email?: string;
       isAdmin?: boolean;
     };
+
+    // Check if token has required fields
+    if (!decoded.id || !decoded.email) {
+      return NextResponse.json(
+        { error: "Authentication failed" },
+        { status: 401 },
+      );
+    }
 
     console.log("UserAPI: Finding user...");
     const user = await prisma.user.findUnique({
