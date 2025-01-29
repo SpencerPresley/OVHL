@@ -32,6 +32,7 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   player              Player?
+  notifications       Notification[]
 }
 
 model Player {
@@ -269,4 +270,38 @@ model PlayerMatch {
   updatedAt          DateTime         @updatedAt @map("updated_at")
   match              Match            @relation(fields: [matchId], references: [id])
   playerTeamSeason   PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id])
+}
+
+// --------- Notification System ---------
+enum NotificationType {
+  SYSTEM
+  FORUM
+  TEAM
+  LEAGUE
+  MATCH
+  CUSTOM
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  userId      String            @map("user_id")
+  type        NotificationType
+  title       String
+  message     String
+  status      NotificationStatus @default(UNREAD)
+  link        String?           // Optional link to related content
+  metadata    Json?             // Flexible metadata for different notification types
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
 }

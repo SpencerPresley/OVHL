@@ -6,6 +6,7 @@ import { SeasonSignupCard } from "@/components/season-signup-card";
 import { cookies } from "next/headers";
 import { verify } from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { TestNotificationButton } from "@/components/test-notification-button";
 
 const prisma = new PrismaClient();
 
@@ -68,9 +69,13 @@ export default async function Home() {
             prestigious online league
           </p>
           <div className="flex gap-6 justify-center">
-            <Link href="/sign-up" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition">
-              Join the League
-            </Link>
+            {isAuthenticated ? (
+              <TestNotificationButton />
+            ) : (
+              <Link href="/sign-up" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition">
+                Join the League
+              </Link>
+            )}
             <Link href="/about" className="card-gradient px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition">
               Learn More
             </Link>

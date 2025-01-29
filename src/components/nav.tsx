@@ -30,6 +30,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { NotificationBell } from "@/components/notification-bell";
 
 interface User {
   id: string;
@@ -166,7 +167,10 @@ export function Nav() {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 {user ? (
-                  <UserNav user={user} />
+                  <div className="flex items-center gap-2">
+                    <NotificationBell />
+                    <UserNav user={user} />
+                  </div>
                 ) : (
                   <Button asChild>
                     <Link href="/sign-in">Sign In</Link>
@@ -237,7 +241,10 @@ export function Nav() {
                   </CollapsibleContent>
                 </Collapsible>
                 {user ? (
-                  <UserNav user={user} />
+                  <div className="flex items-center gap-2">
+                    <NotificationBell />
+                    <UserNav user={user} />
+                  </div>
                 ) : (
                   <Button asChild>
                     <Link href="/sign-in">Sign In</Link>

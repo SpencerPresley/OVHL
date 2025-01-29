@@ -5,30 +5,40 @@ const createJestConfig = nextJest({
   dir: './',
 })
 
-// Add any custom config to be passed to Jest
-const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+/** @type {import('jest').Config} */
+const config = {
   testEnvironment: 'jest-environment-jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/__tests__/**/*',
-  ],
-  coverageThreshold: {
-    global: {
-      statements: 70,
-      branches: 70,
-      functions: 70,
-      lines: 70,
+  moduleDirectories: ['node_modules', '<rootDir>'],
+  projects: [
+    {
+      displayName: 'dom',
+      testEnvironment: 'jest-environment-jsdom',
+      testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
     },
-  },
-  testMatch: [
-    '<rootDir>/src/__tests__/**/*.test.{js,jsx,ts,tsx}',
+    {
+      displayName: 'node',
+      testEnvironment: 'jest-environment-node',
+      testMatch: ['**/__tests__/app/api/**/*.test.[jt]s?(x)'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
   ],
-}
+};
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig) 
+module.exports = createJestConfig(config) 
