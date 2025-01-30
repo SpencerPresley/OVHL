@@ -23,13 +23,13 @@ function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    
+
     // Set initial value
     setMatches(media.matches);
 
     // Create event listener
     const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
-    
+
     // Start listening for changes
     media.addEventListener('change', listener);
 
@@ -40,4 +40,4 @@ function useMediaQuery(query: string): boolean {
   return matches;
 }
 
-export { useIsMobile, useMediaQuery }; 
+export { useIsMobile, useMediaQuery };

@@ -30,7 +30,7 @@ export function GifPicker({ onGifSelect, onClose }: GifPickerProps) {
   };
 
   return (
-    <div className={isMobile ? "w-full" : "w-[300px] sm:w-[400px]"}>
+    <div className={isMobile ? 'w-full' : 'w-[300px] sm:w-[400px]'}>
       <div className="mb-2 p-2">
         <input
           type="text"
@@ -59,4 +59,4 @@ export function GifPicker({ onGifSelect, onClose }: GifPickerProps) {
   );
 }
 
-export default GifPicker; 
+export default GifPicker;

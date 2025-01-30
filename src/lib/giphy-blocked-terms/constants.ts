@@ -43,6 +43,21 @@ const BLOCKED_TERMS = [
   'reid',
   'riley reid',
   'riley ried',
+  'naughty',
+  'nau',
+  'naug',
+  'naugh',
+  'naught',
+  'nuaghty',
+  'steamy',
+  'panties',
+  'bra',
+  'busty',
+  'bussy',
+  'boi',
+  'nazi',
+  'fascist',
+  'fascism',
   // Add more terms here
 ];
 

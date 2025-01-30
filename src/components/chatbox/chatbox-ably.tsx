@@ -10,6 +10,11 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Sticker, SendHorizontal } from 'lucide-react';
 import GifPicker from './gif-picker';
 
 /**
@@ -25,7 +30,7 @@ export interface ChatProps {
     id: string;
     /** User's display name */
     name: string;
-  }; 
+  };
 }
 
 /**
@@ -195,33 +200,37 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-[800px] lg:h-[600px] bg-gray-800 rounded-lg p-2">
-      <div className="flex-1 overflow-y-auto space-y-2 bg-gray-900 rounded-lg">
-        <div className="sticky top-0 bg-gray-900 border-b border-gray-800">
-          <div className="flex items-center justify-between p-2">
-            <span className="text-sm text-gray-500">Shout Box</span>
-            <span className="text-xs text-gray-500">{onlineUsers} online</span>
+    <Card className="flex flex-col h-[800px] lg:h-[600px] card-gradient shadow-xl">
+      <CardContent className="flex-1 p-0 overflow-hidden">
+        <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 z-10">
+          <div className="flex items-center justify-between p-3">
+            <span className="text-sm font-medium text-gray-300">Shout Box</span>
+            <span className="text-xs bg-gray-800/80 px-2 py-1 rounded-full text-gray-300">
+              {onlineUsers} online
+            </span>
           </div>
-          
-          <form onSubmit={sendMessage} className="flex gap-2 p-2 border-t border-gray-800">
-            <input
+
+          <form onSubmit={sendMessage} className="flex gap-2 p-3 border-t border-gray-800">
+            <Input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type a message... 😊"
-              className="flex-1 bg-gray-800 text-white text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 bg-gray-800/80 text-white border-gray-700 focus:border-gray-600 transition-colors rounded-md"
             />
             {isMobile ? (
               <Dialog open={showGifPicker} onOpenChange={setShowGifPicker}>
                 <DialogTrigger asChild>
-                  <button
+                  <Button
                     type="button"
-                    className="bg-gray-800 text-white px-2 py-1.5 rounded hover:bg-gray-700 transition-colors text-sm"
+                    variant="secondary"
+                    size="icon"
+                    className="bg-gray-800/80 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 transition-all rounded-md text-xs font-medium"
                   >
                     GIF
-                  </button>
+                  </Button>
                 </DialogTrigger>
-                <DialogContent className="p-0 sm:max-w-[425px]">
+                <DialogContent className="p-0 sm:max-w-[425px] border-gray-800 bg-gray-900 rounded-lg">
                   <DialogTitle className="sr-only">GIF Picker</DialogTitle>
                   <GifPicker onGifSelect={sendGif} onClose={() => setShowGifPicker(false)} />
                 </DialogContent>
@@ -229,16 +238,18 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
             ) : (
               <Popover open={showGifPicker} onOpenChange={setShowGifPicker}>
                 <PopoverTrigger asChild>
-                  <button
+                  <Button
                     type="button"
-                    className="bg-gray-800 text-white px-2 py-1.5 rounded hover:bg-gray-700 transition-colors text-sm"
+                    variant="secondary"
+                    size="icon"
+                    className="bg-gray-800/80 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 transition-all rounded-md text-xs font-medium"
                   >
                     GIF
-                  </button>
+                  </Button>
                 </PopoverTrigger>
-                <PopoverContent 
-                  className="p-0 w-auto" 
-                  align="end" 
+                <PopoverContent
+                  className="p-0 w-auto border-gray-800 bg-gray-900 rounded-lg"
+                  align="end"
                   side="bottom"
                   sideOffset={5}
                   alignOffset={0}
@@ -247,62 +258,75 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
                 </PopoverContent>
               </Popover>
             )}
-            <button
+            <Button
               type="submit"
-              className="bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600 transition-colors text-sm"
+              variant="default"
+              size="icon"
+              className="bg-blue-600 hover:bg-blue-500 transition-colors rounded-md"
             >
-              Send
-            </button>
+              <SendHorizontal className="h-4 w-4" />
+            </Button>
           </form>
         </div>
 
-        <div className="p-3 space-y-2">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              No messages yet. Be the first to chat! 👋
-            </div>
-          ) : (
-            <div className="flex flex-col-reverse space-y-reverse space-y-2">
-              {messages.map((msg, index) => (
-                <div key={index} className="bg-gray-800 rounded p-2">
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <Link
-                        href={`/users/${msg.userId}`}
-                        className="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
-                      >
-                        {msg.username}
-                      </Link>
-                      <span className="text-gray-400">: </span>
-                    </div>
-                    <span className="text-xs text-gray-400">{formatMessageTime(msg.timestamp)}</span>
-                  </div>
-                  {msg.text ? (
-                    <span className="text-white whitespace-pre-wrap break-words">{msg.text}</span>
-                  ) : msg.gif ? (
-                    <div className="mt-2">
-                      <img
-                        src={msg.gif.url}
-                        alt={msg.gif.title}
-                        className="max-w-full rounded-lg"
-                        style={{
-                          maxHeight: '200px',
-                          width: 'auto',
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+        <ScrollArea className="flex-1 h-[calc(100%-90px)]">
+          <div className="p-3 min-h-full">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No messages yet. Be the first to chat! 👋
+              </div>
+            ) : (
+              <div className="flex flex-col-reverse space-y-reverse space-y-2">
+                {messages.map((msg, index) => (
+                  <Card
+                    key={index}
+                    className="group bg-gray-800/80 border-gray-700/50 hover:bg-gray-800/90 transition-colors rounded-md"
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex justify-between items-start mb-1.5">
+                        <div>
+                          <Link
+                            href={`/users/${msg.userId}`}
+                            className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
+                          >
+                            {msg.username}
+                          </Link>
+                          <span className="text-gray-500">: </span>
+                        </div>
+                        <span className="text-xs text-gray-500 opacity-60 group-hover:opacity-100 transition-opacity">
+                          {formatMessageTime(msg.timestamp)}
+                        </span>
+                      </div>
+                      {msg.text ? (
+                        <span className="text-gray-100 whitespace-pre-wrap break-words">
+                          {msg.text}
+                        </span>
+                      ) : msg.gif ? (
+                        <div className="mt-2 rounded-lg overflow-hidden">
+                          <img
+                            src={msg.gif.url}
+                            alt={msg.gif.title}
+                            className="max-w-full hover:scale-[1.02] transition-transform"
+                            style={{
+                              maxHeight: '200px',
+                              width: 'auto',
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 }
 
