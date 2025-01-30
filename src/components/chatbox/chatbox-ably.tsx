@@ -4,9 +4,13 @@ import * as Ably from 'ably';
 import { AblyProvider, useChannel, ChannelProvider } from 'ably/react';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Grid } from '@giphy/react-components';
 import { IGif } from '@giphy/js-types';
 import type { SyntheticEvent } from 'react';
+import { formatDistanceToNow, format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
+import GifPicker from './gif-picker';
 
 /**
  * Props for the Chat component
@@ -21,7 +25,7 @@ export interface ChatProps {
     id: string;
     /** User's display name */
     name: string;
-  };
+  }; 
 }
 
 /**
@@ -84,7 +88,7 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   const [onlineUsers, setOnlineUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showGifPicker, setShowGifPicker] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const isMobile = useIsMobile();
 
   // Subscribe to all messages on the channel
   const { channel } = useChannel(`league-chat:${leagueId}`, (message) => {
@@ -158,7 +162,6 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   };
 
   const sendGif = (gif: IGif, e: SyntheticEvent<HTMLElement, Event>) => {
-    // Prevent default behavior and event propagation
     e.preventDefault();
     e.stopPropagation();
 
@@ -179,113 +182,126 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     setShowGifPicker(false);
   };
 
-  // Custom fetch function for Giphy Grid
-  const fetchGifs = async (offset: number) => {
-    const params = new URLSearchParams({
-      offset: offset.toString(),
-      limit: '10',
-      ...(searchQuery && { q: searchQuery }),
-    });
+  const formatMessageTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const hoursDiff = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
-    const response = await fetch(`/api/giphy?${params}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch GIFs');
+    if (hoursDiff < 24) {
+      return formatDistanceToNow(date, { addSuffix: true });
+    } else {
+      return format(date, 'MMM d, h:mm a');
     }
-    return response.json();
   };
 
   return (
-    <div className="flex flex-col h-[600px] lg:h-[400px]">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">League Chat</h2>
-        <span className="text-sm text-gray-400">{onlineUsers} online</span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto space-y-2 bg-gray-800 rounded-lg p-4 mb-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+    <div className="flex flex-col h-[800px] lg:h-[600px] bg-gray-800 rounded-lg p-2">
+      <div className="flex-1 overflow-y-auto space-y-2 bg-gray-900 rounded-lg">
+        <div className="sticky top-0 bg-gray-900 border-b border-gray-800">
+          <div className="flex items-center justify-between p-2">
+            <span className="text-sm text-gray-500">Shout Box</span>
+            <span className="text-xs text-gray-500">{onlineUsers} online</span>
           </div>
-        ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            No messages yet. Be the first to chat! 👋
-          </div>
-        ) : (
-          <div className="flex flex-col-reverse space-y-reverse space-y-2">
-            {messages.map((msg, index) => (
-              <div key={index} className="bg-gray-700 rounded p-2">
-                <Link
-                  href={`/users/${msg.userId}`}
-                  className="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
-                >
-                  {msg.username}
-                </Link>
-                <span className="text-gray-400">: </span>
-                {msg.text ? (
-                  <span className="text-white whitespace-pre-wrap break-words">{msg.text}</span>
-                ) : msg.gif ? (
-                  <div className="mt-2">
-                    <img
-                      src={msg.gif.url}
-                      alt={msg.gif.title}
-                      className="max-w-full rounded-lg"
-                      style={{
-                        maxHeight: '200px',
-                        width: 'auto',
-                      }}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {showGifPicker && (
-        <div className="mb-4 bg-gray-800 rounded-lg p-4 h-[300px] overflow-y-auto">
-          <div className="mb-4">
+          
+          <form onSubmit={sendMessage} className="flex gap-2 p-2 border-t border-gray-800">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search GIFs..."
-              className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Type a message... 😊"
+              className="flex-1 bg-gray-800 text-white text-sm rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
-          <Grid
-            key={searchQuery}
-            onGifClick={sendGif}
-            fetchGifs={fetchGifs}
-            width={window.innerWidth - 100}
-            columns={3}
-            gutter={6}
-          />
+            {isMobile ? (
+              <Dialog open={showGifPicker} onOpenChange={setShowGifPicker}>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    className="bg-gray-800 text-white px-2 py-1.5 rounded hover:bg-gray-700 transition-colors text-sm"
+                  >
+                    GIF
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="p-0 sm:max-w-[425px]">
+                  <DialogTitle className="sr-only">GIF Picker</DialogTitle>
+                  <GifPicker onGifSelect={sendGif} onClose={() => setShowGifPicker(false)} />
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Popover open={showGifPicker} onOpenChange={setShowGifPicker}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="bg-gray-800 text-white px-2 py-1.5 rounded hover:bg-gray-700 transition-colors text-sm"
+                  >
+                    GIF
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="p-0 w-auto" 
+                  align="end" 
+                  side="bottom"
+                  sideOffset={5}
+                  alignOffset={0}
+                >
+                  <GifPicker onGifSelect={sendGif} onClose={() => setShowGifPicker(false)} />
+                </PopoverContent>
+              </Popover>
+            )}
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600 transition-colors text-sm"
+            >
+              Send
+            </button>
+          </form>
         </div>
-      )}
 
-      <form onSubmit={sendMessage} className="flex gap-2">
-        <input
-          type="text"
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Type a message... 😊"
-          className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-[16px]"
-        />
-        <button
-          type="button"
-          onClick={() => setShowGifPicker(!showGifPicker)}
-          className="bg-gray-700 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition-colors"
-        >
-          GIF
-        </button>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
-        >
-          Send
-        </button>
-      </form>
+        <div className="p-3 space-y-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              No messages yet. Be the first to chat! 👋
+            </div>
+          ) : (
+            <div className="flex flex-col-reverse space-y-reverse space-y-2">
+              {messages.map((msg, index) => (
+                <div key={index} className="bg-gray-800 rounded p-2">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <Link
+                        href={`/users/${msg.userId}`}
+                        className="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
+                      >
+                        {msg.username}
+                      </Link>
+                      <span className="text-gray-400">: </span>
+                    </div>
+                    <span className="text-xs text-gray-400">{formatMessageTime(msg.timestamp)}</span>
+                  </div>
+                  {msg.text ? (
+                    <span className="text-white whitespace-pre-wrap break-words">{msg.text}</span>
+                  ) : msg.gif ? (
+                    <div className="mt-2">
+                      <img
+                        src={msg.gif.url}
+                        alt={msg.gif.title}
+                        className="max-w-full rounded-lg"
+                        style={{
+                          maxHeight: '200px',
+                          width: 'auto',
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
