@@ -1,12 +1,12 @@
-import Image from "next/image";
-import { Images } from "@/constants/images";
-import Link from "next/link";
-import { Nav } from "@/components/nav";
-import { SeasonSignupCard } from "@/components/season-signup-card";
-import { cookies } from "next/headers";
-import { verify } from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import { TestNotificationButton } from "@/components/test-notification-button";
+import Image from 'next/image';
+import { Images } from '@/constants/images';
+import Link from 'next/link';
+import { Nav } from '@/components/nav';
+import { SeasonSignupCard } from '@/components/season-signup-card';
+import { cookies } from 'next/headers';
+import { verify } from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+import { TestNotificationButton } from '@/components/test-notification-button';
 
 const prisma = new PrismaClient();
 
@@ -32,14 +32,14 @@ export default async function Home() {
   try {
     // Check authentication
     const cookieStore = await cookies();
-    const token = cookieStore.get("token");
-    
+    const token = cookieStore.get('token');
+
     if (token) {
       try {
-        verify(token.value, process.env.JWT_SECRET || "");
+        verify(token.value, process.env.JWT_SECRET || '');
         isAuthenticated = true;
       } catch (error) {
-        console.error("Invalid token:", error);
+        console.error('Invalid token:', error);
       }
     }
 
@@ -49,10 +49,10 @@ export default async function Home() {
         where: { isLatest: true },
       });
     } catch (error) {
-      console.error("Failed to fetch latest season:", error);
+      console.error('Failed to fetch latest season:', error);
     }
   } catch (error) {
-    console.error("Error in home page:", error);
+    console.error('Error in home page:', error);
   }
 
   return (
@@ -65,18 +65,24 @@ export default async function Home() {
             Welcome to OVHL
           </h1>
           <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto text-gray-200">
-            Experience the thrill of competitive virtual hockey in the most
-            prestigious online league
+            Experience the thrill of competitive virtual hockey in the most prestigious online
+            league
           </p>
           <div className="flex gap-6 justify-center">
             {isAuthenticated ? (
               <TestNotificationButton />
             ) : (
-              <Link href="/sign-up" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition">
+              <Link
+                href="/sign-up"
+                className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition"
+              >
                 Join the League
               </Link>
             )}
-            <Link href="/about" className="card-gradient px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition">
+            <Link
+              href="/about"
+              className="card-gradient px-8 py-4 rounded-lg text-lg hover:bg-white/5 transition"
+            >
               Learn More
             </Link>
           </div>
@@ -85,10 +91,7 @@ export default async function Home() {
         {/* Season Signup Section */}
         {latestSeason && (
           <section className="py-10">
-            <SeasonSignupCard
-              season={latestSeason}
-              isAuthenticated={isAuthenticated}
-            />
+            <SeasonSignupCard season={latestSeason} isAuthenticated={isAuthenticated} />
           </section>
         )}
 
@@ -97,19 +100,18 @@ export default async function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Competitive Seasons",
+                title: 'Competitive Seasons',
                 description:
-                  "Participate in structured leagues with regular seasons, playoffs, and championships",
+                  'Participate in structured leagues with regular seasons, playoffs, and championships',
               },
               {
-                title: "Player Development",
-                description:
-                  "Track your progress, improve your skills, and climb the rankings",
+                title: 'Player Development',
+                description: 'Track your progress, improve your skills, and climb the rankings',
               },
               {
-                title: "Active Community",
+                title: 'Active Community',
                 description:
-                  "Join a thriving community of passionate hockey gamers from around the world",
+                  'Join a thriving community of passionate hockey gamers from around the world',
               },
             ].map((feature, i) => (
               <div key={i} className="card-gradient card-hover p-8 rounded-xl">
@@ -125,17 +127,12 @@ export default async function Home() {
           <h2 className="text-3xl font-bold mb-12 text-center">Latest News</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="card-gradient card-hover rounded-xl overflow-hidden"
-              >
+              <div key={i} className="card-gradient card-hover rounded-xl overflow-hidden">
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">
-                    Season 12 Registration Open
-                  </h3>
+                  <h3 className="text-xl font-bold mb-2">Season 12 Registration Open</h3>
                   <p className="text-gray-300 mb-4">
-                    Registration for the upcoming season is now open. Secure your
-                    spot in the league...
+                    Registration for the upcoming season is now open. Secure your spot in the
+                    league...
                   </p>
                   <Link href="/news/1" className="text-blue-400 hover:text-blue-300 transition">
                     Read More →
@@ -149,17 +146,18 @@ export default async function Home() {
         {/* CTA Section */}
         <section className="py-20">
           <div className="card-gradient rounded-2xl p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Join the League?
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Join the League?</h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Take your virtual hockey career to the next level. Join OVHL today
-              and compete with the best.
+              Take your virtual hockey career to the next level. Join OVHL today and compete with
+              the best.
             </p>
-            <Link href="/sign-up" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition">
+            <Link
+              href="/sign-up"
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-blue-700 transition"
+            >
               Register Now
             </Link>
-        </div>
+          </div>
         </section>
       </main>
 
@@ -169,7 +167,7 @@ export default async function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <Link href="/">
-          <Image
+                <Image
                   src={Images.LOGO_MAIN.path}
                   alt="OVHL Footer Logo"
                   width={100}

@@ -1,16 +1,16 @@
 export enum NotificationType {
-  SYSTEM = "SYSTEM",
-  FORUM = "FORUM",
-  TEAM = "TEAM",
-  LEAGUE = "LEAGUE",
-  MATCH = "MATCH",
-  CUSTOM = "CUSTOM",
+  SYSTEM = 'SYSTEM',
+  FORUM = 'FORUM',
+  TEAM = 'TEAM',
+  LEAGUE = 'LEAGUE',
+  MATCH = 'MATCH',
+  CUSTOM = 'CUSTOM',
 }
 
 export enum NotificationStatus {
-  UNREAD = "UNREAD",
-  READ = "READ",
-  ARCHIVED = "ARCHIVED",
+  UNREAD = 'UNREAD',
+  READ = 'READ',
+  ARCHIVED = 'ARCHIVED',
 }
 
 export interface Notification {
@@ -24,4 +24,4 @@ export interface Notification {
   createdAt: string;
   updatedAt: string;
   userId: string;
-} 
+}

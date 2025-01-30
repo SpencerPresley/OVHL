@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { NHL_TEAMS } from "@/lib/teams/nhl";
-import { AHL_TEAMS } from "@/lib/teams/ahl";
-import { ECHL_TEAMS } from "@/lib/teams/echl";
-import { CHL_TEAMS } from "@/lib/teams/chl";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { NHL_TEAMS } from '@/lib/teams/nhl';
+import { AHL_TEAMS } from '@/lib/teams/ahl';
+import { ECHL_TEAMS } from '@/lib/teams/echl';
+import { CHL_TEAMS } from '@/lib/teams/chl';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 const LEAGUE_LEVELS: Record<string, number> = {
   nhl: 1,
@@ -20,32 +20,26 @@ const LEAGUE_LEVELS: Record<string, number> = {
 function getTeamDivision(teamIdentifier: string, leagueId: string) {
   switch (leagueId) {
     case 'nhl':
-      return NHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+      return NHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
     case 'ahl':
-      return AHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+      return AHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
     case 'echl':
-      return ECHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+      return ECHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
     case 'chl':
-      return CHL_TEAMS.find(t => t.id.toUpperCase() === teamIdentifier)?.division;
+      return CHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
     default:
       return null;
   }
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const resolvedParams = await params;
     const leagueId = resolvedParams.id.toLowerCase();
     const leagueLevel = LEAGUE_LEVELS[leagueId];
 
     if (!leagueLevel) {
-      return NextResponse.json(
-        { error: "Invalid league ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid league ID' }, { status: 400 });
     }
 
     // Get the latest season
@@ -54,10 +48,7 @@ export async function GET(
     });
 
     if (!latestSeason) {
-      return NextResponse.json(
-        { error: "No active season found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
     // Get the tier for this league
@@ -69,10 +60,7 @@ export async function GET(
     });
 
     if (!tier) {
-      return NextResponse.json(
-        { error: "League tier not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'League tier not found' }, { status: 404 });
     }
 
     // Get all team seasons for this tier
@@ -88,7 +76,7 @@ export async function GET(
     // Calculate stats and group teams by division
     const teamsByDivision = new Map<string, any[]>();
 
-    teamSeasons.forEach(ts => {
+    teamSeasons.forEach((ts) => {
       const division = getTeamDivision(ts.team.teamIdentifier, leagueId);
       if (!division) return;
 
@@ -100,20 +88,22 @@ export async function GET(
         wins: ts.wins,
         losses: ts.losses,
         otLosses: ts.otLosses,
-        points: (ts.wins * 2) + ts.otLosses,
+        points: ts.wins * 2 + ts.otLosses,
         goalsFor: ts.goalsFor,
         goalsAgainst: ts.goalsAgainst,
         goalDifferential: ts.goalsFor - ts.goalsAgainst,
         powerplayGoals: ts.powerplayGoals,
         powerplayOpportunities: ts.powerplayOpportunities,
-        powerplayPercentage: ts.powerplayOpportunities > 0 
-          ? (ts.powerplayGoals / ts.powerplayOpportunities) * 100 
-          : 0,
+        powerplayPercentage:
+          ts.powerplayOpportunities > 0 ? (ts.powerplayGoals / ts.powerplayOpportunities) * 100 : 0,
         penaltyKillGoalsAgainst: ts.penaltyKillGoalsAgainst,
         penaltyKillOpportunities: ts.penaltyKillOpportunities,
-        penaltyKillPercentage: ts.penaltyKillOpportunities > 0
-          ? ((ts.penaltyKillOpportunities - ts.penaltyKillGoalsAgainst) / ts.penaltyKillOpportunities) * 100
-          : 0,
+        penaltyKillPercentage:
+          ts.penaltyKillOpportunities > 0
+            ? ((ts.penaltyKillOpportunities - ts.penaltyKillGoalsAgainst) /
+                ts.penaltyKillOpportunities) *
+              100
+            : 0,
       };
 
       if (!teamsByDivision.has(division)) {
@@ -144,10 +134,7 @@ export async function GET(
       standings,
     });
   } catch (error) {
-    console.error("Failed to fetch standings:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch standings" },
-      { status: 500 },
-    );
+    console.error('Failed to fetch standings:', error);
+    return NextResponse.json({ error: 'Failed to fetch standings' }, { status: 500 });
   }
-} 
+}

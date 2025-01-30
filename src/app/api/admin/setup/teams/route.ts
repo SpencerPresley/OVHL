@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { NHL_TEAMS } from "@/lib/teams/nhl";
-import { AHL_TEAMS } from "@/lib/teams/ahl";
-import { ECHL_TEAMS } from "@/lib/teams/echl";
-import { CHL_TEAMS } from "@/lib/teams/chl";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { NHL_TEAMS } from '@/lib/teams/nhl';
+import { AHL_TEAMS } from '@/lib/teams/ahl';
+import { ECHL_TEAMS } from '@/lib/teams/echl';
+import { CHL_TEAMS } from '@/lib/teams/chl';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
@@ -17,8 +17,8 @@ export async function POST() {
         return await prisma.team.upsert({
           where: { teamIdentifier: team.id.toUpperCase() },
           create: {
-            eaClubId: "",
-            eaClubName: "",
+            eaClubId: '',
+            eaClubName: '',
             officialName: team.name,
             teamIdentifier: team.id.toUpperCase(),
           },
@@ -32,15 +32,15 @@ export async function POST() {
     // Step 2: Create AHL Teams with NHL Affiliations
     const ahlTeams = await Promise.all(
       AHL_TEAMS.map(async (team) => {
-        const nhlTeam = team.nhlTeamId ? 
-          nhlTeams.find(t => t.teamIdentifier === team.nhlTeamId?.toUpperCase()) : 
-          null;
+        const nhlTeam = team.nhlTeamId
+          ? nhlTeams.find((t) => t.teamIdentifier === team.nhlTeamId?.toUpperCase())
+          : null;
 
         return await prisma.team.upsert({
           where: { teamIdentifier: team.id.toUpperCase() },
           create: {
-            eaClubId: "",
-            eaClubName: "",
+            eaClubId: '',
+            eaClubName: '',
             officialName: team.name,
             teamIdentifier: team.id.toUpperCase(),
             nhlAffiliateId: nhlTeam?.id,
@@ -56,19 +56,19 @@ export async function POST() {
     // Step 3: Create ECHL Teams with NHL and AHL Affiliations
     await Promise.all(
       ECHL_TEAMS.map(async (team) => {
-        const nhlTeam = team.nhlTeamId ? 
-          nhlTeams.find(t => t.teamIdentifier === team.nhlTeamId.toUpperCase()) : 
-          null;
-        
-        const ahlTeam = team.ahlTeamId ? 
-          ahlTeams.find(t => t.teamIdentifier === team.ahlTeamId.toUpperCase()) : 
-          null;
+        const nhlTeam = team.nhlTeamId
+          ? nhlTeams.find((t) => t.teamIdentifier === team.nhlTeamId.toUpperCase())
+          : null;
+
+        const ahlTeam = team.ahlTeamId
+          ? ahlTeams.find((t) => t.teamIdentifier === team.ahlTeamId.toUpperCase())
+          : null;
 
         return await prisma.team.upsert({
           where: { teamIdentifier: team.id.toUpperCase() },
           create: {
-            eaClubId: "",
-            eaClubName: "",
+            eaClubId: '',
+            eaClubName: '',
             officialName: team.name,
             teamIdentifier: team.id.toUpperCase(),
             nhlAffiliateId: nhlTeam?.id,
@@ -89,8 +89,8 @@ export async function POST() {
         return await prisma.team.upsert({
           where: { teamIdentifier: team.id.toUpperCase() },
           create: {
-            eaClubId: "",
-            eaClubName: "",
+            eaClubId: '',
+            eaClubName: '',
             officialName: team.name,
             teamIdentifier: team.id.toUpperCase(),
           },
@@ -102,13 +102,10 @@ export async function POST() {
     );
 
     return NextResponse.json({
-      message: "Teams setup completed successfully",
+      message: 'Teams setup completed successfully',
     });
   } catch (error) {
-    console.error("Failed to setup teams:", error);
-    return NextResponse.json(
-      { error: "Failed to setup teams" },
-      { status: 500 },
-    );
+    console.error('Failed to setup teams:', error);
+    return NextResponse.json({ error: 'Failed to setup teams' }, { status: 500 });
   }
-} 
+}

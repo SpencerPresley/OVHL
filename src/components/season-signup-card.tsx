@@ -1,11 +1,17 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 interface SeasonSignupCardProps {
   season: {
@@ -15,26 +21,26 @@ interface SeasonSignupCardProps {
   isAuthenticated: boolean;
 }
 
-type Position = "Center" | "Left Wing" | "Right Wing" | "Left Defense" | "Right Defense" | "Goalie";
+type Position = 'Center' | 'Left Wing' | 'Right Wing' | 'Left Defense' | 'Right Defense' | 'Goalie';
 
 const positions: Position[] = [
-  "Center",
-  "Left Wing",
-  "Right Wing",
-  "Left Defense",
-  "Right Defense",
-  "Goalie",
+  'Center',
+  'Left Wing',
+  'Right Wing',
+  'Left Defense',
+  'Right Defense',
+  'Goalie',
 ];
 
 export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [position, setPosition] = useState<Position | "">("");
+  const [position, setPosition] = useState<Position | ''>('');
 
   const handleSignup = async () => {
     // Validate first
     if (!position) {
-      setError("Position is required");
+      setError('Position is required');
       return;
     }
 
@@ -42,10 +48,10 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/seasons/signup", {
-        method: "POST",
+      const response = await fetch('/api/seasons/signup', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           seasonId: season.id,
@@ -56,13 +62,13 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign up for season");
+        throw new Error(data.error || 'Failed to sign up for season');
       }
 
       // Reload the page to reflect changes
       window.location.reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign up for season");
+      setError(err instanceof Error ? err.message : 'Failed to sign up for season');
     } finally {
       setLoading(false);
     }
@@ -100,12 +106,8 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
               </Select>
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button
-              onClick={handleSignup}
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? "Signing up..." : "Sign up for Season"}
+            <Button onClick={handleSignup} disabled={loading} className="w-full">
+              {loading ? 'Signing up...' : 'Sign up for Season'}
             </Button>
           </div>
         ) : (
@@ -119,4 +121,4 @@ export function SeasonSignupCard({ season, isAuthenticated }: SeasonSignupCardPr
       </CardContent>
     </Card>
   );
-} 
+}

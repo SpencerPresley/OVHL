@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 interface LeagueNavProps {
   leagueId: string;
@@ -25,11 +25,11 @@ export function LeagueNav({ leagueId }: LeagueNavProps) {
   const pathname = usePathname();
 
   const links = [
-    { href: `/leagues/${leagueId}`, label: "Overview" },
-    { href: `/leagues/${leagueId}/standings`, label: "Standings" },
-    { href: `/leagues/${leagueId}/teams`, label: "Teams" },
-    { href: `/leagues/${leagueId}/schedule`, label: "Schedule" },
-    { href: `/leagues/${leagueId}/stats`, label: "Stats" },
+    { href: `/leagues/${leagueId}`, label: 'Overview' },
+    { href: `/leagues/${leagueId}/standings`, label: 'Standings' },
+    { href: `/leagues/${leagueId}/teams`, label: 'Teams' },
+    { href: `/leagues/${leagueId}/schedule`, label: 'Schedule' },
+    { href: `/leagues/${leagueId}/stats`, label: 'Stats' },
   ];
 
   return (
@@ -41,10 +41,10 @@ export function LeagueNav({ leagueId }: LeagueNavProps) {
               key={link.href}
               href={link.href}
               className={cn(
-                "py-4 text-sm font-medium transition-colors hover:text-blue-400",
+                'py-4 text-sm font-medium transition-colors hover:text-blue-400',
                 pathname === link.href
-                  ? "border-b-2 border-blue-400 text-blue-400"
-                  : "text-gray-300",
+                  ? 'border-b-2 border-blue-400 text-blue-400'
+                  : 'text-gray-300'
               )}
             >
               {link.label}

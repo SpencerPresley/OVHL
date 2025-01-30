@@ -1,11 +1,11 @@
-import { Nav } from "@/components/nav";
-import { LeagueNav } from "@/components/league-nav";
-import Image from "next/image";
-import { notFound } from "next/navigation";
+import { Nav } from '@/components/nav';
+import { LeagueNav } from '@/components/league-nav';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { default as dynamicImport } from 'next/dynamic';
-import { PrismaClient } from "@prisma/client";
-import { cookies } from "next/headers";
-import { verify } from "jsonwebtoken";
+import { PrismaClient } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { verify } from 'jsonwebtoken';
 
 // Use nodejs runtime to avoid edge runtime issues with crypto
 export const runtime = 'nodejs';
@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
  * Using dynamic import to avoid SSR issues with WebSocket connections
  */
 const ClientChat = dynamicImport(() => import('@/components/chatbox/client-wrapper'), {
-  loading: () => <div className="animate-pulse bg-gray-700 h-[400px] rounded-lg"></div>
+  loading: () => <div className="animate-pulse bg-gray-700 h-[400px] rounded-lg"></div>,
 });
 
 /**
@@ -38,28 +38,28 @@ interface League {
  */
 const leagues: Record<string, League> = {
   nhl: {
-    id: "nhl",
-    name: "NHL",
-    logo: "/nhl_logo.png",
-    bannerColor: "bg-blue-900",
+    id: 'nhl',
+    name: 'NHL',
+    logo: '/nhl_logo.png',
+    bannerColor: 'bg-blue-900',
   },
   ahl: {
-    id: "ahl",
-    name: "AHL",
-    logo: "/ahl_logo.png",
-    bannerColor: "bg-yellow-400",
+    id: 'ahl',
+    name: 'AHL',
+    logo: '/ahl_logo.png',
+    bannerColor: 'bg-yellow-400',
   },
   echl: {
-    id: "echl",
-    name: "ECHL",
-    logo: "/echl_logo.png",
-    bannerColor: "bg-emerald-600",
+    id: 'echl',
+    name: 'ECHL',
+    logo: '/echl_logo.png',
+    bannerColor: 'bg-emerald-600',
   },
   chl: {
-    id: "chl",
-    name: "CHL",
-    logo: "/chl_logo.png",
-    bannerColor: "bg-teal-600",
+    id: 'chl',
+    name: 'CHL',
+    logo: '/chl_logo.png',
+    bannerColor: 'bg-teal-600',
   },
 };
 
@@ -72,7 +72,7 @@ const leagues: Record<string, League> = {
  * - League name
  * - Real-time chat for authenticated users
  * - News and stats sections
- * 
+ *
  * Authentication:
  * - Chat is only available to authenticated users with a valid name
  * - Non-authenticated users can still view the page but see a sign-in prompt for chat
@@ -84,13 +84,9 @@ const leagues: Record<string, League> = {
  * @param {string} props.params.id - League ID from the URL
  * @returns {Promise<JSX.Element>} Rendered league page
  */
-export default async function LeaguePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function LeaguePage({ params }: { params: { id: string } }) {
   console.log('LeaguePage: Starting to load', params);
-  
+
   const { id } = await Promise.resolve(params);
   const league = leagues[id];
 
@@ -104,23 +100,23 @@ export default async function LeaguePage({
   // Attempt to get authenticated user for chat functionality
   console.log('LeaguePage: Getting auth token');
   const cookieStore = await cookies();
-  const token = cookieStore.get("token");
-  
+  const token = cookieStore.get('token');
+
   console.log('LeaguePage: Token found:', !!token);
-  
+
   let currentUser = null;
   if (token?.value) {
     try {
       console.log('LeaguePage: Verifying token');
       const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
       console.log('LeaguePage: Token verified, getting user');
-      
+
       currentUser = await prisma.user.findUnique({
         where: { id: decoded.id },
         select: {
           id: true,
           name: true,
-        }
+        },
       });
       console.log('LeaguePage: User found:', !!currentUser);
     } catch (error) {
@@ -129,7 +125,7 @@ export default async function LeaguePage({
   }
 
   console.log('LeaguePage: Rendering page');
-  
+
   return (
     <div className="min-h-screen">
       <Nav />
@@ -157,12 +153,12 @@ export default async function LeaguePage({
         {/* Chat Section - Full width on larger screens */}
         <div className="w-full">
           {currentUser && currentUser.name ? (
-            <ClientChat 
-              leagueId={league.id} 
+            <ClientChat
+              leagueId={league.id}
               currentUser={{
                 id: currentUser.id,
-                name: currentUser.name
-              }} 
+                name: currentUser.name,
+              }}
             />
           ) : (
             <div className="bg-gray-800 rounded-lg p-6 text-center">

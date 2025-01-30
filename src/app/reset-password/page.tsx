@@ -1,6 +1,6 @@
-import { Suspense } from "react";
-import { ResetPasswordForm } from "@/components/auth/reset-password-form";
-import { Toaster } from "@/components/ui/sonner";
+import { Suspense } from 'react';
+import { ResetPasswordForm } from '@/components/auth/reset-password-form';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function ResetPasswordPage() {
   return (

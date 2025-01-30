@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import * as React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+} from '@/components/ui/navigation-menu';
 // import { cn } from "@/lib/utils"
 
 /**
@@ -46,15 +46,15 @@ export function UserNav({ user }: UserNavProps) {
    * - Redirects to sign-in page
    */
   const handleSignOut = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = "/sign-in";
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    window.location.href = '/sign-in';
   };
 
   /**
    * Handles navigation to user profile
    */
   const handleProfile = () => {
-    window.location.href = "/profile";
+    window.location.href = '/profile';
   };
 
   return (

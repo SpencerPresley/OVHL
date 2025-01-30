@@ -10,14 +10,14 @@
  */
 export const PROTECTED_ROUTES = [
   // Dashboard routes
-  "/dashboard",
-  "/dashboard/",
-  "/dashboard/profile",
-  "/dashboard/settings",
+  '/dashboard',
+  '/dashboard/',
+  '/dashboard/profile',
+  '/dashboard/settings',
 
   // API routes that need protection
-  "/api/user",
-  "/api/profile",
+  '/api/user',
+  '/api/profile',
 
   // Add more protected routes as needed
 ] as const;
@@ -28,19 +28,14 @@ export const PROTECTED_ROUTES = [
  * @constant
  * @type {string[]}
  */
-export const AUTH_ROUTES = [
-  "/sign-in",
-  "/sign-up",
-  "/forgot-password",
-  "/reset-password",
-] as const;
+export const AUTH_ROUTES = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'] as const;
 
 /**
  * Public API routes that don't require authentication
  * @constant
  * @type {string[]}
  */
-export const PUBLIC_API_ROUTES = ["/api/auth", "/api/public"] as const;
+export const PUBLIC_API_ROUTES = ['/api/auth', '/api/public'] as const;
 
 /**
  * Type for route categories

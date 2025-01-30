@@ -1,12 +1,6 @@
-"use client";
+'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -15,10 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Team {
   id: string;
@@ -34,13 +28,13 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [seasonDialogOpen, setSeasonDialogOpen] = useState(false);
-  const [seasonId, setSeasonId] = useState("");
+  const [seasonId, setSeasonId] = useState('');
   const router = useRouter();
 
   // Fetch teams on component mount
   useEffect(() => {
     const fetchTeams = async () => {
-      const response = await fetch("/api/admin/teams");
+      const response = await fetch('/api/admin/teams');
       if (response.ok) {
         const data = await response.json();
         setTeams(data.teams);
@@ -52,20 +46,20 @@ export default function AdminPage() {
   const setupTeams = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/setup/teams", {
-        method: "POST",
+      const response = await fetch('/api/admin/setup/teams', {
+        method: 'POST',
       });
-      
+
       if (!response.ok) {
-        throw new Error("Failed to setup teams");
+        throw new Error('Failed to setup teams');
       }
-      
-      alert("Teams setup successfully!");
+
+      alert('Teams setup successfully!');
       // Refresh the teams list
       router.refresh();
     } catch (error) {
-      console.error("Error setting up teams:", error);
-      alert("Failed to setup teams. Please check console for details.");
+      console.error('Error setting up teams:', error);
+      alert('Failed to setup teams. Please check console for details.');
     } finally {
       setIsLoading(false);
     }
@@ -75,22 +69,22 @@ export default function AdminPage() {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/admin/teams/${teamId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ eaClubId, eaClubName }),
       });
-      
+
       if (!response.ok) {
-        throw new Error("Failed to update EA Club ID");
+        throw new Error('Failed to update EA Club ID');
       }
-      
+
       // Refresh the teams list
       router.refresh();
     } catch (error) {
-      console.error("Error updating EA Club ID:", error);
-      alert("Failed to update EA Club ID. Please check console for details.");
+      console.error('Error updating EA Club ID:', error);
+      alert('Failed to update EA Club ID. Please check console for details.');
     } finally {
       setIsLoading(false);
     }
@@ -99,19 +93,19 @@ export default function AdminPage() {
   async function createSeason(seasonId: string) {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/seasons", {
-        method: "POST",
+      const response = await fetch('/api/admin/seasons', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ seasonId }),
       });
-      if (!response.ok) throw new Error("Failed to create season");
-      alert("Season created successfully!");
+      if (!response.ok) throw new Error('Failed to create season');
+      alert('Season created successfully!');
       router.refresh();
     } catch (error) {
-      console.error("Error creating season:", error);
-      alert("Failed to create season");
+      console.error('Error creating season:', error);
+      alert('Failed to create season');
     } finally {
       setIsLoading(false);
     }
@@ -120,15 +114,15 @@ export default function AdminPage() {
   async function insertTestData() {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/test-data", {
-        method: "POST",
+      const response = await fetch('/api/admin/test-data', {
+        method: 'POST',
       });
-      if (!response.ok) throw new Error("Failed to insert test data");
-      alert("Test data inserted successfully!");
+      if (!response.ok) throw new Error('Failed to insert test data');
+      alert('Test data inserted successfully!');
       router.refresh();
     } catch (error) {
-      console.error("Error inserting test data:", error);
-      alert("Failed to insert test data");
+      console.error('Error inserting test data:', error);
+      alert('Failed to insert test data');
     } finally {
       setIsLoading(false);
     }
@@ -137,15 +131,15 @@ export default function AdminPage() {
   async function createTestPlayers() {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/admin/test-data/players", {
-        method: "POST",
+      const response = await fetch('/api/admin/test-data/players', {
+        method: 'POST',
       });
-      if (!response.ok) throw new Error("Failed to create test players");
-      alert("Test players created successfully!");
+      if (!response.ok) throw new Error('Failed to create test players');
+      alert('Test players created successfully!');
       router.refresh();
     } catch (error) {
-      console.error("Error creating test players:", error);
-      alert("Failed to create test players");
+      console.error('Error creating test players:', error);
+      alert('Failed to create test players');
     } finally {
       setIsLoading(false);
     }
@@ -153,35 +147,31 @@ export default function AdminPage() {
 
   async function handleCreateSeason() {
     if (!seasonId) {
-      alert("Please enter a season ID");
+      alert('Please enter a season ID');
       return;
     }
     await createSeason(seasonId);
     setSeasonDialogOpen(false);
-    setSeasonId("");
+    setSeasonId('');
   }
 
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
-      
+
       <div className="grid gap-6 md:grid-cols-2">
         {/* Team Setup Card */}
         <Card>
           <CardHeader>
             <CardTitle>Initial Team Setup</CardTitle>
             <CardDescription>
-              Initialize all teams across NHL, AHL, ECHL, and CHL leagues.
-              This only needs to be done once. After setup, you can update EA Club IDs below.
+              Initialize all teams across NHL, AHL, ECHL, and CHL leagues. This only needs to be
+              done once. After setup, you can update EA Club IDs below.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={setupTeams} 
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? "Setting up..." : "Setup Teams"}
+            <Button onClick={setupTeams} disabled={isLoading} className="w-full">
+              {isLoading ? 'Setting up...' : 'Setup Teams'}
             </Button>
           </CardContent>
         </Card>
@@ -191,8 +181,8 @@ export default function AdminPage() {
           <CardHeader>
             <CardTitle>Season Management</CardTitle>
             <CardDescription>
-              Create a new season and automatically set up all tiers and teams.
-              Make sure all teams are set up first.
+              Create a new season and automatically set up all tiers and teams. Make sure all teams
+              are set up first.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -219,32 +209,29 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button
-                    onClick={handleCreateSeason}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Creating..." : "Create Season"}
+                  <Button onClick={handleCreateSeason} disabled={isLoading}>
+                    {isLoading ? 'Creating...' : 'Create Season'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
 
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               className="w-full"
               onClick={insertTestData}
               disabled={isLoading}
             >
-              {isLoading ? "Creating Test Data..." : "Insert Test Data"}
+              {isLoading ? 'Creating Test Data...' : 'Insert Test Data'}
             </Button>
 
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               className="w-full"
               onClick={createTestPlayers}
               disabled={isLoading}
             >
-              {isLoading ? "Creating Players..." : "Create Test Players"}
+              {isLoading ? 'Creating Players...' : 'Create Test Players'}
             </Button>
           </CardContent>
         </Card>
@@ -266,10 +253,14 @@ export default function AdminPage() {
                   <h3 className="font-semibold">{team.officialName}</h3>
                   <p className="text-sm text-gray-500">{team.teamIdentifier}</p>
                   {team.nhlAffiliate && (
-                    <p className="text-xs text-gray-400">NHL Affiliate: {team.nhlAffiliate.officialName}</p>
+                    <p className="text-xs text-gray-400">
+                      NHL Affiliate: {team.nhlAffiliate.officialName}
+                    </p>
                   )}
                   {team.ahlAffiliate && (
-                    <p className="text-xs text-gray-400">AHL Affiliate: {team.ahlAffiliate.officialName}</p>
+                    <p className="text-xs text-gray-400">
+                      AHL Affiliate: {team.ahlAffiliate.officialName}
+                    </p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -291,8 +282,12 @@ export default function AdminPage() {
                   />
                   <Button
                     onClick={() => {
-                      const idInput = document.querySelector(`input[data-team-id="${team.id}"][data-field="id"]`) as HTMLInputElement;
-                      const nameInput = document.querySelector(`input[data-team-id="${team.id}"][data-field="name"]`) as HTMLInputElement;
+                      const idInput = document.querySelector(
+                        `input[data-team-id="${team.id}"][data-field="id"]`
+                      ) as HTMLInputElement;
+                      const nameInput = document.querySelector(
+                        `input[data-team-id="${team.id}"][data-field="name"]`
+                      ) as HTMLInputElement;
                       if (idInput && nameInput) {
                         updateEaClubId(team.id, idInput.value, nameInput.value);
                       }
@@ -309,4 +304,4 @@ export default function AdminPage() {
       </Card>
     </div>
   );
-} 
+}

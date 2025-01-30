@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import * as Ably from 'ably';
 import { AblyProvider, useChannel, ChannelProvider } from 'ably/react';
@@ -41,7 +41,7 @@ const MAX_MESSAGES = 100;
 
 /**
  * Chat Component
- * 
+ *
  * A real-time chat component that uses Ably for message delivery.
  * Features:
  * - Real-time message updates with consistent ordering
@@ -51,13 +51,13 @@ const MAX_MESSAGES = 100;
  * - Message limit (100) with automatic pruning
  * - Multi-browser support with unique client IDs
  * - Emoji support and rich text formatting
- * 
+ *
  * Message Handling:
  * - Messages are stored chronologically (oldest to newest)
  * - Display is reversed to show newest messages at top
  * - History is loaded on component mount
  * - New messages are appended to maintain order
- * 
+ *
  * User Experience:
  * - Loading states during history fetch
  * - Empty state prompts for first message
@@ -76,7 +76,7 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   // Subscribe to all messages on the channel
   const { channel } = useChannel(`league-chat:${leagueId}`, (message) => {
     if (message.name === 'message') {
-      setMessages(prev => {
+      setMessages((prev) => {
         // Always add new messages to the end and maintain order
         const newMessages = [...prev, message.data as ChatMessage];
         // Keep only the last MAX_MESSAGES
@@ -92,14 +92,13 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     const loadHistory = async () => {
       try {
         // Get messages in reverse order (oldest first) with a larger limit
-        const history = await channel.history({ 
+        const history = await channel.history({
           limit: MAX_MESSAGES,
-          direction: 'forwards' // Get oldest messages first
+          direction: 'forwards', // Get oldest messages first
         });
-        
-        const historicalMessages = history.items
-          .map(item => item.data as ChatMessage);
-        
+
+        const historicalMessages = history.items.map((item) => item.data as ChatMessage);
+
         setMessages(historicalMessages);
       } catch (error) {
         console.error('Failed to load message history:', error);
@@ -110,7 +109,7 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
 
     // Subscribe to presence updates
     const onPresenceUpdate = () => {
-      channel.presence.get().then(members => {
+      channel.presence.get().then((members) => {
         setOnlineUsers(members?.length || 0);
       });
     };
@@ -149,11 +148,9 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     <div className="flex flex-col h-[600px] lg:h-[400px]">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">League Chat</h2>
-        <span className="text-sm text-gray-400">
-          {onlineUsers} online
-        </span>
+        <span className="text-sm text-gray-400">{onlineUsers} online</span>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto space-y-2 bg-gray-800 rounded-lg p-4 mb-4">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -167,7 +164,7 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
           <div className="flex flex-col-reverse space-y-reverse space-y-2">
             {messages.map((msg, index) => (
               <div key={index} className="bg-gray-700 rounded p-2">
-                <Link 
+                <Link
                   href={`/users/${msg.userId}`}
                   className="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
                 >
@@ -202,14 +199,14 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
 
 /**
  * Chat Provider Component
- * 
+ *
  * Wraps the chat component with necessary providers for Ably integration.
  * Creates and uses a memoized Ably client instance to enable:
  * - Single persistent connection for all chats
  * - Multiple simultaneous channel subscriptions
  * - Efficient connection management
  * - Cross-browser support
- * 
+ *
  * Configuration:
  * - Uses token auth for security
  * - Enables message echoing for consistent display
@@ -221,7 +218,7 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
  */
 const Chat = function Chat({ leagueId, currentUser }: ChatProps) {
   console.log('Chat: Initializing for league', leagueId);
-  
+
   // Create a memoized client instance that persists across renders
   const client = useMemo(() => {
     console.log('Chat: Creating new Ably client');
@@ -229,10 +226,10 @@ const Chat = function Chat({ leagueId, currentUser }: ChatProps) {
       authUrl: '/api/ably',
       authMethod: 'GET',
       echoMessages: true,
-      closeOnUnload: true
+      closeOnUnload: true,
     });
   }, []);
-  
+
   const channelName = `league-chat:${leagueId}`;
   console.log('Chat: Using channel', channelName);
 

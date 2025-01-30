@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import dynamic from 'next/dynamic';
 import { ChatProps } from './chatbox-ably';
@@ -10,12 +10,12 @@ import { ChatProps } from './chatbox-ably';
  */
 const Chat = dynamic(() => import('./chatbox-ably'), {
   ssr: false,
-  loading: () => <div className="animate-pulse bg-gray-700 h-[400px] rounded-lg"></div>
+  loading: () => <div className="animate-pulse bg-gray-700 h-[400px] rounded-lg"></div>,
 });
 
 /**
  * Client Wrapper Component for Chat
- * 
+ *
  * This component serves as a client-side wrapper for the chat functionality.
  * It's necessary to have this separate wrapper because:
  * 1. It marks the boundary between server and client components
@@ -30,4 +30,4 @@ const Chat = dynamic(() => import('./chatbox-ably'), {
  */
 export default function ClientWrapper({ leagueId, currentUser }: ChatProps) {
   return <Chat leagueId={leagueId} currentUser={currentUser} />;
-} 
+}

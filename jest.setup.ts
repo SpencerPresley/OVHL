@@ -1,26 +1,26 @@
-import '@testing-library/jest-dom'
-import { enableFetchMocks } from 'jest-fetch-mock'
-import { loadEnvConfig } from '@next/env'
-import { mockPrismaClient } from '@/mocks/prisma'
+import '@testing-library/jest-dom';
+import { enableFetchMocks } from 'jest-fetch-mock';
+import { loadEnvConfig } from '@next/env';
+import { mockPrismaClient } from '@/mocks/prisma';
 
 // Load test environment variables
 loadEnvConfig(process.cwd(), true, { info: () => null, error: console.error });
 
 // Set up TextEncoder/TextDecoder
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder as typeof global.TextDecoder
+global.TextEncoder = require('util').TextEncoder;
+global.TextDecoder = require('util').TextDecoder as typeof global.TextDecoder;
 
 // Mock Prisma client
 jest.mock('@/lib/prisma', () => ({
   prisma: mockPrismaClient,
-}))
+}));
 
 // Apply browser-specific mocks only in jsdom environment
 if (typeof window !== 'undefined') {
   // Mock matchMedia
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation(query => ({
+    value: jest.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: null,
@@ -30,14 +30,14 @@ if (typeof window !== 'undefined') {
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
     })),
-  })
+  });
 
   // Mock ResizeObserver
   global.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}
-  }
+  };
 }
 
 // Mock EventSource for SSE tests
@@ -66,7 +66,7 @@ class MockEventSource extends EventTarget {
 (global as any).EventSource = MockEventSource;
 
 // Mock next/navigation
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -77,24 +77,24 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock Headers
-Object.defineProperty(global, "Headers", {
+Object.defineProperty(global, 'Headers', {
   configurable: true,
   writable: true,
   value: Headers,
 });
 
-enableFetchMocks()
+enableFetchMocks();
 
 // Mock Request and Response
 Object.defineProperty(globalThis, 'Request', {
   writable: true,
   value: Request,
-})
+});
 
 Object.defineProperty(globalThis, 'Response', {
   writable: true,
   value: Response,
-})
+});
 
 // Mock fetch for Node.js environment
-require('cross-fetch/polyfill'); 
+require('cross-fetch/polyfill');

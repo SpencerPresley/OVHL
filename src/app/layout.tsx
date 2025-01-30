@@ -1,25 +1,24 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
-import "./globals.css";
-import "@/styles/notifications.css";
-import { NotificationsProvider } from "@/providers/notifications-provider";
-import { Toaster } from "@/components/ui/toaster";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
+import './globals.css';
+import '@/styles/notifications.css';
+import { NotificationsProvider } from '@/providers/notifications-provider';
+import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "OVHL - Online Virtual Hockey League",
-  description:
-    "Welcome to the Online Virtual Hockey League - Where Competition Meets Community",
+  title: 'OVHL - Online Virtual Hockey League',
+  description: 'Welcome to the Online Virtual Hockey League - Where Competition Meets Community',
 };
 
 export default function RootLayout({
@@ -37,12 +36,8 @@ export default function RootLayout({
           });
         `}</Script>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NotificationsProvider>
-          {children}
-        </NotificationsProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NotificationsProvider>{children}</NotificationsProvider>
         <Toaster />
       </body>
     </html>

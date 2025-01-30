@@ -1,29 +1,16 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { formatDistanceToNow } from "date-fns";
-import {
-  Bell,
-  MessageSquare,
-  Shield,
-  Trophy,
-  Users2,
-  Archive,
-  RotateCcw,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useNotifications } from "@/hooks/use-notifications";
-import { NotificationStatus, NotificationType } from "@/types/notifications";
-import { useRouter } from "next/navigation";
+import * as React from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { Bell, MessageSquare, Shield, Trophy, Users2, Archive, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useNotifications } from '@/hooks/use-notifications';
+import { NotificationStatus, NotificationType } from '@/types/notifications';
+import { useRouter } from 'next/navigation';
 
 interface NotificationListProps {
-  filter: "all" | "unread" | "archived";
+  filter: 'all' | 'unread' | 'archived';
   onAction?: () => void;
 }
 
@@ -42,8 +29,8 @@ export function NotificationList({ filter, onAction }: NotificationListProps) {
     useNotifications();
 
   const filteredNotifications = notifications.filter((notification) => {
-    if (filter === "unread") return notification.status === NotificationStatus.UNREAD;
-    if (filter === "archived") return notification.status === NotificationStatus.ARCHIVED;
+    if (filter === 'unread') return notification.status === NotificationStatus.UNREAD;
+    if (filter === 'archived') return notification.status === NotificationStatus.ARCHIVED;
     return true;
   });
 
@@ -56,7 +43,7 @@ export function NotificationList({ filter, onAction }: NotificationListProps) {
     event: React.MouseEvent
   ) => {
     // Don't trigger if clicking action buttons
-    if ((event.target as HTMLElement).closest("button")) return;
+    if ((event.target as HTMLElement).closest('button')) return;
 
     if (notification.status === NotificationStatus.UNREAD) {
       await markAsRead(notification.id);
@@ -89,8 +76,8 @@ export function NotificationList({ filter, onAction }: NotificationListProps) {
             key={notification.id}
             className={`relative flex gap-4 rounded-lg p-4 transition-colors cursor-pointer ${
               notification.status === NotificationStatus.UNREAD
-                ? "bg-blue-500/10 hover:bg-blue-500/20"
-                : "hover:bg-accent"
+                ? 'bg-blue-500/10 hover:bg-blue-500/20'
+                : 'hover:bg-accent'
             }`}
             onClick={(e) => handleNotificationClick(notification, e)}
           >
@@ -128,20 +115,18 @@ export function NotificationList({ filter, onAction }: NotificationListProps) {
                       </TooltipTrigger>
                       <TooltipContent>
                         {notification.status === NotificationStatus.ARCHIVED
-                          ? "Restore notification"
-                          : "Archive notification"}
+                          ? 'Restore notification'
+                          : 'Archive notification'}
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {notification.message}
-              </p>
+              <p className="text-sm text-muted-foreground">{notification.message}</p>
             </div>
           </div>
         );
       })}
     </div>
   );
-} 
+}

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface User {
   id: string;
@@ -18,15 +18,15 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/auth/user");
+        const response = await fetch('/api/auth/user');
         if (!response.ok) {
-          throw new Error("Not authenticated");
+          throw new Error('Not authenticated');
         }
         const data = await response.json();
         setUser(data.user);
       } catch (error) {
-        console.error("Failed to fetch user:", error);
-        router.push("/sign-in");
+        console.error('Failed to fetch user:', error);
+        router.push('/sign-in');
       } finally {
         setLoading(false);
       }

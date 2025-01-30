@@ -1,12 +1,12 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
 interface NotificationData {
-  userId: string
-  type: string
-  title: string
-  message: string
-  link?: string | null
-  metadata?: Record<string, any> | null
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  link?: string | null;
+  metadata?: Record<string, any> | null;
 }
 
 const mockNotifications = [
@@ -21,12 +21,12 @@ const mockNotifications = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-]
+];
 
 export const handlers = [
   // Auth endpoints
   http.post('/api/auth/register', async () => {
-    return HttpResponse.json({ success: true })
+    return HttpResponse.json({ success: true });
   }),
 
   http.post('/api/auth/login', async () => {
@@ -37,7 +37,7 @@ export const handlers = [
         name: 'Test User',
       },
       token: 'mock-jwt-token',
-    })
+    });
   }),
 
   // League endpoints
@@ -51,7 +51,7 @@ export const handlers = [
           createdAt: new Date().toISOString(),
         },
       ],
-    })
+    });
   }),
 
   // Team endpoints
@@ -65,22 +65,22 @@ export const handlers = [
           createdAt: new Date().toISOString(),
         },
       ],
-    })
+    });
   }),
 
   http.get('/api/notifications', () => {
-    return HttpResponse.json({ notifications: mockNotifications })
+    return HttpResponse.json({ notifications: mockNotifications });
   }),
 
   http.post('/api/notifications', async ({ request }) => {
-    const data = await request.json() as NotificationData
+    const data = (await request.json()) as NotificationData;
     const notification = {
       ...data,
       id: '2',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
-    return HttpResponse.json({ notification })
+    };
+    return HttpResponse.json({ notification });
   }),
 
   http.get('/api/notifications/sse', () => {
@@ -88,8 +88,8 @@ export const handlers = [
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       },
-    })
+    });
   }),
-] 
+];

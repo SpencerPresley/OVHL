@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { randomBytes } from "crypto";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { randomBytes } from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 const prisma = new PrismaClient();
 
@@ -37,23 +37,23 @@ export async function POST(request: Request) {
     const { email } = data;
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    console.log("Looking up user:", email);
+    console.log('Looking up user:', email);
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    console.log("User found:", !!user);
+    console.log('User found:', !!user);
 
     // Always return success message to prevent email enumeration
     const successResponse = NextResponse.json(
-      { message: "If an account exists with this email, you will receive password reset instructions" },
+      {
+        message:
+          'If an account exists with this email, you will receive password reset instructions',
+      },
       { status: 200 }
     );
 
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     // Generate reset token
-    const resetToken = randomBytes(32).toString("hex");
+    const resetToken = randomBytes(32).toString('hex');
     const resetTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     // Update user with reset token
@@ -81,9 +81,9 @@ export async function POST(request: Request) {
     return successResponse;
   } catch (error) {
     // Log error but don't expose details to client
-    console.error("Password reset error:", error);
+    console.error('Password reset error:', error);
     return NextResponse.json(
-      { error: "An error occurred while processing your request" },
+      { error: 'An error occurred while processing your request' },
       { status: 500 }
     );
   }

@@ -7,10 +7,10 @@
 // - Token verification
 // - Database interaction verification
 
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-describe("Forgot Password API Route", () => {
-  it("passes", () => {
+describe('Forgot Password API Route', () => {
+  it('passes', () => {
     expect(true).toBe(true);
   });
-}); 
+});

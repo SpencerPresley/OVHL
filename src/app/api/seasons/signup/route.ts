@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { verify } from "jsonwebtoken";
-import { cookies } from "next/headers";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { verify } from 'jsonwebtoken';
+import { cookies } from 'next/headers';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * Season Signup API Route
@@ -21,16 +21,13 @@ export async function POST(request: Request) {
   try {
     // Verify authentication
     const cookieStore = await cookies();
-    const token = cookieStore.get("token");
+    const token = cookieStore.get('token');
 
     if (!token) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const decoded = verify(token.value, process.env.JWT_SECRET || "") as {
+    const decoded = verify(token.value, process.env.JWT_SECRET || '') as {
       userId: string;
       email: string;
     };
@@ -40,10 +37,7 @@ export async function POST(request: Request) {
     const { seasonId, position } = body;
 
     if (!seasonId || !position) {
-      return NextResponse.json(
-        { error: "Season ID and position are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Season ID and position are required' }, { status: 400 });
     }
 
     // Verify season exists and is latest
@@ -55,10 +49,7 @@ export async function POST(request: Request) {
     });
 
     if (!season) {
-      return NextResponse.json(
-        { error: "Invalid or inactive season" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Invalid or inactive season' }, { status: 400 });
     }
 
     // Get player record
@@ -67,10 +58,7 @@ export async function POST(request: Request) {
     });
 
     if (!player) {
-      return NextResponse.json(
-        { error: "Player record not found" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Player record not found' }, { status: 400 });
     }
 
     // Check if player is already signed up for this season
@@ -82,10 +70,7 @@ export async function POST(request: Request) {
     });
 
     if (existingSignup) {
-      return NextResponse.json(
-        { error: "Already signed up for this season" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Already signed up for this season' }, { status: 400 });
     }
 
     // Create player season record
@@ -98,13 +83,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      message: "Successfully signed up for season",
+      message: 'Successfully signed up for season',
     });
   } catch (error) {
-    console.error("Failed to sign up for season:", error);
-    return NextResponse.json(
-      { error: "Failed to sign up for season" },
-      { status: 500 },
-    );
+    console.error('Failed to sign up for season:', error);
+    return NextResponse.json({ error: 'Failed to sign up for season' }, { status: 500 });
   }
-} 
+}

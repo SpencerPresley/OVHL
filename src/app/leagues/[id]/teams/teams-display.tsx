@@ -1,17 +1,12 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Nav } from "@/components/nav";
-import { LeagueNav } from "@/components/league-nav";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { System } from "@prisma/client";
+import React from 'react';
+import { Nav } from '@/components/nav';
+import { LeagueNav } from '@/components/league-nav';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { System } from '@prisma/client';
 
 interface League {
   id: string;
@@ -59,7 +54,7 @@ interface TeamsDisplayProps {
 
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   // Sort teams alphabetically by name
-  const sortedTeams = [...teams].sort((a, b) => 
+  const sortedTeams = [...teams].sort((a, b) =>
     a.team.officialName.localeCompare(b.team.officialName)
   );
 
@@ -70,7 +65,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -80,14 +75,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 500);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const getPositionPlayers = (players: Player[], positions: string[]) => {
     return players
-      .filter(p => positions.includes(p.playerSeason.position))
+      .filter((p) => positions.includes(p.playerSeason.position))
       .sort((a, b) => a.playerSeason.player.name.localeCompare(b.playerSeason.player.name));
   };
 
@@ -99,11 +94,11 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
       const teamNavHeight = 48; // Team nav height
       const padding = isMobile ? 80 : -40; // More padding on mobile, negative on desktop
       const totalOffset = navHeight + leagueNavHeight + teamNavHeight + padding;
-      
+
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       window.scrollTo({
         top: elementPosition - totalOffset,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -155,21 +150,30 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {sortedTeams.map((teamSeason) => (
-            <Card 
-              key={teamSeason.team.id} 
+            <Card
+              key={teamSeason.team.id}
               id={teamSeason.team.id}
               className="card-gradient card-hover overflow-hidden"
             >
               <CardHeader className="border-b border-border">
                 <CardTitle className="flex flex-col">
-                  <Link 
+                  <Link
                     href={`/leagues/${league.id}/teams/${teamSeason.team.teamIdentifier}`}
                     className="text-2xl hover:opacity-75"
                   >
                     {teamSeason.team.officialName}
                   </Link>
                   <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-gray-400">${teamSeason.players.reduce((total, player) => total + (player.playerSeason.contract?.amount || 500000), 0).toLocaleString()}</span>
+                    <span className="text-sm text-gray-400">
+                      $
+                      {teamSeason.players
+                        .reduce(
+                          (total, player) =>
+                            total + (player.playerSeason.contract?.amount || 500000),
+                          0
+                        )
+                        .toLocaleString()}
+                    </span>
                     <span className="text-lg font-mono bg-secondary/50 px-3 py-1 rounded-md">
                       {teamSeason.wins}-{teamSeason.losses}-{teamSeason.otLosses}
                     </span>
@@ -183,11 +187,19 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                     <div className="flex justify-between items-center">
                       <h3 className="text-xl font-bold">Forwards</h3>
                       {(() => {
-                        const forwardCount = getPositionPlayers(teamSeason.players, ["LW", "C", "RW"]).length;
+                        const forwardCount = getPositionPlayers(teamSeason.players, [
+                          'LW',
+                          'C',
+                          'RW',
+                        ]).length;
                         let countColor = 'text-red-500';
                         if (forwardCount >= 9) countColor = 'text-green-500';
                         else if (forwardCount >= 6) countColor = 'text-yellow-500';
-                        return <span className={`${countColor} font-medium`}>{forwardCount} players</span>;
+                        return (
+                          <span className={`${countColor} font-medium`}>
+                            {forwardCount} players
+                          </span>
+                        );
                       })()}
                     </div>
                   </div>
@@ -197,26 +209,36 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Left Wing</h4>
                         {(() => {
-                          const lwCount = getPositionPlayers(teamSeason.players, ["LW"]).length;
+                          const lwCount = getPositionPlayers(teamSeason.players, ['LW']).length;
                           let countColor = 'text-red-500';
                           if (lwCount >= 3) countColor = 'text-green-500';
                           else if (lwCount === 2) countColor = 'text-yellow-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{lwCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{lwCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["LW"]).map((player) => (
-                          <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                        {getPositionPlayers(teamSeason.players, ['LW']).map((player) => (
+                          <div
+                            key={player.playerSeason.player.id}
+                            className="mb-2 flex justify-between items-center last:mb-0"
+                          >
                             <div className="flex items-center gap-2">
-                              <Link 
+                              <Link
                                 href={`/users/${player.playerSeason.player.id}`}
                                 className="hover:text-blue-400"
                               >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                  player.playerSeason.player.name}
                               </Link>
-                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              <span className="text-xs text-gray-400">
+                                ${(player.playerSeason.contract?.amount || 500000).toLocaleString()}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
+                            >
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -228,26 +250,36 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Center</h4>
                         {(() => {
-                          const cCount = getPositionPlayers(teamSeason.players, ["C"]).length;
+                          const cCount = getPositionPlayers(teamSeason.players, ['C']).length;
                           let countColor = 'text-red-500';
                           if (cCount >= 3) countColor = 'text-green-500';
                           else if (cCount === 2) countColor = 'text-yellow-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{cCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{cCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["C"]).map((player) => (
-                          <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                        {getPositionPlayers(teamSeason.players, ['C']).map((player) => (
+                          <div
+                            key={player.playerSeason.player.id}
+                            className="mb-2 flex justify-between items-center last:mb-0"
+                          >
                             <div className="flex items-center gap-2">
-                              <Link 
+                              <Link
                                 href={`/users/${player.playerSeason.player.id}`}
                                 className="hover:text-blue-400"
                               >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                  player.playerSeason.player.name}
                               </Link>
-                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              <span className="text-xs text-gray-400">
+                                ${(player.playerSeason.contract?.amount || 500000).toLocaleString()}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
+                            >
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -259,26 +291,36 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Right Wing</h4>
                         {(() => {
-                          const rwCount = getPositionPlayers(teamSeason.players, ["RW"]).length;
+                          const rwCount = getPositionPlayers(teamSeason.players, ['RW']).length;
                           let countColor = 'text-red-500';
                           if (rwCount >= 3) countColor = 'text-green-500';
                           else if (rwCount === 2) countColor = 'text-yellow-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{rwCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{rwCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["RW"]).map((player) => (
-                          <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                        {getPositionPlayers(teamSeason.players, ['RW']).map((player) => (
+                          <div
+                            key={player.playerSeason.player.id}
+                            className="mb-2 flex justify-between items-center last:mb-0"
+                          >
                             <div className="flex items-center gap-2">
-                              <Link 
+                              <Link
                                 href={`/users/${player.playerSeason.player.id}`}
                                 className="hover:text-blue-400"
                               >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                  player.playerSeason.player.name}
                               </Link>
-                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              <span className="text-xs text-gray-400">
+                                ${(player.playerSeason.contract?.amount || 500000).toLocaleString()}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
+                            >
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -294,11 +336,18 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                     <div className="flex justify-between items-center">
                       <h3 className="text-xl font-bold">Defense</h3>
                       {(() => {
-                        const defenseCount = getPositionPlayers(teamSeason.players, ["LD", "RD"]).length;
+                        const defenseCount = getPositionPlayers(teamSeason.players, [
+                          'LD',
+                          'RD',
+                        ]).length;
                         let countColor = 'text-red-500';
                         if (defenseCount >= 6) countColor = 'text-green-500';
                         else if (defenseCount >= 4) countColor = 'text-yellow-500';
-                        return <span className={`${countColor} font-medium`}>{defenseCount} players</span>;
+                        return (
+                          <span className={`${countColor} font-medium`}>
+                            {defenseCount} players
+                          </span>
+                        );
                       })()}
                     </div>
                   </div>
@@ -308,25 +357,35 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Left Defense</h4>
                         {(() => {
-                          const ldCount = getPositionPlayers(teamSeason.players, ["LD"]).length;
+                          const ldCount = getPositionPlayers(teamSeason.players, ['LD']).length;
                           let countColor = 'text-yellow-500';
                           if (ldCount >= 3) countColor = 'text-green-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{ldCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{ldCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["LD"]).map((player) => (
-                          <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                        {getPositionPlayers(teamSeason.players, ['LD']).map((player) => (
+                          <div
+                            key={player.playerSeason.player.id}
+                            className="mb-2 flex justify-between items-center last:mb-0"
+                          >
                             <div className="flex items-center gap-2">
-                              <Link 
+                              <Link
                                 href={`/users/${player.playerSeason.player.id}`}
                                 className="hover:text-blue-400"
                               >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                  player.playerSeason.player.name}
                               </Link>
-                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              <span className="text-xs text-gray-400">
+                                ${(player.playerSeason.contract?.amount || 500000).toLocaleString()}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
+                            >
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -338,25 +397,35 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Right Defense</h4>
                         {(() => {
-                          const rdCount = getPositionPlayers(teamSeason.players, ["RD"]).length;
+                          const rdCount = getPositionPlayers(teamSeason.players, ['RD']).length;
                           let countColor = 'text-yellow-500';
                           if (rdCount >= 3) countColor = 'text-green-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{rdCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{rdCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["RD"]).map((player) => (
-                          <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                        {getPositionPlayers(teamSeason.players, ['RD']).map((player) => (
+                          <div
+                            key={player.playerSeason.player.id}
+                            className="mb-2 flex justify-between items-center last:mb-0"
+                          >
                             <div className="flex items-center gap-2">
-                              <Link 
+                              <Link
                                 href={`/users/${player.playerSeason.player.id}`}
                                 className="hover:text-blue-400"
                               >
-                                {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                  player.playerSeason.player.name}
                               </Link>
-                              <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                              <span className="text-xs text-gray-400">
+                                ${(player.playerSeason.contract?.amount || 500000).toLocaleString()}
+                              </span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            <span
+                              className={`px-2 py-0.5 rounded text-sm min-w-[48px] text-center ${player.plusMinus >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}
+                            >
                               {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
                             </span>
                           </div>
@@ -372,11 +441,13 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                     <div className="flex justify-between items-center">
                       <h3 className="text-xl font-bold">Goalies</h3>
                       {(() => {
-                        const goalieCount = getPositionPlayers(teamSeason.players, ["G"]).length;
+                        const goalieCount = getPositionPlayers(teamSeason.players, ['G']).length;
                         let countColor = 'text-red-500';
                         if (goalieCount >= 2) countColor = 'text-green-500';
                         else if (goalieCount === 1) countColor = 'text-yellow-500';
-                        return <span className={`${countColor} font-medium`}>{goalieCount} players</span>;
+                        return (
+                          <span className={`${countColor} font-medium`}>{goalieCount} players</span>
+                        );
                       })()}
                     </div>
                   </div>
@@ -385,19 +456,21 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="flex justify-between items-center mb-3 pb-2 border-b border-border/50">
                         <h4 className="font-semibold text-primary">Goalies</h4>
                         {(() => {
-                          const gCount = getPositionPlayers(teamSeason.players, ["G"]).length;
+                          const gCount = getPositionPlayers(teamSeason.players, ['G']).length;
                           let countColor = 'text-yellow-500';
                           if (gCount >= 2) countColor = 'text-green-500';
-                          return <span className={`${countColor} text-sm font-medium`}>{gCount}</span>;
+                          return (
+                            <span className={`${countColor} text-sm font-medium`}>{gCount}</span>
+                          );
                         })()}
                       </div>
                       <div className="flex-1">
-                        {getPositionPlayers(teamSeason.players, ["G"]).map((player) => {
+                        {getPositionPlayers(teamSeason.players, ['G']).map((player) => {
                           const saves = player.saves ?? 0;
                           const goalsAgainst = player.goalsAgainst ?? 0;
                           const totalShots = saves + goalsAgainst;
                           const savePercentage = totalShots > 0 ? saves / totalShots : 0;
-                          
+
                           let savePercentageColor = 'text-red-500 bg-red-500/20';
                           if (savePercentage >= 0.8) {
                             savePercentageColor = 'text-green-500 bg-green-500/20';
@@ -406,18 +479,31 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                           }
 
                           return (
-                            <div key={player.playerSeason.player.id} className="mb-2 flex justify-between items-center last:mb-0">
+                            <div
+                              key={player.playerSeason.player.id}
+                              className="mb-2 flex justify-between items-center last:mb-0"
+                            >
                               <div className="flex items-center gap-2">
-                                <Link 
+                                <Link
                                   href={`/users/${player.playerSeason.player.id}`}
                                   className="hover:text-blue-400"
                                 >
-                                  {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+                                  {player.playerSeason.player.gamertags[0]?.gamertag ||
+                                    player.playerSeason.player.name}
                                 </Link>
-                                <span className="text-xs text-gray-400">${(player.playerSeason.contract?.amount || 500000).toLocaleString()}</span>
+                                <span className="text-xs text-gray-400">
+                                  $
+                                  {(
+                                    player.playerSeason.contract?.amount || 500000
+                                  ).toLocaleString()}
+                                </span>
                               </div>
-                              <span className={`px-2 py-0.5 rounded text-sm ${savePercentageColor}`}>
-                                {totalShots === 0 ? '0.0%' : `${(savePercentage * 100).toFixed(1)}%`}
+                              <span
+                                className={`px-2 py-0.5 rounded text-sm ${savePercentageColor}`}
+                              >
+                                {totalShots === 0
+                                  ? '0.0%'
+                                  : `${(savePercentage * 100).toFixed(1)}%`}
                               </span>
                             </div>
                           );
@@ -439,21 +525,21 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
           className="fixed bottom-8 right-8 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity"
           aria-label="Back to top"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="m18 15-6-6-6 6"/>
+            <path d="m18 15-6-6-6 6" />
           </svg>
         </button>
       )}
     </div>
   );
-} 
+}

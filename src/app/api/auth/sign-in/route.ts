@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { sign } from "jsonwebtoken";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 // import { cookies } from "next/headers"
 
 // Disable Next.js caching for this route
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 /**
@@ -48,20 +48,17 @@ const prisma = new PrismaClient();
  */
 export async function POST(request: Request) {
   try {
-    console.log("SignInAPI: Starting sign-in process...");
+    console.log('SignInAPI: Starting sign-in process...');
     // Parse and validate request body
     const body = await request.json();
     const { email, password, rememberMe } = body;
 
     if (!email || !password) {
-      console.log("SignInAPI: Missing credentials");
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
-      );
+      console.log('SignInAPI: Missing credentials');
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    console.log("SignInAPI: Finding user by email...");
+    console.log('SignInAPI: Finding user by email...');
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
@@ -69,33 +66,27 @@ export async function POST(request: Request) {
 
     // Return same error for invalid email or password
     if (!user) {
-      console.log("SignInAPI: User not found");
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 },
-      );
+      console.log('SignInAPI: User not found');
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    console.log("SignInAPI: Verifying password...");
+    console.log('SignInAPI: Verifying password...');
     // Verify password using bcrypt
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      console.log("SignInAPI: Invalid password");
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 },
-      );
+      console.log('SignInAPI: Invalid password');
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    console.log("SignInAPI: Generating JWT...");
+    console.log('SignInAPI: Generating JWT...');
     // Generate JWT with appropriate expiration
     const token = sign(
       { id: user.id, email: user.email, isAdmin: user.isAdmin },
-      process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: rememberMe ? "30d" : "24h" },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: rememberMe ? '30d' : '24h' }
     );
 
-    console.log("SignInAPI: Creating response with user data...");
+    console.log('SignInAPI: Creating response with user data...');
     // Create response with user data (excluding sensitive fields)
     const response = NextResponse.json({
       user: {
@@ -105,26 +96,23 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log("SignInAPI: Setting JWT cookie...");
+    console.log('SignInAPI: Setting JWT cookie...');
     // Set secure cookie with JWT
     response.cookies.set({
-      name: "token",
+      name: 'token',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
-      path: "/",
+      path: '/',
     });
 
-    console.log("SignInAPI: Sign-in successful");
+    console.log('SignInAPI: Sign-in successful');
     return response;
   } catch (error) {
     // Log error but don't expose details to client
-    console.error("SignInAPI: Error during sign-in:", error);
-    return NextResponse.json(
-      { error: "An error occurred while signing in" },
-      { status: 500 },
-    );
+    console.error('SignInAPI: Error during sign-in:', error);
+    return NextResponse.json({ error: 'An error occurred while signing in' }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignInForm } from '@/components/auth/sign-in-form';
 
 /**
  * Sign In Page Component

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -22,11 +22,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 // import { useRouter } from "next/navigation"
-import Link from "next/link";
-import { toast } from "sonner";
+import Link from 'next/link';
+import { toast } from 'sonner';
 
 /**
  * @typedef {Object} ForgotPasswordValues
@@ -39,7 +39,7 @@ import { toast } from "sonner";
  */
 const forgotPasswordSchema = z.object({
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: 'Please enter a valid email address.',
   }),
 });
 
@@ -67,7 +67,7 @@ type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
  */
 export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   //   const router = useRouter()
 
@@ -78,7 +78,7 @@ export function ForgotPasswordForm() {
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: "",
+      email: '',
     },
   });
 
@@ -97,14 +97,14 @@ export function ForgotPasswordForm() {
    */
   async function onSubmit(values: ForgotPasswordValues) {
     setIsLoading(true);
-    setError("");
+    setError('');
     setSuccess(false);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
       });
@@ -112,15 +112,15 @@ export function ForgotPasswordForm() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to send reset email");
+        throw new Error(data?.error || 'Failed to send reset email');
       }
 
       setSuccess(true);
-      toast.success(data?.message || "Reset instructions sent if email exists");
+      toast.success(data?.message || 'Reset instructions sent if email exists');
     } catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "An error occurred");
-      toast.error("Failed to send reset email");
+      setError(error instanceof Error ? error.message : 'An error occurred');
+      toast.error('Failed to send reset email');
     } finally {
       setIsLoading(false);
     }
@@ -130,9 +130,7 @@ export function ForgotPasswordForm() {
     <Card className="w-[400px] card-gradient">
       <CardHeader>
         <CardTitle>Reset Password</CardTitle>
-        <CardDescription>
-          Enter your email to reset your password
-        </CardDescription>
+        <CardDescription>Enter your email to reset your password</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -147,8 +145,8 @@ export function ForgotPasswordForm() {
             {success && (
               <Alert>
                 <AlertDescription>
-                  If an account exists with this email, you will receive
-                  password reset instructions.
+                  If an account exists with this email, you will receive password reset
+                  instructions.
                 </AlertDescription>
               </Alert>
             )}
@@ -172,21 +170,15 @@ export function ForgotPasswordForm() {
               )}
             />
             {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || success}
-            >
-              {isLoading ? "Sending..." : "Send Reset Link"}
+            <Button type="submit" className="w-full" disabled={isLoading || success}>
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
             </Button>
           </form>
         </Form>
       </CardContent>
       {/* Back to Sign In */}
       <CardFooter className="flex flex-col space-y-4">
-        <div className="text-sm text-gray-400 text-center">
-          Remember your password?
-        </div>
+        <div className="text-sm text-gray-400 text-center">Remember your password?</div>
         <Button variant="outline" className="w-full" asChild>
           <Link href="/sign-in">Back to Sign In</Link>
         </Button>

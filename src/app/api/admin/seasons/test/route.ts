@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -23,17 +23,17 @@ export async function GET() {
     // Create a new season
     const season = await prisma.season.create({
       data: {
-        seasonId: "2024",
+        seasonId: '2024',
         isLatest: true,
       },
     });
 
     // Create tiers with their respective teams
     const tiers = [
-      { name: "NHL", level: 1 },
-      { name: "AHL", level: 2 },
-      { name: "ECHL", level: 3 },
-      { name: "CHL", level: 4 },
+      { name: 'NHL', level: 1 },
+      { name: 'AHL', level: 2 },
+      { name: 'ECHL', level: 3 },
+      { name: 'CHL', level: 4 },
     ];
 
     for (const tierData of tiers) {
@@ -47,8 +47,8 @@ export async function GET() {
 
       // Create teams for this tier
       const teams = [
-        { name: `${tierData.name} Team 1`, identifier: "TEAM1" },
-        { name: `${tierData.name} Team 2`, identifier: "TEAM2" },
+        { name: `${tierData.name} Team 1`, identifier: 'TEAM1' },
+        { name: `${tierData.name} Team 2`, identifier: 'TEAM2' },
       ];
 
       for (const teamData of teams) {
@@ -71,14 +71,11 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      message: "Test data created successfully",
+      message: 'Test data created successfully',
       season,
     });
   } catch (error) {
-    console.error("Failed to create test data:", error);
-    return NextResponse.json(
-      { error: "Failed to create test data" },
-      { status: 500 },
-    );
+    console.error('Failed to create test data:', error);
+    return NextResponse.json({ error: 'Failed to create test data' }, { status: 500 });
   }
-} 
+}

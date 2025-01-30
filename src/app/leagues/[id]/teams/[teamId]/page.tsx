@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-import { notFound } from "next/navigation";
-import { TeamDisplay } from "./team-display";
+import { PrismaClient } from '@prisma/client';
+import { notFound } from 'next/navigation';
+import { TeamDisplay } from './team-display';
 
 const prisma = new PrismaClient();
 
@@ -13,36 +13,32 @@ interface League {
 
 const leagues: Record<string, League> = {
   nhl: {
-    id: "nhl",
-    name: "NHL",
-    logo: "/nhl_logo.png",
-    bannerColor: "bg-blue-900",
+    id: 'nhl',
+    name: 'NHL',
+    logo: '/nhl_logo.png',
+    bannerColor: 'bg-blue-900',
   },
   ahl: {
-    id: "ahl",
-    name: "AHL",
-    logo: "/ahl_logo.png",
-    bannerColor: "bg-yellow-400",
+    id: 'ahl',
+    name: 'AHL',
+    logo: '/ahl_logo.png',
+    bannerColor: 'bg-yellow-400',
   },
   echl: {
-    id: "echl",
-    name: "ECHL",
-    logo: "/echl_logo.png",
-    bannerColor: "bg-emerald-600",
+    id: 'echl',
+    name: 'ECHL',
+    logo: '/echl_logo.png',
+    bannerColor: 'bg-emerald-600',
   },
   chl: {
-    id: "chl",
-    name: "CHL",
-    logo: "/chl_logo.png",
-    bannerColor: "bg-teal-600",
+    id: 'chl',
+    name: 'CHL',
+    logo: '/chl_logo.png',
+    bannerColor: 'bg-teal-600',
   },
 };
 
-export default async function TeamPage({ 
-  params 
-}: { 
-  params: { id: string; teamId: string } 
-}) {
+export default async function TeamPage({ params }: { params: { id: string; teamId: string } }) {
   // Get league info
   const paramsData = await params;
   const league = leagues[paramsData.id.toLowerCase()];
@@ -96,4 +92,4 @@ export default async function TeamPage({
   const teamSeason = team.seasons[0];
 
   return <TeamDisplay league={league} team={team} teamSeason={teamSeason} />;
-} 
+}

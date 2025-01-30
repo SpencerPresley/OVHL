@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Nav } from "@/components/nav";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
+import React from 'react';
+import { Nav } from '@/components/nav';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
 interface UserProfileViewProps {
   user: {
@@ -16,7 +16,7 @@ interface UserProfileViewProps {
         gamertag: string;
         createdAt: Date;
         playerId: string;
-        system: "PS" | "XBOX";
+        system: 'PS' | 'XBOX';
       }[];
       seasons: {
         id: string;
@@ -95,30 +95,33 @@ export function UserProfileView({ user }: UserProfileViewProps) {
   const initials = currentGamertag.charAt(0).toUpperCase();
 
   // Calculate career totals
-  const careerStats = user.player.seasons.reduce((totals, season) => {
-    totals.gamesPlayed += season.gamesPlayed || 0;
-    totals.goals += season.goals || 0;
-    totals.assists += season.assists || 0;
-    totals.points += (season.goals || 0) + (season.assists || 0);
-    totals.plusMinus += season.plusMinus || 0;
-    totals.shots += season.shots || 0;
-    totals.hits += season.hits || 0;
-    totals.takeaways += season.takeaways || 0;
-    totals.giveaways += season.giveaways || 0;
-    totals.penaltyMinutes += season.penaltyMinutes || 0;
-    return totals;
-  }, {
-    gamesPlayed: 0,
-    goals: 0,
-    assists: 0,
-    points: 0,
-    plusMinus: 0,
-    shots: 0,
-    hits: 0,
-    takeaways: 0,
-    giveaways: 0,
-    penaltyMinutes: 0
-  });
+  const careerStats = user.player.seasons.reduce(
+    (totals, season) => {
+      totals.gamesPlayed += season.gamesPlayed || 0;
+      totals.goals += season.goals || 0;
+      totals.assists += season.assists || 0;
+      totals.points += (season.goals || 0) + (season.assists || 0);
+      totals.plusMinus += season.plusMinus || 0;
+      totals.shots += season.shots || 0;
+      totals.hits += season.hits || 0;
+      totals.takeaways += season.takeaways || 0;
+      totals.giveaways += season.giveaways || 0;
+      totals.penaltyMinutes += season.penaltyMinutes || 0;
+      return totals;
+    },
+    {
+      gamesPlayed: 0,
+      goals: 0,
+      assists: 0,
+      points: 0,
+      plusMinus: 0,
+      shots: 0,
+      hits: 0,
+      takeaways: 0,
+      giveaways: 0,
+      penaltyMinutes: 0,
+    }
+  );
 
   return (
     <div>
@@ -132,8 +135,12 @@ export function UserProfileView({ user }: UserProfileViewProps) {
             </Avatar>
             <div>
               <h1 className="text-3xl font-bold">{currentGamertag}</h1>
-              <p className="text-gray-300">{user.player.gamertags[0]?.system || 'Unknown System'}</p>
-              <p className="text-gray-300">Contract: ${(user.player.seasons[0]?.contract?.amount || 500000).toLocaleString()}</p>
+              <p className="text-gray-300">
+                {user.player.gamertags[0]?.system || 'Unknown System'}
+              </p>
+              <p className="text-gray-300">
+                Contract: ${(user.player.seasons[0]?.contract?.amount || 500000).toLocaleString()}
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-4 mt-8">
@@ -220,7 +227,7 @@ export function UserProfileView({ user }: UserProfileViewProps) {
                 <div key={idx} className="mt-8">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">
-                      <Link 
+                      <Link
                         href={`/leagues/${teamSeason.teamSeason.tier.name.toLowerCase()}/teams/${teamSeason.teamSeason.team.teamIdentifier}`}
                         className="hover:opacity-75"
                       >
@@ -278,4 +285,4 @@ export function UserProfileView({ user }: UserProfileViewProps) {
       </div>
     </div>
   );
-} 
+}

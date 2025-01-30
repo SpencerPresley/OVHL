@@ -1,331 +1,331 @@
-import { AHLTeam, AHLDivision } from "./types";
+import { AHLTeam, AHLDivision } from './types';
 
 export const AHL_TEAMS: AHLTeam[] = [
   // Atlantic Division
   {
-    id: "bri",
-    name: "Bridgeport Islanders",
+    id: 'bri',
+    name: 'Bridgeport Islanders',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "nyi",
+    nhlTeamId: 'nyi',
     colors: {
-      primary: "#00468B",
-      secondary: "#F26924"
-    }
+      primary: '#00468B',
+      secondary: '#F26924',
+    },
   },
   {
-    id: "cha",
-    name: "Charlotte Checkers",
+    id: 'cha',
+    name: 'Charlotte Checkers',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "fla",
+    nhlTeamId: 'fla',
     colors: {
-      primary: "#E51A38",
-      secondary: "#000000"
-    }
+      primary: '#E51A38',
+      secondary: '#000000',
+    },
   },
   {
-    id: "hfd",
-    name: "Hartford Wolf Pack",
+    id: 'hfd',
+    name: 'Hartford Wolf Pack',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "nyr",
+    nhlTeamId: 'nyr',
     colors: {
-      primary: "#00548E",
-      secondary: "#EF3E42"
-    }
+      primary: '#00548E',
+      secondary: '#EF3E42',
+    },
   },
   {
-    id: "her",
-    name: "Hershey Bears",
+    id: 'her',
+    name: 'Hershey Bears',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "wsh",
+    nhlTeamId: 'wsh',
     colors: {
-      primary: "#7E543A",
-      secondary: "#472A2B"
-    }
+      primary: '#7E543A',
+      secondary: '#472A2B',
+    },
   },
   {
-    id: "lhv",
-    name: "Lehigh Valley Phantoms",
+    id: 'lhv',
+    name: 'Lehigh Valley Phantoms',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "phi",
+    nhlTeamId: 'phi',
     colors: {
-      primary: "#F58220",
-      secondary: "#000000"
-    }
+      primary: '#F58220',
+      secondary: '#000000',
+    },
   },
   {
-    id: "pro",
-    name: "Providence Bruins",
+    id: 'pro',
+    name: 'Providence Bruins',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "bos",
+    nhlTeamId: 'bos',
     colors: {
-      primary: "#FBB337",
-      secondary: "#000000"
-    }
+      primary: '#FBB337',
+      secondary: '#000000',
+    },
   },
   {
-    id: "spr",
-    name: "Springfield Thunderbirds",
+    id: 'spr',
+    name: 'Springfield Thunderbirds',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "stl",
+    nhlTeamId: 'stl',
     colors: {
-      primary: "#005CB9",
-      secondary: "#041E41"
-    }
+      primary: '#005CB9',
+      secondary: '#041E41',
+    },
   },
   {
-    id: "wbs",
-    name: "Wilkes-Barre/Scranton Penguins",
+    id: 'wbs',
+    name: 'Wilkes-Barre/Scranton Penguins',
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: "pit",
+    nhlTeamId: 'pit',
     colors: {
-      primary: "#FEC23D",
-      secondary: "#E31837"
-    }
+      primary: '#FEC23D',
+      secondary: '#E31837',
+    },
   },
 
   // North Division
   {
-    id: "bel",
-    name: "Belleville Senators",
+    id: 'bel',
+    name: 'Belleville Senators',
     division: AHLDivision.NORTH,
-    nhlTeamId: "ott",
+    nhlTeamId: 'ott',
     colors: {
-      primary: "#E3173E",
-      secondary: "#000000"
-    }
+      primary: '#E3173E',
+      secondary: '#000000',
+    },
   },
   {
-    id: "cle",
-    name: "Cleveland Monsters",
+    id: 'cle',
+    name: 'Cleveland Monsters',
     division: AHLDivision.NORTH,
-    nhlTeamId: "cbj",
+    nhlTeamId: 'cbj',
     colors: {
-      primary: "#005695",
-      secondary: "#FDBB30"
-    }
+      primary: '#005695',
+      secondary: '#FDBB30',
+    },
   },
   {
-    id: "lav",
-    name: "Laval Rocket",
+    id: 'lav',
+    name: 'Laval Rocket',
     division: AHLDivision.NORTH,
-    nhlTeamId: "mtl",
+    nhlTeamId: 'mtl',
     colors: {
-      primary: "#001E61",
-      secondary: "#FFFFFF"
-    }
+      primary: '#001E61',
+      secondary: '#FFFFFF',
+    },
   },
   {
-    id: "roc",
-    name: "Rochester Americans",
+    id: 'roc',
+    name: 'Rochester Americans',
     division: AHLDivision.NORTH,
-    nhlTeamId: "buf",
+    nhlTeamId: 'buf',
     colors: {
-      primary: "#393A87",
-      secondary: "#DE2944"
-    }
+      primary: '#393A87',
+      secondary: '#DE2944',
+    },
   },
   {
-    id: "syr",
-    name: "Syracuse Crunch",
+    id: 'syr',
+    name: 'Syracuse Crunch',
     division: AHLDivision.NORTH,
-    nhlTeamId: "tbl",
+    nhlTeamId: 'tbl',
     colors: {
-      primary: "#1D427C",
-      secondary: "#AAA9AC"
-    }
+      primary: '#1D427C',
+      secondary: '#AAA9AC',
+    },
   },
   {
-    id: "tor",
-    name: "Toronto Marlies",
+    id: 'tor',
+    name: 'Toronto Marlies',
     division: AHLDivision.NORTH,
-    nhlTeamId: "tor",
+    nhlTeamId: 'tor',
     colors: {
-      primary: "#003E7E",
-      secondary: "#FFC425"
-    }
+      primary: '#003E7E',
+      secondary: '#FFC425',
+    },
   },
   {
-    id: "uti",
-    name: "Utica Comets",
+    id: 'uti',
+    name: 'Utica Comets',
     division: AHLDivision.NORTH,
-    nhlTeamId: "njd",
+    nhlTeamId: 'njd',
     colors: {
-      primary: "#CF2031",
-      secondary: "#000000"
-    }
+      primary: '#CF2031',
+      secondary: '#000000',
+    },
   },
 
   // Central Division
   {
-    id: "chi",
-    name: "Chicago Wolves",
+    id: 'chi',
+    name: 'Chicago Wolves',
     division: AHLDivision.CENTRAL,
     nhlTeamId: null, // Independent
     colors: {
-      primary: "#939283",
-      secondary: "#E03A3E"
-    }
+      primary: '#939283',
+      secondary: '#E03A3E',
+    },
   },
   {
-    id: "gr",
-    name: "Grand Rapids Griffins",
+    id: 'gr',
+    name: 'Grand Rapids Griffins',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "det",
+    nhlTeamId: 'det',
     colors: {
-      primary: "#866C3F",
-      secondary: "#E51636"
-    }
+      primary: '#866C3F',
+      secondary: '#E51636',
+    },
   },
   {
-    id: "ia",
-    name: "Iowa Wild",
+    id: 'ia',
+    name: 'Iowa Wild',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "min",
+    nhlTeamId: 'min',
     colors: {
-      primary: "#144733",
-      secondary: "#DFCAA3"
-    }
+      primary: '#144733',
+      secondary: '#DFCAA3',
+    },
   },
   {
-    id: "mb",
-    name: "Manitoba Moose",
+    id: 'mb',
+    name: 'Manitoba Moose',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "wpg",
+    nhlTeamId: 'wpg',
     colors: {
-      primary: "#041E41",
-      secondary: "#A4A9AD"
-    }
+      primary: '#041E41',
+      secondary: '#A4A9AD',
+    },
   },
   {
-    id: "mil",
-    name: "Milwaukee Admirals",
+    id: 'mil',
+    name: 'Milwaukee Admirals',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "nsh",
+    nhlTeamId: 'nsh',
     colors: {
-      primary: "#0E2B58",
-      secondary: "#83C2EC"
-    }
+      primary: '#0E2B58',
+      secondary: '#83C2EC',
+    },
   },
   {
-    id: "rkf",
-    name: "Rockford IceHogs",
+    id: 'rkf',
+    name: 'Rockford IceHogs',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "chi",
+    nhlTeamId: 'chi',
     colors: {
-      primary: "#DB1931",
-      secondary: "#94959A"
-    }
+      primary: '#DB1931',
+      secondary: '#94959A',
+    },
   },
   {
-    id: "tex",
-    name: "Texas Stars",
+    id: 'tex',
+    name: 'Texas Stars',
     division: AHLDivision.CENTRAL,
-    nhlTeamId: "dal",
+    nhlTeamId: 'dal',
     colors: {
-      primary: "#1B6031",
-      secondary: "#A5A6A8"
-    }
+      primary: '#1B6031',
+      secondary: '#A5A6A8',
+    },
   },
 
   // Pacific Division
   {
-    id: "abb",
-    name: "Abbotsford Canucks",
+    id: 'abb',
+    name: 'Abbotsford Canucks',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "van",
+    nhlTeamId: 'van',
     colors: {
-      primary: "#047835",
-      secondary: "#0E1C2C"
-    }
+      primary: '#047835',
+      secondary: '#0E1C2C',
+    },
   },
   {
-    id: "bak",
-    name: "Bakersfield Condors",
+    id: 'bak',
+    name: 'Bakersfield Condors',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "edm",
+    nhlTeamId: 'edm',
     colors: {
-      primary: "#152342",
-      secondary: "#DF4E10"
-    }
+      primary: '#152342',
+      secondary: '#DF4E10',
+    },
   },
   {
-    id: "cgy",
-    name: "Calgary Wranglers",
+    id: 'cgy',
+    name: 'Calgary Wranglers',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "cgy",
+    nhlTeamId: 'cgy',
     colors: {
-      primary: "#C2273D",
-      secondary: "#F3BD48"
-    }
+      primary: '#C2273D',
+      secondary: '#F3BD48',
+    },
   },
   {
-    id: "cv",
-    name: "Coachella Valley Firebirds",
+    id: 'cv',
+    name: 'Coachella Valley Firebirds',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "sea",
+    nhlTeamId: 'sea',
     colors: {
-      primary: "#C8102E",
-      secondary: "#FF681D"
-    }
+      primary: '#C8102E',
+      secondary: '#FF681D',
+    },
   },
   {
-    id: "col",
-    name: "Colorado Eagles",
+    id: 'col',
+    name: 'Colorado Eagles',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "col",
+    nhlTeamId: 'col',
     colors: {
-      primary: "#FFD457",
-      secondary: "#19398A"
-    }
+      primary: '#FFD457',
+      secondary: '#19398A',
+    },
   },
   {
-    id: "hnd",
-    name: "Henderson Silver Knights",
+    id: 'hnd',
+    name: 'Henderson Silver Knights',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "vgk",
+    nhlTeamId: 'vgk',
     colors: {
-      primary: "#C2C4C6",
-      secondary: "#B4975B"
-    }
+      primary: '#C2C4C6',
+      secondary: '#B4975B',
+    },
   },
   {
-    id: "ont",
-    name: "Ontario Reign",
+    id: 'ont',
+    name: 'Ontario Reign',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "lak",
+    nhlTeamId: 'lak',
     colors: {
-      primary: "#A4A9AD",
-      secondary: "#000000"
-    }
+      primary: '#A4A9AD',
+      secondary: '#000000',
+    },
   },
   {
-    id: "sd",
-    name: "San Diego Gulls",
+    id: 'sd',
+    name: 'San Diego Gulls',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "ana",
+    nhlTeamId: 'ana',
     colors: {
-      primary: "#FF4C00",
-      secondary: "#0083BF"
-    }
+      primary: '#FF4C00',
+      secondary: '#0083BF',
+    },
   },
   {
-    id: "sj",
-    name: "San Jose Barracuda",
+    id: 'sj',
+    name: 'San Jose Barracuda',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "sjs",
+    nhlTeamId: 'sjs',
     colors: {
-      primary: "#266B73",
-      secondary: "#DD8943"
-    }
+      primary: '#266B73',
+      secondary: '#DD8943',
+    },
   },
   {
-    id: "tuc",
-    name: "Tucson Roadrunners",
+    id: 'tuc',
+    name: 'Tucson Roadrunners',
     division: AHLDivision.PACIFIC,
-    nhlTeamId: "ari",
+    nhlTeamId: 'ari',
     colors: {
-      primary: "#8E0A26",
-      secondary: "#EEE2BE"
-    }
+      primary: '#8E0A26',
+      secondary: '#EEE2BE',
+    },
   },
-]; 
+];

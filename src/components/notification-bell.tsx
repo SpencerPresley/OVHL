@@ -1,20 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NotificationList } from "@/components/notification-list";
-import { useNotifications } from "@/hooks/use-notifications";
-import { Badge } from "@/components/ui/badge";
+import * as React from 'react';
+import { Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NotificationList } from '@/components/notification-list';
+import { useNotifications } from '@/hooks/use-notifications';
+import { Badge } from '@/components/ui/badge';
 
 export function NotificationBell() {
   const { unreadCount, isOpen, setIsOpen } = useNotifications();
@@ -33,7 +27,7 @@ export function NotificationBell() {
               variant="destructive"
               className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center min-w-[1rem]"
             >
-              {unreadCount > 99 ? "99+" : unreadCount}
+              {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
           <span className="sr-only">Open notifications</span>
@@ -51,16 +45,10 @@ export function NotificationBell() {
           </TabsList>
           <ScrollArea className="h-[calc(100vh-10rem)] mt-2 pr-4">
             <TabsContent value="unread" className="mt-0">
-              <NotificationList
-                filter="unread"
-                onAction={() => setIsOpen(false)}
-              />
+              <NotificationList filter="unread" onAction={() => setIsOpen(false)} />
             </TabsContent>
             <TabsContent value="archived" className="mt-0">
-              <NotificationList
-                filter="archived"
-                onAction={() => setIsOpen(false)}
-              />
+              <NotificationList filter="archived" onAction={() => setIsOpen(false)} />
             </TabsContent>
             <TabsContent value="all" className="mt-0">
               <NotificationList filter="all" onAction={() => setIsOpen(false)} />
@@ -70,4 +58,4 @@ export function NotificationBell() {
       </SheetContent>
     </Sheet>
   );
-} 
+}

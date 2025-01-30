@@ -1,33 +1,30 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { verify } from "jsonwebtoken";
-import { NHL_TEAMS } from "@/lib/teams/nhl";
-import { AHL_TEAMS } from "@/lib/teams/ahl";
-import { ECHL_TEAMS } from "@/lib/teams/echl";
-import { CHL_TEAMS } from "@/lib/teams/chl";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { verify } from 'jsonwebtoken';
+import { NHL_TEAMS } from '@/lib/teams/nhl';
+import { AHL_TEAMS } from '@/lib/teams/ahl';
+import { ECHL_TEAMS } from '@/lib/teams/echl';
+import { CHL_TEAMS } from '@/lib/teams/chl';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // League tiers configuration with their teams
 const LEAGUE_TIERS = [
-  { name: "NHL", level: 1, teams: NHL_TEAMS },
-  { name: "AHL", level: 2, teams: AHL_TEAMS },
-  { name: "ECHL", level: 3, teams: ECHL_TEAMS },
-  { name: "CHL", level: 4, teams: CHL_TEAMS },
+  { name: 'NHL', level: 1, teams: NHL_TEAMS },
+  { name: 'AHL', level: 2, teams: AHL_TEAMS },
+  { name: 'ECHL', level: 3, teams: ECHL_TEAMS },
+  { name: 'CHL', level: 4, teams: CHL_TEAMS },
 ] as const;
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token");
+    const token = request.cookies.get('token');
 
     if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
@@ -41,20 +38,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user?.isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     const body = await request.json();
     const { seasonId } = body;
 
     if (!seasonId) {
-      return NextResponse.json(
-        { error: "Season ID is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Season ID is required' }, { status: 400 });
     }
 
     // Set all other seasons to not latest
@@ -85,7 +76,7 @@ export async function POST(request: NextRequest) {
       const teams = await prisma.team.findMany({
         where: {
           teamIdentifier: {
-            in: tierData.teams.map(t => t.id.toUpperCase()),
+            in: tierData.teams.map((t) => t.id.toUpperCase()),
           },
         },
       });
@@ -102,14 +93,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      message: "Season created successfully",
+      message: 'Season created successfully',
       season,
     });
   } catch (error) {
-    console.error("Failed to create season:", error);
-    return NextResponse.json(
-      { error: "Failed to create season" },
-      { status: 500 },
-    );
+    console.error('Failed to create season:', error);
+    return NextResponse.json({ error: 'Failed to create season' }, { status: 500 });
   }
-} 
+}

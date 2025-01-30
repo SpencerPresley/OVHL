@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   Body,
   Button,
@@ -9,7 +9,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from '@react-email/components';
 
 /**
  * Props for the ResetPasswordEmail component
@@ -40,9 +40,7 @@ interface ResetPasswordEmailProps {
  * <ResetPasswordEmail resetLink="https://example.com/reset?token=123" />
  * ```
  */
-export default function ResetPasswordEmail({
-  resetLink,
-}: ResetPasswordEmailProps) {
+export default function ResetPasswordEmail({ resetLink }: ResetPasswordEmailProps) {
   return (
     <Html>
       <Head />
@@ -51,8 +49,8 @@ export default function ResetPasswordEmail({
         <Container style={container}>
           <Heading style={h1}>Reset your password</Heading>
           <Text style={text}>
-            We received a request to reset your password for your WOC League
-            account. Click the button below to set a new password:
+            We received a request to reset your password for your WOC League account. Click the
+            button below to set a new password:
           </Text>
           <Section style={buttonContainer}>
             <Button style={button} href={resetLink}>
@@ -60,12 +58,10 @@ export default function ResetPasswordEmail({
             </Button>
           </Section>
           <Text style={text}>
-            If you didn&apos;t request this password reset\, you can safely
-            ignore this email. The link will expire in 24 hours.
+            If you didn&apos;t request this password reset\, you can safely ignore this email. The
+            link will expire in 24 hours.
           </Text>
-          <Text style={footer}>
-            This is an automated email&apos; please do not reply.
-          </Text>
+          <Text style={footer}>This is an automated email&apos; please do not reply.</Text>
         </Container>
       </Body>
     </Html>
@@ -77,7 +73,7 @@ export default function ResetPasswordEmail({
  * @constant
  */
 const main = {
-  backgroundColor: "#f6f9fc",
+  backgroundColor: '#f6f9fc',
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
@@ -87,10 +83,10 @@ const main = {
  * @constant
  */
 const container = {
-  backgroundColor: "#ffffff",
-  margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
+  backgroundColor: '#ffffff',
+  margin: '0 auto',
+  padding: '20px 0 48px',
+  marginBottom: '64px',
 };
 
 /**
@@ -98,11 +94,11 @@ const container = {
  * @constant
  */
 const h1 = {
-  color: "#333",
-  fontSize: "24px",
-  fontWeight: "600",
-  lineHeight: "40px",
-  margin: "0 0 20px",
+  color: '#333',
+  fontSize: '24px',
+  fontWeight: '600',
+  lineHeight: '40px',
+  margin: '0 0 20px',
 };
 
 /**
@@ -110,10 +106,10 @@ const h1 = {
  * @constant
  */
 const text = {
-  color: "#333",
-  fontSize: "16px",
-  lineHeight: "26px",
-  margin: "16px 0",
+  color: '#333',
+  fontSize: '16px',
+  lineHeight: '26px',
+  margin: '16px 0',
 };
 
 /**
@@ -121,7 +117,7 @@ const text = {
  * @constant
  */
 const buttonContainer = {
-  margin: "24px 0",
+  margin: '24px 0',
 };
 
 /**
@@ -129,15 +125,15 @@ const buttonContainer = {
  * @constant
  */
 const button = {
-  backgroundColor: "#0070f3",
-  borderRadius: "5px",
-  color: "#fff",
-  fontSize: "16px",
-  fontWeight: "bold",
-  textDecoration: "none",
-  textAlign: "center" as const,
-  display: "inline-block",
-  padding: "12px 20px",
+  backgroundColor: '#0070f3',
+  borderRadius: '5px',
+  color: '#fff',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'inline-block',
+  padding: '12px 20px',
 };
 
 /**
@@ -145,7 +141,7 @@ const button = {
  * @constant
  */
 const footer = {
-  color: "#666",
-  fontSize: "14px",
-  margin: "32px 0 0",
+  color: '#666',
+  fontSize: '14px',
+  margin: '32px 0 0',
 };

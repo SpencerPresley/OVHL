@@ -1,24 +1,25 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { System } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { System } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // Helper function to generate random gamertag
 function generateGamertag(): string {
-  const prefixes = ["Pro", "Elite", "Top", "Best", "Epic", "Super", "Ultra", "Mega"];
-  const nouns = ["Player", "Sniper", "Dangler", "Grinder", "Snipe", "Celly", "Sauce", "Deke"];
-  const numbers = Math.floor(Math.random() * 99).toString().padStart(2, '0');
-  
+  const prefixes = ['Pro', 'Elite', 'Top', 'Best', 'Epic', 'Super', 'Ultra', 'Mega'];
+  const nouns = ['Player', 'Sniper', 'Dangler', 'Grinder', 'Snipe', 'Celly', 'Sauce', 'Deke'];
+  const numbers = Math.floor(Math.random() * 99)
+    .toString()
+    .padStart(2, '0');
+
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  
+
   return `${prefix}${noun}${numbers}`;
 }
-
 
 export async function POST() {
   try {
@@ -30,19 +31,16 @@ export async function POST() {
           include: {
             teams: {
               include: {
-                team: true
-              }
-            }
-          }
-        }
-      }
+                team: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!season) {
-      return NextResponse.json(
-        { error: "No active season found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
     // For each team, create 17 players (9F, 6D, 2G)
@@ -52,7 +50,7 @@ export async function POST() {
         const roster = {
           forwards: 9,
           defense: 6,
-          goalies: 2
+          goalies: 2,
         };
 
         // Create players for each position
@@ -62,18 +60,19 @@ export async function POST() {
             const timestamp = Date.now();
             const randomNum = Math.floor(Math.random() * 10000);
             const system = Math.random() > 0.5 ? System.PS : System.XBOX;
-            const pos = position === 'forwards' 
-              ? ['C', 'LW', 'RW'][Math.floor(Math.random() * 3)]
-              : position === 'defense'
-                ? ['LD', 'RD'][Math.floor(Math.random() * 2)]
-                : 'G';
+            const pos =
+              position === 'forwards'
+                ? ['C', 'LW', 'RW'][Math.floor(Math.random() * 3)]
+                : position === 'defense'
+                  ? ['LD', 'RD'][Math.floor(Math.random() * 2)]
+                  : 'G';
 
             // Create user
             const user = await prisma.user.create({
               data: {
                 email: `${gamertag.toLowerCase()}_${timestamp}_${randomNum}@test.com`,
                 username: `${gamertag.toLowerCase()}_${timestamp}_${randomNum}`,
-                password: await bcrypt.hash("password123", 10),
+                password: await bcrypt.hash('password123', 10),
                 name: gamertag,
               },
             });
@@ -108,10 +107,12 @@ export async function POST() {
               takeaways: Math.floor(Math.random() * 20),
               giveaways: Math.floor(Math.random() * 20),
               penaltyMinutes: Math.floor(Math.random() * 30),
-              ...(pos === 'G' ? {
-                saves: Math.floor(Math.random() * 200) + 100,
-                goalsAgainst: Math.floor(Math.random() * 50) + 20,
-              } : {}),
+              ...(pos === 'G'
+                ? {
+                    saves: Math.floor(Math.random() * 200) + 100,
+                    goalsAgainst: Math.floor(Math.random() * 50) + 20,
+                  }
+                : {}),
             };
 
             // Create a player season with stats
@@ -124,9 +125,9 @@ export async function POST() {
                 contract: {
                   create: {
                     amount: 500000,
-                  }
-                }
-              }
+                  },
+                },
+              },
             });
 
             // Create player team season
@@ -135,19 +136,16 @@ export async function POST() {
                 playerSeasonId: playerSeason.id,
                 teamSeasonId: teamSeason.id,
                 ...stats,
-              }
+              },
             });
           }
         }
       }
     }
 
-    return NextResponse.json({ message: "Test players created successfully" });
+    return NextResponse.json({ message: 'Test players created successfully' });
   } catch (error) {
-    console.error("Failed to create test players:", error);
-    return NextResponse.json(
-      { error: "Failed to create test players" },
-      { status: 500 }
-    );
+    console.error('Failed to create test players:', error);
+    return NextResponse.json({ error: 'Failed to create test players' }, { status: 500 });
   }
-} 
+}

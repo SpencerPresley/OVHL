@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Notification } from "@/types/notifications";
-import { formatDistanceToNow } from "date-fns";
-import { Bell } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { use } from "react";
+import { useEffect, useState } from 'react';
+import { Notification } from '@/types/notifications';
+import { formatDistanceToNow } from 'date-fns';
+import { Bell } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { use } from 'react';
 
 export default function NotificationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -19,11 +19,11 @@ export default function NotificationPage({ params }: { params: Promise<{ id: str
     const fetchNotification = async () => {
       try {
         const response = await fetch(`/api/notifications/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch notification");
+        if (!response.ok) throw new Error('Failed to fetch notification');
         const data = await response.json();
         setNotification(data.notification);
       } catch (error) {
-        console.error("Error fetching notification:", error);
+        console.error('Error fetching notification:', error);
       } finally {
         setLoading(false);
       }
@@ -73,4 +73,4 @@ export default function NotificationPage({ params }: { params: Promise<{ id: str
       </div>
     </div>
   );
-} 
+}

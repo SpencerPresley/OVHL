@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useToast } from "@/hooks/use-toast";
-import { Notification } from "@/types/notifications";
+import { useToast } from '@/hooks/use-toast';
+import { Notification } from '@/types/notifications';
 
 export function useNotificationToast() {
   const { toast } = useToast();
@@ -11,7 +11,7 @@ export function useNotificationToast() {
       title: notification.title,
       description: notification.message,
       duration: 2000,
-      className: "notification-toast cursor-pointer",
+      className: 'notification-toast cursor-pointer',
       onClick: () => {
         onOpenSheet?.();
       },
@@ -19,4 +19,4 @@ export function useNotificationToast() {
   };
 
   return { showNotificationToast };
-} 
+}

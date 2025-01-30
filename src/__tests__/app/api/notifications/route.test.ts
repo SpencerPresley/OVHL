@@ -1,30 +1,30 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verify } from "jsonwebtoken";
-import { GET, POST } from "@/app/api/notifications/route";
-import { mockPrismaClient } from "@/mocks/prisma";
-import { NotificationStatus, NotificationType } from "@/types/notifications";
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { verify } from 'jsonwebtoken';
+import { GET, POST } from '@/app/api/notifications/route';
+import { mockPrismaClient } from '@/mocks/prisma';
+import { NotificationStatus, NotificationType } from '@/types/notifications';
 
 // Mock dependencies
-jest.mock("@/lib/prisma", () => ({
+jest.mock('@/lib/prisma', () => ({
   prisma: mockPrismaClient,
 }));
 
-jest.mock("next/headers", () => ({
+jest.mock('next/headers', () => ({
   cookies: jest.fn(),
 }));
 
-jest.mock("jsonwebtoken", () => ({
+jest.mock('jsonwebtoken', () => ({
   verify: jest.fn(),
 }));
 
 // Mock NextResponse
-jest.mock("next/server", () => {
+jest.mock('next/server', () => {
   return {
     NextResponse: {
       json: jest.fn().mockImplementation((data, init) => {
         const response = new Response(JSON.stringify(data), init);
-        Object.defineProperty(response, "json", {
+        Object.defineProperty(response, 'json', {
           value: async () => data,
           writable: true,
           configurable: true,
@@ -54,15 +54,15 @@ global.Request = jest.fn().mockImplementation((url, init) => {
   return request;
 }) as any;
 
-describe("Notifications API Routes", () => {
-  const mockUserId = "user123";
+describe('Notifications API Routes', () => {
+  const mockUserId = 'user123';
   const mockNotifications = [
     {
-      id: "1",
+      id: '1',
       userId: mockUserId,
       type: NotificationType.SYSTEM,
-      title: "Test Notification",
-      message: "Test Message",
+      title: 'Test Notification',
+      message: 'Test Message',
       status: NotificationStatus.UNREAD,
       createdAt: new Date(),
     },
@@ -73,17 +73,17 @@ describe("Notifications API Routes", () => {
     mockPrismaClient.notification.findMany.mockResolvedValue(mockNotifications);
     mockPrismaClient.notification.create.mockImplementation(async (args) => ({
       ...args.data,
-      id: "1",
+      id: '1',
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
     (verify as jest.Mock).mockReturnValue({ id: mockUserId, isAdmin: true });
     (cookies as jest.Mock).mockReturnValue({
-      get: jest.fn().mockReturnValue({ value: "valid.token" }),
+      get: jest.fn().mockReturnValue({ value: 'valid.token' }),
     });
   });
 
-  describe("GET /api/notifications", () => {
+  describe('GET /api/notifications', () => {
     it("should return user's notifications", async () => {
       const response = await GET();
       const data = await response.json();
@@ -95,36 +95,36 @@ describe("Notifications API Routes", () => {
           userId: mockUserId,
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
       });
     });
 
-    it("should handle database errors", async () => {
-      mockPrismaClient.notification.findMany.mockRejectedValue(new Error("Database error"));
+    it('should handle database errors', async () => {
+      mockPrismaClient.notification.findMany.mockRejectedValue(new Error('Database error'));
 
       const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data).toEqual({ error: "Failed to fetch notifications" });
+      expect(data).toEqual({ error: 'Failed to fetch notifications' });
     });
   });
 
-  describe("POST /api/notifications", () => {
+  describe('POST /api/notifications', () => {
     const mockNotification = {
       userId: mockUserId,
       type: NotificationType.SYSTEM,
-      title: "Test Notification",
-      message: "Test Message",
+      title: 'Test Notification',
+      message: 'Test Message',
       status: NotificationStatus.UNREAD,
     };
 
-    it("should create a new notification for admin users", async () => {
-      const request = new Request("http://localhost:3000/api/notifications", {
-        method: "POST",
+    it('should create a new notification for admin users', async () => {
+      const request = new Request('http://localhost:3000/api/notifications', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(mockNotification),
       });
@@ -139,13 +139,13 @@ describe("Notifications API Routes", () => {
       });
     });
 
-    it("should handle database errors", async () => {
-      mockPrismaClient.notification.create.mockRejectedValue(new Error("Database error"));
+    it('should handle database errors', async () => {
+      mockPrismaClient.notification.create.mockRejectedValue(new Error('Database error'));
 
-      const request = new Request("http://localhost:3000/api/notifications", {
-        method: "POST",
+      const request = new Request('http://localhost:3000/api/notifications', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(mockNotification),
       });
@@ -154,7 +154,7 @@ describe("Notifications API Routes", () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data).toEqual({ error: "Failed to create notification" });
+      expect(data).toEqual({ error: 'Failed to create notification' });
     });
   });
-}); 
+});

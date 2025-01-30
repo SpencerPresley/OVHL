@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -22,11 +22,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 // import { useRouter } from "next/navigation"
-import Link from "next/link";
-import { Checkbox } from "@/components/ui/checkbox";
+import Link from 'next/link';
+import { Checkbox } from '@/components/ui/checkbox';
 
 /**
  * Zod schema for sign-in form validation
@@ -36,10 +36,10 @@ import { Checkbox } from "@/components/ui/checkbox";
  */
 const signInSchema = z.object({
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: 'Please enter a valid email address.',
   }),
   password: z.string().min(1, {
-    message: "Password is required.",
+    message: 'Password is required.',
   }),
   rememberMe: z.boolean().default(false),
 });
@@ -58,15 +58,15 @@ type SignInValues = z.infer<typeof signInSchema>;
  */
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   // const router = useRouter()
 
   // Initialize form with zod validation
   const form = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       rememberMe: false,
     },
   });
@@ -82,32 +82,32 @@ export function SignInForm() {
    */
   async function onSubmit(values: SignInValues) {
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
-        credentials: "include",
+        credentials: 'include',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign in");
+        throw new Error(data.error || 'Failed to sign in');
       }
 
       // Wait for cookie to be set
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Redirect to home and force a full page reload
-      window.location.href = "/";
+      window.location.href = '/';
     } catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +117,7 @@ export function SignInForm() {
     <Card className="w-[400px] card-gradient">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>
-          Enter your email and password to sign in
-        </CardDescription>
+        <CardDescription>Enter your email and password to sign in</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -178,10 +176,7 @@ export function SignInForm() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Remember me</FormLabel>
@@ -192,17 +187,14 @@ export function SignInForm() {
 
             {/* Forgot Password Link */}
             <div className="text-sm text-right">
-              <Link
-                href="/forgot-password"
-                className="text-primary hover:underline"
-              >
+              <Link href="/forgot-password" className="text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
 
             {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </Form>
@@ -210,9 +202,7 @@ export function SignInForm() {
 
       {/* Sign Up Link */}
       <CardFooter className="flex flex-col space-y-4">
-        <div className="text-sm text-gray-400 text-center">
-          Don&#39;t have an account?
-        </div>
+        <div className="text-sm text-gray-400 text-center">Don&#39;t have an account?</div>
         <Button variant="outline" className="w-full" asChild>
           <Link href="/sign-up">Create an account</Link>
         </Button>

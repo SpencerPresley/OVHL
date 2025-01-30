@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Nav } from "@/components/nav";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { Nav } from '@/components/nav';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface UserProfileProps {
   user: {
@@ -14,7 +14,7 @@ interface UserProfileProps {
         gamertag: string;
         createdAt: Date;
         playerId: string;
-        system: "PS" | "XBOX";
+        system: 'PS' | 'XBOX';
       }[];
       seasons: {
         teamSeasons: {
@@ -29,11 +29,11 @@ interface UserProfileProps {
             gamesPlayed?: number;
             goals?: number;
             assists?: number;
-          }
-        }[]
-      }[]
-    }
-  }
+          };
+        }[];
+      }[];
+    };
+  };
 }
 
 export function UserProfile({ user }: UserProfileProps) {
@@ -57,7 +57,7 @@ export function UserProfile({ user }: UserProfileProps) {
               <AvatarImage src="" alt={currentGamertag} />
               <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
-            
+
             <div className="text-center">
               <h2 className="text-xl font-medium">{currentGamertag}</h2>
               <p className="text-sm text-gray-500">{user.email}</p>
@@ -86,7 +86,9 @@ export function UserProfile({ user }: UserProfileProps) {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Points</p>
-                  <p className="text-lg font-bold">{(currentTeamSeason.goals || 0) + (currentTeamSeason.assists || 0)}</p>
+                  <p className="text-lg font-bold">
+                    {(currentTeamSeason.goals || 0) + (currentTeamSeason.assists || 0)}
+                  </p>
                 </div>
               </div>
             )}
@@ -95,4 +97,4 @@ export function UserProfile({ user }: UserProfileProps) {
       </div>
     </div>
   );
-} 
+}

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,18 +13,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 /**
  * @typedef {Object} ResetPasswordValues
@@ -39,13 +33,13 @@ import { toast } from "sonner";
 const resetPasswordSchema = z
   .object({
     password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
+      message: 'Password must be at least 8 characters.',
     }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ['confirmPassword'],
   });
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
@@ -71,10 +65,10 @@ type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
  */
 export function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams.get('token');
 
   /**
    * Initialize form with Zod validation
@@ -83,8 +77,8 @@ export function ResetPasswordForm() {
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      password: "",
-      confirmPassword: "",
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -103,18 +97,18 @@ export function ResetPasswordForm() {
    */
   async function onSubmit(values: ResetPasswordValues) {
     if (!token) {
-      setError("Reset token is missing");
+      setError('Reset token is missing');
       return;
     }
 
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           token,
@@ -125,15 +119,15 @@ export function ResetPasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+        throw new Error(data.error || 'Failed to reset password');
       }
 
-      toast.success("Password reset successful");
-      router.push("/sign-in");
+      toast.success('Password reset successful');
+      router.push('/sign-in');
     } catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "An error occurred");
-      toast.error("Failed to reset password");
+      setError(error instanceof Error ? error.message : 'An error occurred');
+      toast.error('Failed to reset password');
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +188,7 @@ export function ResetPasswordForm() {
             />
             {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Resetting..." : "Reset Password"}
+              {isLoading ? 'Resetting...' : 'Reset Password'}
             </Button>
           </form>
         </Form>

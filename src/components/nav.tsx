@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { UserNav } from "@/components/user-nav";
-import { useEffect, useState } from "react";
-import { Images } from "@/constants/images";
+import * as React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { UserNav } from '@/components/user-nav';
+import { useEffect, useState } from 'react';
+import { Images } from '@/constants/images';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,22 +15,12 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
-import { Menu, ChevronDown } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { NotificationBell } from "@/components/notification-bell";
+} from '@/components/ui/navigation-menu';
+import { cn } from '@/lib/utils';
+import { Menu, ChevronDown } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { NotificationBell } from '@/components/notification-bell';
 
 interface User {
   id: string;
@@ -50,10 +40,10 @@ interface League {
  * Available leagues in the system
  */
 const leagues: League[] = [
-  { id: "nhl", name: "NHL", logo: "/nhl_logo.png" },
-  { id: "ahl", name: "AHL", logo: "/ahl_logo.png" },
-  { id: "echl", name: "ECHL", logo: "/echl_logo.png" },
-  { id: "chl", name: "CHL", logo: "/chl_logo.png" },
+  { id: 'nhl', name: 'NHL', logo: '/nhl_logo.png' },
+  { id: 'ahl', name: 'AHL', logo: '/ahl_logo.png' },
+  { id: 'echl', name: 'ECHL', logo: '/echl_logo.png' },
+  { id: 'chl', name: 'CHL', logo: '/chl_logo.png' },
 ];
 
 /**
@@ -74,8 +64,8 @@ export function Nav() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/auth/user", {
-          credentials: "include",
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
         });
 
         if (response.ok) {
@@ -85,7 +75,7 @@ export function Nav() {
           setUser(null);
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error('Auth check failed:', error);
         setUser(null);
       }
     };
@@ -102,21 +92,15 @@ export function Nav() {
    * @property {string} label - The display text for the link
    */
   const navigationLinks = [
-    { href: "/", label: "Home" },
-    { href: "#", label: "News" },
+    { href: '/', label: 'Home' },
+    { href: '#', label: 'News' },
   ];
 
   return (
     <nav className="nav-blur sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/">
-          <Image
-            src={Images.LOGO_MAIN.path}
-            alt="OVHL Logo"
-            width={120}
-            height={60}
-            priority
-          />
+          <Image src={Images.LOGO_MAIN.path} alt="OVHL Logo" width={120} height={60} priority />
         </Link>
 
         {/* Desktop Navigation - Shown on md screens and up */}
@@ -127,10 +111,7 @@ export function Nav() {
                 <NavigationMenuItem key={link.label}>
                   <Link href={link.href} legacyBehavior passHref>
                     <NavigationMenuLink
-                      className={cn(
-                        "nav-menu-trigger",
-                        "cursor-pointer hover:text-blue-400"
-                      )}
+                      className={cn('nav-menu-trigger', 'cursor-pointer hover:text-blue-400')}
                     >
                       {link.label}
                     </NavigationMenuLink>
@@ -156,9 +137,7 @@ export function Nav() {
                             height={40}
                             className="rounded-sm object-contain"
                           />
-                          <span className="text-sm font-medium">
-                            {league.name}
-                          </span>
+                          <span className="text-sm font-medium">{league.name}</span>
                         </Link>
                       </li>
                     ))}
@@ -216,8 +195,8 @@ export function Nav() {
                     <span>Leagues</span>
                     <ChevronDown
                       className={cn(
-                        "h-4 w-4 transition-transform duration-200",
-                        isLeaguesOpen ? "transform rotate-180" : "",
+                        'h-4 w-4 transition-transform duration-200',
+                        isLeaguesOpen ? 'transform rotate-180' : ''
                       )}
                     />
                   </CollapsibleTrigger>

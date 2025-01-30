@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Nav } from "@/components/nav";
-import { LeagueNav } from "@/components/league-nav";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Nav } from '@/components/nav';
+import { LeagueNav } from '@/components/league-nav';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   ColumnDef,
   flexRender,
@@ -20,14 +20,14 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { NHL_TEAMS } from "@/lib/teams/nhl";
-import { AHL_TEAMS } from "@/lib/teams/ahl";
-import { ECHL_TEAMS } from "@/lib/teams/echl";
-import { CHL_TEAMS } from "@/lib/teams/chl";
+} from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { NHL_TEAMS } from '@/lib/teams/nhl';
+import { AHL_TEAMS } from '@/lib/teams/ahl';
+import { ECHL_TEAMS } from '@/lib/teams/echl';
+import { CHL_TEAMS } from '@/lib/teams/chl';
 
 interface League {
   id: string;
@@ -65,32 +65,39 @@ interface StandingsDisplayProps {
   league: League;
 }
 
-function DivisionTable({ 
-  division, 
-  teams, 
-  leagueId 
-}: { 
-  division: string; 
-  teams: TeamStats[]; 
+function DivisionTable({
+  division,
+  teams,
+  leagueId,
+}: {
+  division: string;
+  teams: TeamStats[];
   leagueId: string;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   // Create a map of team identifiers to colors based on league
   const teamColorsMap = new Map(
-    leagueId === "nhl" ? NHL_TEAMS.map(team => [team.id.toUpperCase(), team.colors]) :
-    leagueId === "ahl" ? AHL_TEAMS.map(team => [team.id.toUpperCase(), team.colors]) :
-    leagueId === "echl" ? ECHL_TEAMS.map(team => [team.id.toUpperCase(), team.colors]) :
-    leagueId === "chl" ? CHL_TEAMS.map(team => [team.id.toUpperCase(), team.colors]) :
-    []
+    leagueId === 'nhl'
+      ? NHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
+      : leagueId === 'ahl'
+        ? AHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
+        : leagueId === 'echl'
+          ? ECHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
+          : leagueId === 'chl'
+            ? CHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
+            : []
   );
 
   const columns: ColumnDef<TeamStats>[] = [
     {
-      accessorKey: "teamIdentifier",
-      header: "Team",
+      accessorKey: 'teamIdentifier',
+      header: 'Team',
       cell: ({ row }) => (
-        <Link href={`/leagues/${leagueId}/teams/${row.original.teamIdentifier}`} className="hover:opacity-75">
+        <Link
+          href={`/leagues/${leagueId}/teams/${row.original.teamIdentifier}`}
+          className="hover:opacity-75"
+        >
           <div className="text-left">
             <span className="font-bold">{row.original.teamIdentifier}</span>
             <span className="text-sm text-gray-400 ml-2">{row.original.teamName}</span>
@@ -99,54 +106,58 @@ function DivisionTable({
       ),
     },
     {
-      accessorKey: "gamesPlayed",
-      header: "GP",
+      accessorKey: 'gamesPlayed',
+      header: 'GP',
       cell: ({ row }) => <div className="text-right">{row.original.gamesPlayed}</div>,
     },
     {
-      accessorKey: "wins",
-      header: "W",
+      accessorKey: 'wins',
+      header: 'W',
       cell: ({ row }) => <div className="text-right">{row.original.wins}</div>,
     },
     {
-      accessorKey: "losses",
-      header: "L",
+      accessorKey: 'losses',
+      header: 'L',
       cell: ({ row }) => <div className="text-right">{row.original.losses}</div>,
     },
     {
-      accessorKey: "otLosses",
-      header: "OTL",
+      accessorKey: 'otLosses',
+      header: 'OTL',
       cell: ({ row }) => <div className="text-right">{row.original.otLosses}</div>,
     },
     {
-      accessorKey: "points",
-      header: "PTS",
+      accessorKey: 'points',
+      header: 'PTS',
       cell: ({ row }) => <div className="text-right font-bold">{row.original.points}</div>,
     },
     {
-      accessorKey: "goalsFor",
-      header: "GF",
+      accessorKey: 'goalsFor',
+      header: 'GF',
       cell: ({ row }) => <div className="text-right">{row.original.goalsFor}</div>,
     },
     {
-      accessorKey: "goalsAgainst",
-      header: "GA",
+      accessorKey: 'goalsAgainst',
+      header: 'GA',
       cell: ({ row }) => <div className="text-right">{row.original.goalsAgainst}</div>,
     },
     {
-      accessorKey: "goalDifferential",
-      header: "DIFF",
+      accessorKey: 'goalDifferential',
+      header: 'DIFF',
       cell: ({ row }) => <div className="text-right">{row.original.goalDifferential}</div>,
     },
     {
-      accessorKey: "powerplayPercentage",
-      header: "PP%",
-      cell: ({ row }) => <div className="text-right">{row.original.powerplayPercentage.toFixed(1)}%</div>,
+      accessorKey: 'powerplayPercentage',
+      header: 'PP%',
+      cell: ({ row }) => (
+        <div className="text-right">{row.original.powerplayPercentage.toFixed(1)}%</div>
+      ),
     },
     {
-      accessorKey: "penaltyKillPercentage",
-      header: "PK%",
-      cell: ({ row }) => <div className="text-right">{row.original.penaltyKillPercentage.toFixed(1)}%</div>,
+      accessorKey: 'penaltyKillPercentage',
+      header: 'PK%',
+      cell: ({ row }) => (
+        <div className="text-right">{row.original.penaltyKillPercentage.toFixed(1)}%</div>
+      ),
     },
   ];
 
@@ -176,21 +187,21 @@ function DivisionTable({
                         variant="ghost"
                         onClick={header.column.getToggleSortingHandler()}
                         className={cn(
-                          "h-8 flex items-center gap-2 w-full px-0",
-                          header.column.getCanSort() ? "cursor-pointer select-none" : "",
-                          header.column.id === "teamIdentifier" ? "justify-start text-left" : "justify-end text-right"
+                          'h-8 flex items-center gap-2 w-full px-0',
+                          header.column.getCanSort() ? 'cursor-pointer select-none' : '',
+                          header.column.id === 'teamIdentifier'
+                            ? 'justify-start text-left'
+                            : 'justify-end text-right'
                         )}
                       >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
                           asc: <ArrowUp className="h-4 w-4 shrink-0" />,
                           desc: <ArrowDown className="h-4 w-4 shrink-0" />,
-                        }[header.column.getIsSorted() as string] ?? (
-                          header.column.getCanSort() ? <ChevronsUpDown className="h-4 w-4 shrink-0" /> : null
-                        )}
+                        }[header.column.getIsSorted() as string] ??
+                          (header.column.getCanSort() ? (
+                            <ChevronsUpDown className="h-4 w-4 shrink-0" />
+                          ) : null)}
                       </Button>
                     )}
                   </TableHead>
@@ -202,10 +213,12 @@ function DivisionTable({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const teamColors = teamColorsMap.get(row.original.teamIdentifier);
-                const style = teamColors ? {
-                  background: `linear-gradient(to right, ${teamColors.primary}50, ${teamColors.secondary}60)`,
-                  borderLeft: `4px solid ${teamColors.primary}`,
-                } : {};
+                const style = teamColors
+                  ? {
+                      background: `linear-gradient(to right, ${teamColors.primary}50, ${teamColors.secondary}60)`,
+                      borderLeft: `4px solid ${teamColors.primary}`,
+                    }
+                  : {};
 
                 return (
                   <TableRow key={row.id} style={style}>
@@ -239,11 +252,11 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
     const fetchStandings = async () => {
       try {
         const response = await fetch(`/api/leagues/${league.id}/standings`);
-        if (!response.ok) throw new Error("Failed to fetch standings");
+        if (!response.ok) throw new Error('Failed to fetch standings');
         const data = await response.json();
         setStandings(data.standings);
       } catch (error) {
-        console.error("Error fetching standings:", error);
+        console.error('Error fetching standings:', error);
       } finally {
         setIsLoading(false);
       }
@@ -267,9 +280,7 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
               height={80}
               className="object-contain"
             />
-            <h1 className="text-4xl font-bold text-white">
-              {league.name} Standings
-            </h1>
+            <h1 className="text-4xl font-bold text-white">{league.name} Standings</h1>
           </div>
         </div>
       </div>
@@ -293,4 +304,4 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
       </div>
     </div>
   );
-} 
+}

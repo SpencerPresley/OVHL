@@ -1,1 +1,1 @@
-export { useNotifications } from "@/providers/notifications-provider"; 
+export { useNotifications } from '@/providers/notifications-provider';

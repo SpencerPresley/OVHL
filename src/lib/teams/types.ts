@@ -1,58 +1,58 @@
 // NHL Division Enums
 export enum NHLConference {
-  EASTERN = "Eastern",
-  WESTERN = "Western"
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
 }
 
 export enum NHLDivision {
-  ATLANTIC = "Atlantic",
-  METROPOLITAN = "Metropolitan",
-  CENTRAL = "Central",
-  PACIFIC = "Pacific"
+  ATLANTIC = 'Atlantic',
+  METROPOLITAN = 'Metropolitan',
+  CENTRAL = 'Central',
+  PACIFIC = 'Pacific',
 }
 
 // AHL Division Enums
 export enum AHLDivision {
-  ATLANTIC = "Atlantic",
-  NORTH = "North",
-  CENTRAL = "Central",
-  PACIFIC = "Pacific"
+  ATLANTIC = 'Atlantic',
+  NORTH = 'North',
+  CENTRAL = 'Central',
+  PACIFIC = 'Pacific',
 }
 
 // ECHL Division Enums
 export enum ECHLDivision {
-  NORTH = "Eastern North",
-  SOUTH = "Eastern South",
-  CENTRAL = "Western Central",
-  MOUNTAIN = "Western Mountain"
+  NORTH = 'Eastern North',
+  SOUTH = 'Eastern South',
+  CENTRAL = 'Western Central',
+  MOUNTAIN = 'Western Mountain',
 }
 
 // CHL League and Division Enums
 export enum CHLLeague {
-  NAJHL = "NAJHL",
-  OHL = "OHL",
-  QMJHL = "QMJHL",
-  WHL = "WHL"
+  NAJHL = 'NAJHL',
+  OHL = 'OHL',
+  QMJHL = 'QMJHL',
+  WHL = 'WHL',
 }
 
 export enum NAJHLDivision {
-  EAST = "East",
-  WEST = "West"
+  EAST = 'East',
+  WEST = 'West',
 }
 
 export enum OHLDivision {
-  NORTH = "North",
-  SOUTH = "South"
+  NORTH = 'North',
+  SOUTH = 'South',
 }
 
 export enum QMJHLDivision {
-  NORTH = "North",
-  SOUTH = "South"
+  NORTH = 'North',
+  SOUTH = 'South',
 }
 
 export enum WHLDivision {
-  EAST = "East",
-  WEST = "West"
+  EAST = 'East',
+  WEST = 'West',
 }
 
 // Team Interfaces
@@ -99,4 +99,4 @@ export interface CHLTeam {
     primary: string;
     secondary: string;
   };
-} 
+}

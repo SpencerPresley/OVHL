@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -22,9 +22,9 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+} from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 /**
  * Props for the SignUpForm validation schema
@@ -34,13 +34,13 @@ import Link from "next/link";
  */
 const signUpSchema = z.object({
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: 'Please enter a valid email address.',
   }),
   username: z.string().min(3, {
-    message: "Username must be at least 3 characters.",
+    message: 'Username must be at least 3 characters.',
   }),
   password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+    message: 'Password must be at least 8 characters.',
   }),
 });
 
@@ -62,27 +62,27 @@ type SignUpValues = z.infer<typeof signUpSchema>;
  */
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      email: "",
-      username: "",
-      password: "",
+      email: '',
+      username: '',
+      password: '',
     },
   });
 
   async function onSubmit(values: SignUpValues) {
     setIsLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
       });
@@ -90,15 +90,15 @@ export function SignUpForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign up");
+        throw new Error(data.error || 'Failed to sign up');
       }
 
       // Redirect to sign in after successful registration
-      router.push("/sign-in?registered=true");
+      router.push('/sign-in?registered=true');
       router.refresh();
     } catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -108,9 +108,7 @@ export function SignUpForm() {
     <Card className="w-[400px] card-gradient">
       <CardHeader>
         <CardTitle>Create Account</CardTitle>
-        <CardDescription>
-          Enter your details to create a new account
-        </CardDescription>
+        <CardDescription>Enter your details to create a new account</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -153,26 +151,20 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Create a password"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="Create a password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating Account..." : "Create Account"}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
-        <div className="text-sm text-gray-400 text-center">
-          Already have an account?
-        </div>
+        <div className="text-sm text-gray-400 text-center">Already have an account?</div>
         <Button variant="outline" className="w-full" asChild>
           <Link href="/sign-in">Sign In</Link>
         </Button>

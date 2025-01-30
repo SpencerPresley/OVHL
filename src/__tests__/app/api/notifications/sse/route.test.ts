@@ -1,31 +1,31 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verify } from "jsonwebtoken";
-import { mockPrismaClient } from "@/mocks/prisma";
-import { GET } from "@/app/api/notifications/sse/route";
-import { NotificationStatus } from "@/types/notifications";
-import { TextEncoder } from "util";
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { verify } from 'jsonwebtoken';
+import { mockPrismaClient } from '@/mocks/prisma';
+import { GET } from '@/app/api/notifications/sse/route';
+import { NotificationStatus } from '@/types/notifications';
+import { TextEncoder } from 'util';
 
 // Mock dependencies
-jest.mock("next/headers", () => ({
+jest.mock('next/headers', () => ({
   cookies: jest.fn(),
 }));
 
-jest.mock("jsonwebtoken", () => ({
+jest.mock('jsonwebtoken', () => ({
   verify: jest.fn(),
 }));
 
-jest.mock("@/lib/prisma", () => ({
+jest.mock('@/lib/prisma', () => ({
   prisma: mockPrismaClient,
 }));
 
 // Mock NextResponse
-jest.mock("next/server", () => {
+jest.mock('next/server', () => {
   return {
     NextResponse: {
       json: jest.fn().mockImplementation((data, init) => {
         const response = new Response(JSON.stringify(data), init);
-        Object.defineProperty(response, "json", {
+        Object.defineProperty(response, 'json', {
           value: async () => data,
           writable: true,
           configurable: true,
@@ -79,13 +79,13 @@ class MockReadableStream {
 
   removeEventListener(event: string, callback: (event: any) => void) {
     if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+      this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
     }
   }
 
   dispatchEvent(event: any) {
     const listeners = this.listeners[event.type] || [];
-    listeners.forEach(callback => callback(event));
+    listeners.forEach((callback) => callback(event));
     return true;
   }
 }
@@ -94,16 +94,17 @@ class MockReadableStream {
 const originalResponse = global.Response;
 global.Response = jest.fn().mockImplementation((body, init) => {
   // If body is a string (JSON), use it directly
-  const actualBody = typeof body === 'string' ? body : body instanceof ReadableStream ? body : JSON.stringify(body);
+  const actualBody =
+    typeof body === 'string' ? body : body instanceof ReadableStream ? body : JSON.stringify(body);
   const response = new originalResponse(actualBody, init);
-  
+
   // Add proper json method
   Object.defineProperty(response, 'json', {
     value: async () => JSON.parse(await response.text()),
     writable: true,
     configurable: true,
   });
-  
+
   return response;
 }) as any;
 
@@ -145,21 +146,21 @@ global.Request = jest.fn().mockImplementation((url, init) => {
   return request;
 }) as any;
 
-describe("SSE API Route", () => {
+describe('SSE API Route', () => {
   let mockTimer: NodeJS.Timeout;
-  const mockUserId = "user123";
-  const mockToken = "mock-token";
-  
+  const mockUserId = 'user123';
+  const mockToken = 'mock-token';
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(console, 'error').mockImplementation(() => {}); // Silence console.error
-    
+
     // Mock cookies
     const mockCookieStore = {
       get: jest.fn().mockReturnValue({ value: mockToken }),
     };
     (cookies as jest.Mock).mockReturnValue(mockCookieStore);
-    
+
     // Mock JWT verify
     (verify as jest.Mock).mockReturnValue({ id: mockUserId });
   });
@@ -174,56 +175,56 @@ describe("SSE API Route", () => {
     (console.error as jest.Mock).mockRestore();
   });
 
-  it("should establish SSE connection and send initial message", async () => {
-    const request = new Request("http://localhost:3000/api/notifications/sse");
+  it('should establish SSE connection and send initial message', async () => {
+    const request = new Request('http://localhost:3000/api/notifications/sse');
     const response = await GET(request);
-    
+
     expect(response.status).toBe(200);
-    expect(response.headers.get("Content-Type")).toBe("text/event-stream");
-    expect(response.headers.get("Cache-Control")).toBe("no-cache, no-transform");
-    expect(response.headers.get("Connection")).toBe("keep-alive");
+    expect(response.headers.get('Content-Type')).toBe('text/event-stream');
+    expect(response.headers.get('Cache-Control')).toBe('no-cache, no-transform');
+    expect(response.headers.get('Connection')).toBe('keep-alive');
 
     // Fast-forward past the first ping
     jest.advanceTimersByTime(100);
-    
+
     // Cleanup
     jest.clearAllTimers();
   }, 10000);
 
-  it("should handle unauthorized requests", async () => {
+  it('should handle unauthorized requests', async () => {
     // Mock missing token
     const mockCookieStore = {
       get: jest.fn().mockReturnValue(null),
     };
     (cookies as jest.Mock).mockReturnValue(mockCookieStore);
 
-    const request = new Request("http://localhost:3000/api/notifications/sse");
+    const request = new Request('http://localhost:3000/api/notifications/sse');
     const response = await GET(request);
 
     expect(response.status).toBe(401);
-    expect(response.headers.get("Content-Type")).toBe("application/json");
-    
+    expect(response.headers.get('Content-Type')).toBe('application/json');
+
     const text = await response.text();
     const data = JSON.parse(text);
-    expect(data).toEqual({ error: "Authentication required" });
+    expect(data).toEqual({ error: 'Authentication required' });
   });
 
-  it("should send notifications when available", async () => {
+  it('should send notifications when available', async () => {
     const mockNotifications = [
       {
-        id: "1",
+        id: '1',
         userId: mockUserId,
-        type: "GENERAL",
-        title: "Test Notification",
-        message: "This is a test notification",
-        status: "UNREAD",
+        type: 'GENERAL',
+        title: 'Test Notification',
+        message: 'This is a test notification',
+        status: 'UNREAD',
         createdAt: new Date(),
       },
     ];
 
     (mockPrismaClient.notification.findMany as jest.Mock).mockResolvedValue(mockNotifications);
 
-    const request = new Request("http://localhost:3000/api/notifications/sse");
+    const request = new Request('http://localhost:3000/api/notifications/sse');
     const response = await GET(request);
 
     // Fast-forward past the immediate notification check
@@ -232,23 +233,23 @@ describe("SSE API Route", () => {
     expect(mockPrismaClient.notification.findMany).toHaveBeenCalledWith({
       where: {
         userId: mockUserId,
-        status: "UNREAD",
+        status: 'UNREAD',
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
-    
+
     // Cleanup
     jest.clearAllTimers();
   }, 10000);
 
-  it("should handle database errors gracefully", async () => {
+  it('should handle database errors gracefully', async () => {
     (mockPrismaClient.notification.findMany as jest.Mock).mockRejectedValue(
-      new Error("Database error")
+      new Error('Database error')
     );
 
-    const request = new Request("http://localhost:3000/api/notifications/sse");
+    const request = new Request('http://localhost:3000/api/notifications/sse');
     const response = await GET(request);
 
     // Fast-forward past the error
@@ -257,16 +258,16 @@ describe("SSE API Route", () => {
     // The connection should stay alive despite the error
     expect(response.status).toBe(200);
     expect(console.error).toHaveBeenCalledWith(
-      "Error checking for notifications:",
+      'Error checking for notifications:',
       expect.any(Error)
     );
-    
+
     // Cleanup
     jest.clearAllTimers();
   }, 10000);
 
-  it("should clean up resources on client disconnect", async () => {
-    const request = new Request("http://localhost:3000/api/notifications/sse");
+  it('should clean up resources on client disconnect', async () => {
+    const request = new Request('http://localhost:3000/api/notifications/sse');
     const response = await GET(request);
 
     // Simulate client disconnect
@@ -277,8 +278,8 @@ describe("SSE API Route", () => {
     jest.advanceTimersByTime(100);
 
     expect(response.status).toBe(200);
-    
+
     // Cleanup
     jest.clearAllTimers();
   }, 10000);
-}); 
+});
