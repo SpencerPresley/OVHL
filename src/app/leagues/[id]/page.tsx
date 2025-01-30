@@ -89,21 +89,32 @@ export default async function LeaguePage({
 }: {
   params: { id: string };
 }) {
+  console.log('LeaguePage: Starting to load', params);
+  
   const { id } = await Promise.resolve(params);
   const league = leagues[id];
 
+  console.log('LeaguePage: Found league:', league);
+
   if (!league) {
+    console.log('LeaguePage: League not found, redirecting to 404');
     notFound();
   }
 
   // Attempt to get authenticated user for chat functionality
+  console.log('LeaguePage: Getting auth token');
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
+  
+  console.log('LeaguePage: Token found:', !!token);
   
   let currentUser = null;
   if (token?.value) {
     try {
+      console.log('LeaguePage: Verifying token');
       const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
+      console.log('LeaguePage: Token verified, getting user');
+      
       currentUser = await prisma.user.findUnique({
         where: { id: decoded.id },
         select: {
@@ -111,11 +122,14 @@ export default async function LeaguePage({
           name: true,
         }
       });
+      console.log('LeaguePage: User found:', !!currentUser);
     } catch (error) {
-      // Token verification failed, user will see sign-in prompt
+      console.error('LeaguePage: Error verifying token:', error);
     }
   }
 
+  console.log('LeaguePage: Rendering page');
+  
   return (
     <div className="min-h-screen">
       <Nav />
