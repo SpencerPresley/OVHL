@@ -2,6 +2,26 @@ import { Nav } from "@/components/nav";
 import { LeagueNav } from "@/components/league-nav";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { default as dynamicImport } from 'next/dynamic';
+import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
+import { verify } from "jsonwebtoken";
+
+// Use nodejs runtime to avoid edge runtime issues with crypto
+export const runtime = 'nodejs';
+
+// Force dynamic to ensure real-time updates
+export const revalidate = 0;
+
+const prisma = new PrismaClient();
+
+/**
+ * Dynamic import of the chat component with loading state
+ * Using dynamic import to avoid SSR issues with WebSocket connections
+ */
+const ClientChat = dynamicImport(() => import('@/components/chatbox/client-wrapper'), {
+  loading: () => <div className="animate-pulse bg-gray-700 h-[400px] rounded-lg"></div>
+});
 
 /**
  * League configuration type
@@ -43,18 +63,20 @@ const leagues: Record<string, League> = {
   },
 };
 
-// Tell Next.js this is a dynamic page
-export const dynamic = "force-dynamic";
-
 /**
  * League Page Component
  *
- * A dynamic page that displays league-specific content.
- * Features:
+ * A dynamic page that displays league-specific content including:
  * - Dynamic banner with league-specific colors
  * - League logo display
  * - League name
- * - Responsive design
+ * - Real-time chat for authenticated users
+ * - News and stats sections
+ * 
+ * Authentication:
+ * - Chat is only available to authenticated users with a valid name
+ * - Non-authenticated users can still view the page but see a sign-in prompt for chat
+ * - Uses JWT token from cookies for authentication
  *
  * @component
  * @param {Object} props - Component props
@@ -72,6 +94,26 @@ export default async function LeaguePage({
 
   if (!league) {
     notFound();
+  }
+
+  // Attempt to get authenticated user for chat functionality
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token");
+  
+  let currentUser = null;
+  if (token?.value) {
+    try {
+      const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
+      currentUser = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          name: true,
+        }
+      });
+    } catch (error) {
+      // Token verification failed, user will see sign-in prompt
+    }
   }
 
   return (
@@ -97,7 +139,25 @@ export default async function LeaguePage({
       <LeagueNav leagueId={league.id} />
 
       {/* League Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Chat Section - Full width on larger screens */}
+        <div className="w-full">
+          {currentUser && currentUser.name ? (
+            <ClientChat 
+              leagueId={league.id} 
+              currentUser={{
+                id: currentUser.id,
+                name: currentUser.name
+              }} 
+            />
+          ) : (
+            <div className="bg-gray-800 rounded-lg p-6 text-center">
+              <p className="text-gray-400">Please sign in to participate in the chat.</p>
+            </div>
+          )}
+        </div>
+
+        {/* News and Stats Grid */}
         <div className="grid md:grid-cols-2 gap-8">
           <div className="card-gradient rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Recent News</h2>
