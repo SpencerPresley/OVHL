@@ -4,6 +4,9 @@ import * as Ably from 'ably';
 import { AblyProvider, useChannel, ChannelProvider } from 'ably/react';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import { Grid } from '@giphy/react-components';
+import { IGif } from '@giphy/js-types';
+import type { SyntheticEvent } from 'react';
 
 /**
  * Props for the Chat component
@@ -27,7 +30,15 @@ export interface ChatProps {
  */
 interface ChatMessage {
   /** The message text content */
-  text: string;
+  text?: string;
+  /** The GIF object if this is a GIF message */
+  gif?: {
+    id: string;
+    url: string;
+    title: string;
+    width: number;
+    height: number;
+  };
   /** The username of the message sender */
   username: string;
   /** The user ID of the message sender */
@@ -72,6 +83,8 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Subscribe to all messages on the channel
   const { channel } = useChannel(`league-chat:${leagueId}`, (message) => {
@@ -144,6 +157,43 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     setInputMessage('');
   };
 
+  const sendGif = (gif: IGif, e: SyntheticEvent<HTMLElement, Event>) => {
+    // Prevent default behavior and event propagation
+    e.preventDefault();
+    e.stopPropagation();
+
+    const message: ChatMessage = {
+      gif: {
+        id: gif.id.toString(),
+        url: gif.images.original.url,
+        title: gif.title,
+        width: gif.images.original.width,
+        height: gif.images.original.height,
+      },
+      username: currentUser.name,
+      userId: currentUser.id,
+      timestamp: Date.now(),
+    };
+
+    channel.publish('message', message);
+    setShowGifPicker(false);
+  };
+
+  // Custom fetch function for Giphy Grid
+  const fetchGifs = async (offset: number) => {
+    const params = new URLSearchParams({
+      offset: offset.toString(),
+      limit: '10',
+      ...(searchQuery && { q: searchQuery }),
+    });
+
+    const response = await fetch(`/api/giphy?${params}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch GIFs');
+    }
+    return response.json();
+  };
+
   return (
     <div className="flex flex-col h-[600px] lg:h-[400px]">
       <div className="flex justify-between items-center mb-4">
@@ -171,12 +221,48 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
                   {msg.username}
                 </Link>
                 <span className="text-gray-400">: </span>
-                <span className="text-white whitespace-pre-wrap break-words">{msg.text}</span>
+                {msg.text ? (
+                  <span className="text-white whitespace-pre-wrap break-words">{msg.text}</span>
+                ) : msg.gif ? (
+                  <div className="mt-2">
+                    <img
+                      src={msg.gif.url}
+                      alt={msg.gif.title}
+                      className="max-w-full rounded-lg"
+                      style={{
+                        maxHeight: '200px',
+                        width: 'auto',
+                      }}
+                    />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {showGifPicker && (
+        <div className="mb-4 bg-gray-800 rounded-lg p-4 h-[300px] overflow-y-auto">
+          <div className="mb-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search GIFs..."
+              className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <Grid
+            key={searchQuery}
+            onGifClick={sendGif}
+            fetchGifs={fetchGifs}
+            width={window.innerWidth - 100}
+            columns={3}
+            gutter={6}
+          />
+        </div>
+      )}
 
       <form onSubmit={sendMessage} className="flex gap-2">
         <input
@@ -186,6 +272,13 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
           placeholder="Type a message... 😊"
           className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-[16px]"
         />
+        <button
+          type="button"
+          onClick={() => setShowGifPicker(!showGifPicker)}
+          className="bg-gray-700 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+        >
+          GIF
+        </button>
         <button
           type="submit"
           className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
