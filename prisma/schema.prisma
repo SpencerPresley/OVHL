@@ -33,6 +33,13 @@ model User {
   updatedAt           DateTime  @updatedAt
   player              Player?
   notifications       Notification[]
+  forumPosts          ForumPost[]
+  forumComments       ForumComment[]
+  forumReactions      ForumReaction[]
+  forumFollowing      ForumFollower[]
+  forumSubscriptions  ForumPostSubscription[]
+
+  @@map("User")
 }
 
 model Player {
@@ -304,4 +311,107 @@ model Notification {
   @@index([userId])
   @@index([status])
   @@index([type])
+}
+
+// --------- Forum System ---------
+enum ForumPostStatus {
+  PUBLISHED
+  HIDDEN
+  DELETED
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+  LAUGH
+  THINKING
+  HEART
+}
+
+model ForumPost {
+  id          String      @id @default(cuid())
+  title       String
+  content     String
+  status      ForumPostStatus @default(PUBLISHED)
+  authorId    String      @map("author_id")
+  leagueId    String      @map("league_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  author      User        @relation(fields: [authorId], references: [id])
+  comments    ForumComment[]
+  reactions   ForumReaction[]
+  followers   ForumFollower[]
+  subscribers ForumPostSubscription[]
+
+  @@index([authorId])
+  @@index([leagueId])
+  @@index([status])
+  @@map("forum_posts")
+}
+
+model ForumReaction {
+  id          String       @id @default(cuid())
+  type        ReactionType
+  userId      String       @map("user_id")
+  postId      String?      @map("post_id")
+  commentId   String?      @map("comment_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  user        User         @relation(fields: [userId], references: [id])
+  post        ForumPost?   @relation(fields: [postId], references: [id])
+  comment     ForumComment? @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, postId, commentId, type])
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("forum_reactions")
+}
+
+model ForumFollower {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  postId      String    @map("post_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  user        User      @relation(fields: [userId], references: [id])
+  post        ForumPost @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("forum_followers")
+}
+
+model ForumPostSubscription {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  post      ForumPost @relation(fields: [postId], references: [id])
+  postId    String
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("forum_post_subscriptions")
+}
+
+model ForumComment {
+  id            String          @id @default(cuid())
+  content       String
+  status        ForumPostStatus @default(PUBLISHED)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  author        User      @relation(fields: [authorId], references: [id])
+  authorId      String    @map("author_id")
+  post          ForumPost @relation(fields: [postId], references: [id])
+  postId        String    @map("post_id")
+  quotedComment ForumComment? @relation("QuotedComment", fields: [quotedCommentId], references: [id])
+  quotedCommentId String?  @map("quoted_comment_id")
+  quotedBy      ForumComment[] @relation("QuotedComment")
+  reactions     ForumReaction[]
+  gif           Json?      // For storing GIF data
+
+  @@index([authorId])
+  @@index([postId])
+  @@map("forum_comments")
 }

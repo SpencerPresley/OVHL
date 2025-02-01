@@ -30,6 +30,7 @@ export function LeagueNav({ leagueId }: LeagueNavProps) {
     { href: `/leagues/${leagueId}/teams`, label: 'Teams' },
     { href: `/leagues/${leagueId}/schedule`, label: 'Schedule' },
     { href: `/leagues/${leagueId}/stats`, label: 'Stats' },
+    { href: `/leagues/${leagueId}/forum`, label: 'Forum' },
   ];
 
   return (
