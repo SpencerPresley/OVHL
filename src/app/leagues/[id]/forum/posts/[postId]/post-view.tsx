@@ -317,15 +317,12 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
             height={80}
             className="object-contain"
           />
-          <div>
-            <Link
-              href={`/leagues/${league.id}/forum`}
-              className="text-sm text-gray-300 hover:text-white transition-colors"
-            >
-              {league.name} Forum
-            </Link>
-            <h1 className="text-4xl font-bold text-white mt-1">{post.title}</h1>
-          </div>
+          <Link
+            href={`/leagues/${league.id}/forum`}
+            className="text-sm text-gray-300 hover:text-white transition-colors"
+          >
+            {league.name} Forum
+          </Link>
         </div>
       </div>
 
@@ -336,34 +333,32 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
         <div className="space-y-6">
           {/* Post Card */}
           <Card className="card-gradient">
-            <CardHeader>
-              <CardTitle>
-                <h1 className="text-2xl font-bold">{post.title}</h1>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/users/${post.author.id}`}
-                      className="text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      {post.author.name}
-                    </Link>
-                    <span className="text-sm text-gray-400">
-                      {formatDistanceToNow(post.createdAt, {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-                  {currentUser?.isAdmin && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete()}
-                    >
-                      Delete Post
-                    </Button>
-                  )}
+            <CardHeader className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/users/${post.author.id}`}
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {post.author.name}
+                  </Link>
+                  <span className="text-sm text-gray-400">
+                    {formatDistanceToNow(post.createdAt, {
+                      addSuffix: true,
+                    })}
+                  </span>
                 </div>
-              </CardTitle>
+                {currentUser?.isAdmin && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete()}
+                  >
+                    Delete Post
+                  </Button>
+                )}
+              </div>
+              <h1 className="text-2xl font-bold">{post.title}</h1>
             </CardHeader>
             <CardContent>
               <div className="mb-6">

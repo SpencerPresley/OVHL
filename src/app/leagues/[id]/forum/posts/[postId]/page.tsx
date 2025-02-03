@@ -4,6 +4,78 @@ import { PostView } from './post-view';
 import { ForumPostStatus, ReactionType } from '@prisma/client';
 import type { ForumPost, ForumComment, GifData } from '@/types/forum';
 
+interface PrismaGif {
+  id: string;
+  title: string;
+  images: {
+    original: {
+      url: string;
+      width: number;
+      height: number;
+    };
+  };
+}
+
+interface PrismaComment {
+  id: string;
+  content: string | null;
+  gif: PrismaGif | null;
+  createdAt: Date;
+  updatedAt: Date;
+  status: ForumPostStatus;
+  authorId: string;
+  postId: string;
+  quotedCommentId: string | null;
+  author: {
+    id: string;
+    name: string | null;
+    username: string;
+  };
+  quotedComment: PrismaComment | null;
+  reactions: Array<{
+    id: string;
+    type: ReactionType;
+    createdAt: Date;
+    user: {
+      id: string;
+      name: string | null;
+      username: string;
+    };
+    postId: string | null;
+    commentId: string | null;
+  }>;
+}
+
+interface PrismaPost {
+  id: string;
+  title: string;
+  content: string | null;
+  gif: PrismaGif | null;
+  createdAt: Date;
+  updatedAt: Date;
+  status: ForumPostStatus;
+  authorId: string;
+  leagueId: string;
+  author: {
+    id: string;
+    name: string | null;
+    username: string;
+  };
+  comments: PrismaComment[];
+  reactions: Array<{
+    id: string;
+    type: ReactionType;
+    createdAt: Date;
+    user: {
+      id: string;
+      name: string | null;
+      username: string;
+    };
+    postId: string | null;
+    commentId: string | null;
+  }>;
+}
+
 const leagues = {
   nhl: {
     id: 'nhl',
@@ -31,16 +103,20 @@ const leagues = {
   },
 };
 
-function transformComment(comment: any, includeQuoted = true): ForumComment {
+function transformComment(comment: PrismaComment, includeQuoted = true): ForumComment {
   const base = {
     id: comment.id,
-    content: comment.content,
+    content: comment.content || '',
     gif: comment.gif ? {
       id: comment.gif.id,
-      url: comment.gif.url,
       title: comment.gif.title,
-      width: comment.gif.width,
-      height: comment.gif.height,
+      images: {
+        original: {
+          url: comment.gif.images.original.url,
+          width: comment.gif.images.original.width,
+          height: comment.gif.images.original.height
+        }
+      }
     } : null,
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
@@ -53,19 +129,19 @@ function transformComment(comment: any, includeQuoted = true): ForumComment {
       name: comment.author.name || comment.author.username,
       username: comment.author.username,
     },
-    reactions: comment.reactions?.map((reaction: any) => ({
+    reactions: comment.reactions.map(reaction => ({
       id: reaction.id,
       type: reaction.type as unknown as ReactionType,
       createdAt: reaction.createdAt,
       userId: reaction.user.id,
-      postId: reaction.postId,
-      commentId: reaction.commentId,
+      postId: reaction.postId || undefined,
+      commentId: reaction.commentId || undefined,
       user: {
         id: reaction.user.id,
         name: reaction.user.name || reaction.user.username,
         username: reaction.user.username,
       },
-    })) || [],
+    })),
   };
 
   return {
@@ -89,64 +165,31 @@ export default async function PostPage({ params }: { params: { id: string; postI
     const post = await prisma.forumPost.findUnique({
       where: {
         id: postId,
-        status: 'PUBLISHED',
       },
       include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-          },
-        },
+        author: true,
         comments: {
-          where: { status: 'PUBLISHED' },
-          orderBy: { createdAt: 'asc' },
           include: {
-            author: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
+            author: true,
             quotedComment: {
               include: {
-                author: {
-                  select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                  },
-                },
+                author: true,
               },
             },
             reactions: {
               include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                  },
-                },
+                user: true,
               },
             },
           },
         },
         reactions: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
+            user: true,
           },
         },
       },
-    });
+    }) as unknown as PrismaPost | null;
 
     if (!post) {
       notFound();
@@ -157,7 +200,17 @@ export default async function PostPage({ params }: { params: { id: string; postI
       id: post.id,
       title: post.title,
       content: post.content || '',
-      gif: post.gif as GifData | null,
+      gif: post.gif ? {
+        id: post.gif.id,
+        title: post.gif.title,
+        images: {
+          original: {
+            url: post.gif.images.original.url,
+            width: post.gif.images.original.width,
+            height: post.gif.images.original.height
+          }
+        }
+      } : null,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       status: post.status,
@@ -181,53 +234,7 @@ export default async function PostPage({ params }: { params: { id: string; postI
           username: reaction.user.username,
         },
       })),
-      comments: post.comments.map(comment => ({
-        id: comment.id,
-        content: comment.content || '',
-        gif: comment.gif as GifData | null,
-        createdAt: comment.createdAt,
-        updatedAt: comment.updatedAt,
-        status: comment.status,
-        authorId: comment.authorId,
-        postId: comment.postId,
-        quotedCommentId: comment.quotedCommentId,
-        author: {
-          id: comment.author.id,
-          name: comment.author.name || comment.author.username,
-          username: comment.author.username,
-        },
-        quotedComment: comment.quotedComment ? {
-          id: comment.quotedComment.id,
-          content: comment.quotedComment.content || '',
-          gif: comment.quotedComment.gif as GifData | null,
-          createdAt: comment.quotedComment.createdAt,
-          updatedAt: comment.quotedComment.updatedAt,
-          status: comment.quotedComment.status,
-          authorId: comment.quotedComment.authorId,
-          postId: comment.quotedComment.postId,
-          quotedCommentId: comment.quotedComment.quotedCommentId,
-          author: {
-            id: comment.quotedComment.author.id,
-            name: comment.quotedComment.author.name || comment.quotedComment.author.username,
-            username: comment.quotedComment.author.username,
-          },
-          quotedComment: null,
-          reactions: [],
-        } : null,
-        reactions: comment.reactions.map(reaction => ({
-          id: reaction.id,
-          type: reaction.type,
-          createdAt: reaction.createdAt,
-          userId: reaction.user.id,
-          postId: reaction.postId || undefined,
-          commentId: reaction.commentId || undefined,
-          user: {
-            id: reaction.user.id,
-            name: reaction.user.name || reaction.user.username,
-            username: reaction.user.username,
-          },
-        })),
-      })),
+      comments: post.comments.map(comment => transformComment(comment)),
     };
 
     return (

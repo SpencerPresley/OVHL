@@ -8,9 +8,10 @@ export async function GET(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
+    const { id, postId } = await params;
     const post = await prisma.forumPost.findUnique({
       where: {
-        id: params.postId,
+        id: postId,
         status: 'PUBLISHED',
       },
       include: {

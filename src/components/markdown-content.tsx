@@ -65,7 +65,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
 
   return (
     <div 
-      className="prose dark:prose-invert max-w-none whitespace-pre-wrap"
+      className="markdown-content whitespace-pre-wrap"
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
   );

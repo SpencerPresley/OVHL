@@ -78,6 +78,7 @@ body {
     --border: 223 47% 11%;
     --input: 223 47% 11%;
     --ring: 0 0% 83.1%;
+    --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -105,5 +106,19 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .markdown-content ul {
+    @apply list-disc ml-5;
+  }
+
+  .markdown-content ol {
+    @apply list-decimal ml-5;
+  }
+
+  .markdown-content code:not(.hljs) {
+    @apply bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
   }
 }
