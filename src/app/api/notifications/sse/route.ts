@@ -6,18 +6,16 @@ import { verify } from 'jsonwebtoken';
 const encoder = new TextEncoder();
 
 export async function GET(request: Request) {
+  const encoder = new TextEncoder();
+  const controller = new TransformStream();
+  const writer = controller.writable.getWriter();
+
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
 
     if (!token) {
-      const body = JSON.stringify({ error: 'Authentication required' });
-      return new Response(body, {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      throw new Error('Authentication required');
     }
 
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
@@ -25,37 +23,22 @@ export async function GET(request: Request) {
     };
 
     const stream = new ReadableStream({
-      start: async (controller) => {
-        // Send initial connection message
-        const message = encoder.encode(
-          `data: ${JSON.stringify({ type: 'connection', status: 'connected' })}\n\n`
-        );
-        controller.enqueue(message);
+      async start(controller) {
+        let isConnectionClosed = false;
 
-        // Check for notifications immediately
-        try {
-          const notifications = await prisma.notification.findMany({
-            where: {
-              userId: decoded.id,
-              status: NotificationStatus.UNREAD,
-            },
-            orderBy: {
-              createdAt: 'desc',
-            },
-          });
+        // Handle client disconnection
+        request.signal.addEventListener('abort', () => {
+          isConnectionClosed = true;
+          controller.close();
+        });
 
-          if (notifications.length > 0) {
-            const data = encoder.encode(
-              `data: ${JSON.stringify({ type: 'notifications', data: notifications })}\n\n`
-            );
-            controller.enqueue(data);
+        // Keep connection alive with periodic pings
+        const pingInterval = setInterval(async () => {
+          if (isConnectionClosed) {
+            clearInterval(pingInterval);
+            return;
           }
-        } catch (error) {
-          console.error('Error checking for notifications:', error);
-        }
 
-        // Set up interval for checking notifications
-        const timer = setInterval(async () => {
           try {
             // Send ping to keep connection alive
             controller.enqueue(encoder.encode(': ping\n\n'));
@@ -64,7 +47,7 @@ export async function GET(request: Request) {
             const notifications = await prisma.notification.findMany({
               where: {
                 userId: decoded.id,
-                status: NotificationStatus.UNREAD,
+                status: 'UNREAD',
               },
               orderBy: {
                 createdAt: 'desc',
@@ -72,21 +55,27 @@ export async function GET(request: Request) {
             });
 
             if (notifications.length > 0) {
-              const data = encoder.encode(
-                `data: ${JSON.stringify({ type: 'notifications', data: notifications })}\n\n`
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ notifications })}\n\n`
+                )
               );
-              controller.enqueue(data);
             }
           } catch (error) {
             console.error('Error checking for notifications:', error);
-            // Don't throw error here, just log it to keep the connection alive
+            if (!isConnectionClosed) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ error: 'Error checking notifications' })}\n\n`
+                )
+              );
+            }
           }
-        }, 15000).unref(); // Unref the timer so it doesn't keep the process alive
+        }, 5000);
 
-        // Handle client disconnect
+        // Clean up on connection close
         request.signal.addEventListener('abort', () => {
-          clearInterval(timer);
-          controller.close();
+          clearInterval(pingInterval);
         });
       },
     });

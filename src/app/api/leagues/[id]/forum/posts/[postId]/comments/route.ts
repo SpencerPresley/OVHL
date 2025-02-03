@@ -47,6 +47,7 @@ export async function POST(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
+    const { id, postId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) {
@@ -64,7 +65,7 @@ export async function POST(
       );
     }
 
-    const { content, quotedCommentId, gif } = await request.json();
+    const { content = '', quotedCommentId, gif } = await request.json();
 
     if (!content && !gif) {
       return NextResponse.json(
@@ -76,7 +77,7 @@ export async function POST(
     // Check if post exists and is published
     const post = await prisma.forumPost.findUnique({
       where: {
-        id: params.postId,
+        id: postId,
       },
       include: {
         author: true,
@@ -89,23 +90,16 @@ export async function POST(
 
     // Create the comment with proper type for gif
     const commentData: Prisma.ForumCommentCreateInput = {
-      content,
+      content: content || '',  // Ensure content is never undefined
       author: { connect: { id: user.id } },
-      post: { connect: { id: params.postId } },
+      post: { connect: { id: postId } },
       ...(quotedCommentId && { quotedComment: { connect: { id: quotedCommentId } } }),
+      ...(gif && { gif }),  // Store the GIF data directly as JSON
     };
 
     const comment = await prisma.forumComment.create({
       data: commentData,
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        status: true,
-        authorId: true,
-        postId: true,
-        quotedCommentId: true,
+      include: {
         author: {
           select: {
             id: true,
@@ -114,15 +108,19 @@ export async function POST(
           },
         },
         quotedComment: {
-          select: {
-            id: true,
-            content: true,
-            createdAt: true,
-            updatedAt: true,
-            status: true,
-            authorId: true,
-            postId: true,
+          include: {
             author: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+              },
+            },
+          },
+        },
+        reactions: {
+          include: {
+            user: {
               select: {
                 id: true,
                 name: true,
@@ -139,12 +137,12 @@ export async function POST(
       where: {
         userId_postId: {
           userId: user.id,
-          postId: params.postId,
+          postId: postId,
         },
       },
       create: {
         userId: user.id,
-        postId: params.postId,
+        postId: postId,
       },
       update: {},
     });
@@ -152,7 +150,7 @@ export async function POST(
     // Create notifications for subscribers
     const subscribers = await prisma.forumPostSubscription.findMany({
       where: {
-        postId: params.postId,
+        postId: postId,
       },
       include: {
         user: true,
@@ -168,11 +166,11 @@ export async function POST(
           title: 'New Comment',
           message: `${user.name} commented on "${post.title}"`,
           status: NotificationStatus.UNREAD,
-          link: `/leagues/${params.id}/forum/posts/${params.postId}#comment-${comment.id}`,
+          link: `/leagues/${id}/forum/posts/${postId}#comment-${comment.id}`,
           metadata: {
-            postId: params.postId,
+            postId: postId,
             commentId: comment.id,
-            leagueId: params.id,
+            leagueId: id,
           },
         };
         return prisma.notification.create({ data: notificationData });
@@ -186,11 +184,11 @@ export async function POST(
         title: 'New Comment on Your Post',
         message: `${user.name} commented on your post "${post.title}"`,
         status: NotificationStatus.UNREAD,
-        link: `/leagues/${params.id}/forum/posts/${params.postId}#comment-${comment.id}`,
+        link: `/leagues/${id}/forum/posts/${postId}#comment-${comment.id}`,
         metadata: {
-          postId: params.postId,
+          postId: postId,
           commentId: comment.id,
-          leagueId: params.id,
+          leagueId: id,
         },
       };
       notificationPromises.push(prisma.notification.create({ data: authorNotificationData }));

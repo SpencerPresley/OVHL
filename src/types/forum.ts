@@ -1,48 +1,43 @@
-export enum ReactionType {
-  LIKE = 'LIKE',
-  DISLIKE = 'DISLIKE',
-  LAUGH = 'LAUGH',
-  THINKING = 'THINKING',
-  HEART = 'HEART',
-}
+import { ForumPostStatus as PrismaForumPostStatus, ReactionType as PrismaReactionType } from '@prisma/client';
 
-export enum ForumPostStatus {
-  PUBLISHED = 'PUBLISHED',
-  HIDDEN = 'HIDDEN',
-  DELETED = 'DELETED',
-}
+// Re-export the enums as values and types
+export { PrismaForumPostStatus as ForumPostStatus, PrismaReactionType as ReactionType };
 
-export interface ForumGif {
+export interface GifData {
   id: string;
-  url: string;
   title: string;
-  width: number;
-  height: number;
+  images: {
+    original: {
+      url: string;
+      width: number;
+      height: number;
+    };
+  };
 }
 
 export interface ForumUser {
   id: string;
-  name: string | null;
+  name: string;
   username: string;
 }
 
 export interface ForumReaction {
   id: string;
-  type: ReactionType;
+  type: PrismaReactionType;
   createdAt: Date;
   userId: string;
-  postId: string | null;
-  commentId: string | null;
+  postId?: string;
+  commentId?: string;
   user: ForumUser;
 }
 
 export interface ForumComment {
   id: string;
-  content: string | null;
-  gif: ForumGif | null;
+  content: string;
+  gif: GifData | null;
   createdAt: Date;
   updatedAt: Date;
-  status: ForumPostStatus;
+  status: PrismaForumPostStatus;
   authorId: string;
   postId: string;
   quotedCommentId: string | null;
@@ -54,11 +49,11 @@ export interface ForumComment {
 export interface ForumPost {
   id: string;
   title: string;
-  content: string | null;
-  gif: ForumGif | null;
+  content: string;
+  gif: GifData | null;
   createdAt: Date;
   updatedAt: Date;
-  status: ForumPostStatus;
+  status: PrismaForumPostStatus;
   authorId: string;
   leagueId: string;
   author: ForumUser;

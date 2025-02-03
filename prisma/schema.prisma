@@ -342,6 +342,7 @@ model ForumPost {
   reactions   ForumReaction[]
   followers   ForumFollower[]
   subscribers ForumPostSubscription[]
+  gif         Json?       // { id: string, url: string, title: string, width: string, height: string }
 
   @@index([authorId])
   @@index([leagueId])
@@ -409,7 +410,7 @@ model ForumComment {
   quotedCommentId String?  @map("quoted_comment_id")
   quotedBy      ForumComment[] @relation("QuotedComment")
   reactions     ForumReaction[]
-  gif           Json?      // For storing GIF data
+  gif           Json?       // { id: string, url: string, title: string, width: string, height: string }
 
   @@index([authorId])
   @@index([postId])

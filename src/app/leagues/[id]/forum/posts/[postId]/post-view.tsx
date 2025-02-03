@@ -29,6 +29,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { MarkdownContent } from '@/components/markdown-content';
+import { MarkdownEditor } from '@/components/markdown-editor';
 
 interface League {
   id: string;
@@ -176,6 +178,27 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
       return;
     }
 
+    if (!gif.images?.original?.url) {
+      toast({
+        title: 'Error',
+        description: 'Invalid GIF data. Please try another GIF.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const gifData = {
+      id: gif.id,
+      images: {
+        original: {
+          url: gif.images.original.url,
+          width: gif.images.original.width,
+          height: gif.images.original.height,
+        },
+      },
+      title: gif.title || 'GIF',
+    };
+
     setIsLoading(true);
     try {
       const response = await fetch(`/api/leagues/${league.id}/forum/posts/${post.id}/comments`, {
@@ -184,13 +207,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          gif: {
-            id: gif.id,
-            url: gif.images.original.url,
-            title: gif.title,
-            width: gif.images.original.width,
-            height: gif.images.original.height,
-          },
+          gif: gifData,
           authorId: currentUser.id,
           quotedCommentId: quotedComment?.id,
         }),
@@ -276,6 +293,16 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
     return text.slice(0, maxLength) + '...';
   };
 
+  const renderQuotedContent = (content: string | null) => {
+    if (!content) return null;
+    return <MarkdownContent content={content} />;
+  };
+
+  const renderTruncatedContent = (content: string | null, length?: number) => {
+    if (!content) return null;
+    return <MarkdownContent content={truncateText(content, length)} />;
+  };
+
   return (
     <div className="min-h-screen">
       <Nav />
@@ -306,46 +333,48 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
 
       {/* Post Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Main Post Card */}
-        <div className="bg-gray-900/50 rounded-lg p-6 backdrop-blur-sm">
-          <Card className="card-gradient mb-6">
+        <div className="space-y-6">
+          {/* Post Card */}
+          <Card className="card-gradient">
             <CardHeader>
-              <CardTitle className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/users/${post.author.id}`}
-                    className="text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    {post.author.name}
-                  </Link>
-                  <span className="text-sm text-gray-400">
-                    {formatDistanceToNow(post.createdAt, { addSuffix: true })}
-                  </span>
+              <CardTitle>
+                <h1 className="text-2xl font-bold">{post.title}</h1>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/users/${post.author.id}`}
+                      className="text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      {post.author.name}
+                    </Link>
+                    <span className="text-sm text-gray-400">
+                      {formatDistanceToNow(post.createdAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  {currentUser?.isAdmin && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete()}
+                    >
+                      Delete Post
+                    </Button>
+                  )}
                 </div>
-                {currentUser?.isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete()}
-                    className="ml-4"
-                  >
-                    Delete Post
-                  </Button>
-                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
-                className="prose prose-invert max-w-none mb-6"
-              >
-                {post.content}
+              <div className="mb-6">
+                {post.content && <MarkdownContent content={post.content} />}
                 {post.gif && (
                   <div className="mt-4">
                     <Image
-                      src={post.gif.url}
-                      alt={post.gif.title}
-                      width={post.gif.width}
-                      height={post.gif.height}
+                      src={post.gif.images?.original?.url || ''}
+                      alt={post.gif.title || 'GIF'}
+                      width={Number(post.gif.images?.original?.width) || 500}
+                      height={Number(post.gif.images?.original?.height) || 500}
                       className="max-w-full rounded-lg"
                       style={{ maxHeight: '400px', width: 'auto', height: 'auto' }}
                     />
@@ -375,7 +404,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
             </CardContent>
           </Card>
 
-          {/* Comments Section with visual connection to post */}
+          {/* Comments Section */}
           <div className="ml-4 pl-6 border-l-2 border-gray-800">
             <h2 className="text-xl font-semibold text-gray-200 mb-4 flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
@@ -430,13 +459,13 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                                 </Button>
                               )}
                             </div>
-                            <p className="text-gray-300">
-                              {comment.quotedComment.content && (
+                            <div className="text-gray-300">
+                              {comment.quotedComment?.content && (
                                 expandedQuotes.has(comment.id) 
-                                  ? comment.quotedComment.content
-                                  : truncateText(comment.quotedComment.content)
+                                  ? renderQuotedContent(comment.quotedComment.content)
+                                  : renderTruncatedContent(comment.quotedComment.content)
                               )}
-                            </p>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -475,17 +504,15 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                           )}
                         </div>
                       </div>
-                      <div 
-                        className="prose prose-invert max-w-none mb-4 relative"
-                      >
-                        {comment.content}
+                      <div className="mb-4">
+                        {comment.content && <MarkdownContent content={comment.content} />}
                         {comment.gif && (
                           <div className="mt-4">
                             <Image
-                              src={comment.gif.url}
-                              alt={comment.gif.title}
-                              width={comment.gif.width}
-                              height={comment.gif.height}
+                              src={comment.gif.images?.original?.url || ''}
+                              alt={comment.gif.title || 'GIF'}
+                              width={Number(comment.gif.images?.original?.width) || 500}
+                              height={Number(comment.gif.images?.original?.height) || 500}
                               className="max-w-full rounded-lg"
                               style={{ maxHeight: '300px', width: 'auto', height: 'auto' }}
                             />
@@ -521,7 +548,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
             </div>
           </div>
 
-          {/* Comment Form - now part of the main container */}
+          {/* Comment Form */}
           <div className="mt-6 pt-6 border-t-2 border-gray-800">
             <Card className="card-gradient">
               <CardContent className="p-4">
@@ -539,18 +566,16 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                         Cancel Quote
                       </Button>
                     </div>
-                    <p className="text-gray-300">
-                      {truncateText(quotedComment.content, 300)}
-                    </p>
+                    <div className="text-gray-300">
+                      {quotedComment?.content && renderTruncatedContent(quotedComment.content, 300)}
+                    </div>
                   </div>
                 )}
                 <form onSubmit={handleComment} className="space-y-4">
-                  <Textarea
-                    placeholder="Write your comment..."
+                  <MarkdownEditor
                     value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    disabled={isLoading}
-                    className="min-h-[100px]"
+                    onChange={setComment}
+                    placeholder="Write your comment... You can use markdown for formatting."
                   />
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2">

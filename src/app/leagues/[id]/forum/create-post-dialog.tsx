@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { MarkdownEditor } from '@/components/markdown-editor';
 
 interface CreatePostDialogProps {
   leagueId: string;
@@ -79,11 +79,11 @@ export function CreatePostDialog({
       <DialogTrigger asChild>
         {trigger || <Button variant="secondary">Create New Post</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Create New Post</DialogTitle>
           <DialogDescription>
-            Create a new post in the forum. All fields are required.
+            Create a new post in the forum. All fields are required. You can use markdown to format your post.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,12 +96,10 @@ export function CreatePostDialog({
             />
           </div>
           <div className="space-y-2">
-            <Textarea
-              placeholder="Write your post content here..."
+            <MarkdownEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              disabled={isLoading}
-              className="min-h-[200px]"
+              onChange={setContent}
+              placeholder="Write your post content here... You can use markdown for formatting."
             />
           </div>
           <div className="flex justify-end gap-4">

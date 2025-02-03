@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
-import { PrismaClient, ForumPostStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PostView } from './post-view';
-import type { ForumPost, ForumComment, ReactionType } from '@/types/forum';
+import { ForumPostStatus, ReactionType } from '@prisma/client';
+import type { ForumPost, ForumComment, GifData } from '@/types/forum';
 
 const leagues = {
   nhl: {
@@ -34,7 +35,13 @@ function transformComment(comment: any, includeQuoted = true): ForumComment {
   const base = {
     id: comment.id,
     content: comment.content,
-    gif: null,
+    gif: comment.gif ? {
+      id: comment.gif.id,
+      url: comment.gif.url,
+      title: comment.gif.title,
+      width: comment.gif.width,
+      height: comment.gif.height,
+    } : null,
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
     status: comment.status as unknown as import('@/types/forum').ForumPostStatus,
@@ -70,109 +77,71 @@ function transformComment(comment: any, includeQuoted = true): ForumComment {
 }
 
 export default async function PostPage({ params }: { params: { id: string; postId: string } }) {
-  const league = leagues[params.id as keyof typeof leagues];
-  if (!league) {
-    notFound();
-  }
-
   const prisma = new PrismaClient();
 
   try {
-    const post = await prisma.forumPost.findFirst({
+    const { id, postId } = await params;
+    const league = leagues[id as keyof typeof leagues];
+    if (!league) {
+      notFound();
+    }
+
+    const post = await prisma.forumPost.findUnique({
       where: {
-        id: params.postId,
-        status: ForumPostStatus.PUBLISHED,
+        id: postId,
+        status: 'PUBLISHED',
       },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        status: true,
-        authorId: true,
-        leagueId: true,
-        createdAt: true,
-        updatedAt: true,
-        author: { 
-          select: { 
-            id: true, 
-            name: true, 
-            username: true 
-          } 
-        },
-        comments: {
-          where: { 
-            status: ForumPostStatus.PUBLISHED 
-          },
-          orderBy: { 
-            createdAt: 'asc' 
-          },
+      include: {
+        author: {
           select: {
             id: true,
-            content: true,
-            createdAt: true,
-            updatedAt: true,
-            status: true,
-            authorId: true,
-            postId: true,
-            quotedCommentId: true,
-            author: { 
-              select: { 
-                id: true, 
-                name: true, 
-                username: true 
-              } 
-            },
-            quotedComment: {
+            name: true,
+            username: true,
+          },
+        },
+        comments: {
+          where: { status: 'PUBLISHED' },
+          orderBy: { createdAt: 'asc' },
+          include: {
+            author: {
               select: {
                 id: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-                status: true,
-                authorId: true,
-                postId: true,
-                author: { 
-                  select: { 
-                    id: true, 
-                    name: true, 
-                    username: true 
-                  } 
+                name: true,
+                username: true,
+              },
+            },
+            quotedComment: {
+              include: {
+                author: {
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                  },
                 },
               },
             },
             reactions: {
-              select: {
-                id: true,
-                type: true,
-                createdAt: true,
-                userId: true,
-                postId: true,
-                commentId: true,
-                user: { 
-                  select: { 
-                    id: true, 
-                    name: true, 
-                    username: true 
-                  } 
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                  },
                 },
               },
             },
           },
         },
         reactions: {
-          select: {
-            id: true,
-            type: true,
-            createdAt: true,
-            userId: true,
-            postId: true,
-            commentId: true,
-            user: { 
-              select: { 
-                id: true, 
-                name: true, 
-                username: true 
-              } 
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+              },
             },
           },
         },
@@ -187,11 +156,11 @@ export default async function PostPage({ params }: { params: { id: string; postI
     const transformedPost: ForumPost = {
       id: post.id,
       title: post.title,
-      content: post.content,
-      gif: null,
+      content: post.content || '',
+      gif: post.gif as GifData | null,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      status: post.status as unknown as import('@/types/forum').ForumPostStatus,
+      status: post.status,
       authorId: post.authorId,
       leagueId: post.leagueId,
       author: {
@@ -201,18 +170,64 @@ export default async function PostPage({ params }: { params: { id: string; postI
       },
       reactions: post.reactions.map(reaction => ({
         id: reaction.id,
-        type: reaction.type as unknown as ReactionType,
+        type: reaction.type,
         createdAt: reaction.createdAt,
         userId: reaction.user.id,
-        postId: reaction.postId,
-        commentId: reaction.commentId,
+        postId: reaction.postId || undefined,
+        commentId: reaction.commentId || undefined,
         user: {
           id: reaction.user.id,
           name: reaction.user.name || reaction.user.username,
           username: reaction.user.username,
         },
       })),
-      comments: post.comments.map(comment => transformComment(comment)),
+      comments: post.comments.map(comment => ({
+        id: comment.id,
+        content: comment.content || '',
+        gif: comment.gif as GifData | null,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt,
+        status: comment.status,
+        authorId: comment.authorId,
+        postId: comment.postId,
+        quotedCommentId: comment.quotedCommentId,
+        author: {
+          id: comment.author.id,
+          name: comment.author.name || comment.author.username,
+          username: comment.author.username,
+        },
+        quotedComment: comment.quotedComment ? {
+          id: comment.quotedComment.id,
+          content: comment.quotedComment.content || '',
+          gif: comment.quotedComment.gif as GifData | null,
+          createdAt: comment.quotedComment.createdAt,
+          updatedAt: comment.quotedComment.updatedAt,
+          status: comment.quotedComment.status,
+          authorId: comment.quotedComment.authorId,
+          postId: comment.quotedComment.postId,
+          quotedCommentId: comment.quotedComment.quotedCommentId,
+          author: {
+            id: comment.quotedComment.author.id,
+            name: comment.quotedComment.author.name || comment.quotedComment.author.username,
+            username: comment.quotedComment.author.username,
+          },
+          quotedComment: null,
+          reactions: [],
+        } : null,
+        reactions: comment.reactions.map(reaction => ({
+          id: reaction.id,
+          type: reaction.type,
+          createdAt: reaction.createdAt,
+          userId: reaction.user.id,
+          postId: reaction.postId || undefined,
+          commentId: reaction.commentId || undefined,
+          user: {
+            id: reaction.user.id,
+            name: reaction.user.name || reaction.user.username,
+            username: reaction.user.username,
+          },
+        })),
+      })),
     };
 
     return (
