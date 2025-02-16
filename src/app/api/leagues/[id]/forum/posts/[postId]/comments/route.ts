@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, NotificationType, NotificationStatus, Prisma, ForumPostStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  NotificationType,
+  NotificationStatus,
+  Prisma,
+  ForumPostStatus,
+} from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 
@@ -51,27 +57,18 @@ export async function POST(
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
     if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const user = await verifyAuth(token);
     if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { content = '', quotedCommentId, gif } = await request.json();
 
     if (!content && !gif) {
-      return NextResponse.json(
-        { error: 'Content or GIF is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Content or GIF is required' }, { status: 400 });
     }
 
     // Check if post exists and is published
@@ -90,11 +87,11 @@ export async function POST(
 
     // Create the comment with proper type for gif
     const commentData: Prisma.ForumCommentCreateInput = {
-      content: content || '',  // Ensure content is never undefined
+      content: content || '', // Ensure content is never undefined
       author: { connect: { id: user.id } },
       post: { connect: { id: postId } },
       ...(quotedCommentId && { quotedComment: { connect: { id: quotedCommentId } } }),
-      ...(gif && { gif }),  // Store the GIF data directly as JSON
+      ...(gif && { gif }), // Store the GIF data directly as JSON
     };
 
     const comment = await prisma.forumComment.create({
@@ -177,7 +174,10 @@ export async function POST(
       });
 
     // Also notify the post author if they're not already a subscriber
-    if (!subscribers.some((sub: Subscriber) => sub.userId === post.authorId) && post.authorId !== user.id) {
+    if (
+      !subscribers.some((sub: Subscriber) => sub.userId === post.authorId) &&
+      post.authorId !== user.id
+    ) {
       const authorNotificationData: Prisma.NotificationCreateInput = {
         user: { connect: { id: post.authorId } },
         type: NotificationType.FORUM,
@@ -200,10 +200,7 @@ export async function POST(
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {
     console.error('Error creating comment:', error);
-    return NextResponse.json(
-      { error: 'Failed to create comment' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
@@ -258,11 +255,8 @@ export async function GET(
     return NextResponse.json({ comments });
   } catch (error) {
     console.error('Error fetching comments:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch comments' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

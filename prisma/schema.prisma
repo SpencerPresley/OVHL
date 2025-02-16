@@ -1,36 +1,60 @@
+// @file schema.prisma
+// @author Spencer Presley
+// @version 1.0.0
+// @license Proprietary - Copyright (c) 2025 Spencer Presley
+// @copyright All rights reserved. This code is the exclusive property of Spencer Presley.
+// @notice Unauthorized copying, modification, distribution, or use is strictly prohibited.
+// 
+// @description Comprehensive Database Schema for League Management System
+// @module prisma/schema
+// 
+// Database Schema Design Philosophy:
+// - Normalized data structure
+// - Flexible and extensible model relationships
+// - Support for multi-tier league management
+// - Comprehensive player and team tracking
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// Prisma Client Generator Configuration
+// Responsible for generating type-safe database client with robust TypeScript type definitions
 generator client {
   provider = "prisma-client-js"
 }
 
+// PostgreSQL Database Connection Configuration
+// Defines secure connection parameters for the application's primary database
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 // --------- Enums ---------
+// Enum representing gaming platforms/systems
+// Provides standardized tracking of player gaming environments
 enum System {
   PS
   XBOX
 }
 
 // --------- Authentication & Base User Models ---------
+// User model represents the core authentication and profile information
+// Serves as the primary identity management model for the application
 model User {
-  id                  String    @id @default(cuid())
-  email               String    @unique
-  username            String    @unique
+  id                  String                  @id @default(cuid())
+  email               String                  @unique
+  username            String                  @unique
   password            String
   name                String?
-  isAdmin             Boolean   @default(false) @map("is_admin")
-  resetToken          String?   @unique
+  isAdmin             Boolean                 @default(false) @map("is_admin")
+  resetToken          String?                 @unique
   resetTokenExpiresAt DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
   player              Player?
   notifications       Notification[]
   forumPosts          ForumPost[]
@@ -42,6 +66,8 @@ model User {
   @@map("User")
 }
 
+// Player model extends user information with gaming-specific details
+// Tracks player profiles across different gaming platforms and seasons
 model Player {
   id           String            @id // This IS the user's ID
   ea_id        String            @map("ea_id")
@@ -54,6 +80,8 @@ model Player {
   seasons      PlayerSeason[]
 }
 
+// GamertagHistory tracks player's gaming identities across different systems
+// Enables historical tracking of player gamertags and platform transitions
 model GamertagHistory {
   playerId  String   @map("player_id")
   system    System
@@ -65,29 +93,35 @@ model GamertagHistory {
 }
 
 // --------- Season & League Structure ---------
+// Season model represents a specific competitive period
+// Supports tracking of multi-tier league seasons and player participation
 model Season {
-  id        String   @id @default(uuid())
-  seasonId  String   @map("season_id")
-  isLatest  Boolean  @default(false) @map("is_latest")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        String         @id @default(uuid())
+  seasonId  String         @map("season_id")
+  isLatest  Boolean        @default(false) @map("is_latest")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
   tiers     Tier[]
   players   PlayerSeason[]
 }
 
+// Tier model represents different competitive levels within a season
+// Enables hierarchical league structure (e.g., NHL, AHL, CHL)
 model Tier {
-  id          String         @id @default(uuid())
-  seasonId    String         @map("season_id")
-  leagueLevel Int            @map("league_level")
-  name        String         // Add this to store NHL, AHL, CHL, etc.
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
-  season      Season         @relation(fields: [seasonId], references: [id])
-  teams       TeamSeason[]
+  id            String              @id @default(uuid())
+  seasonId      String              @map("season_id")
+  leagueLevel   Int                 @map("league_level")
+  name          String // Add this to store NHL, AHL, CHL, etc.
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+  season        Season              @relation(fields: [seasonId], references: [id])
+  teams         TeamSeason[]
   playerHistory PlayerTierHistory[]
 }
 
 // --------- Team Structure ---------
+// Team model represents a sports team with comprehensive tracking capabilities
+// Supports team affiliations, historical data, and cross-league relationships
 model Team {
   id             String       @id @default(uuid())
   eaClubId       String       @map("ea_club_id")
@@ -99,83 +133,85 @@ model Team {
   seasons        TeamSeason[]
 
   // Affiliation relationships
-  nhlAffiliateId String?     @map("nhl_affiliate_id")
-  ahlAffiliateId String?     @map("ahl_affiliate_id")
-  nhlAffiliate   Team?       @relation("NHLAffiliation", fields: [nhlAffiliateId], references: [id])
-  ahlAffiliate   Team?       @relation("AHLAffiliation", fields: [ahlAffiliateId], references: [id])
-  
+  nhlAffiliateId String? @map("nhl_affiliate_id")
+  ahlAffiliateId String? @map("ahl_affiliate_id")
+  nhlAffiliate   Team?   @relation("NHLAffiliation", fields: [nhlAffiliateId], references: [id])
+  ahlAffiliate   Team?   @relation("AHLAffiliation", fields: [ahlAffiliateId], references: [id])
+
   // Reverse relationships
-  ahlAffiliates  Team[]      @relation("NHLAffiliation")
-  echlAffiliates Team[]      @relation("AHLAffiliation")
+  ahlAffiliates  Team[] @relation("NHLAffiliation")
+  echlAffiliates Team[] @relation("AHLAffiliation")
 
   @@index([nhlAffiliateId])
   @@index([ahlAffiliateId])
 }
 
+// TeamSeason model captures a team's performance and statistics for a specific season
+// Provides granular tracking of team performance metrics
 model TeamSeason {
-  id                       String             @id @default(uuid())
-  teamId                   String             @map("team_id")
-  tierId                   String             @map("tier_id")
-  wins                     Int                @default(0)
-  losses                   Int                @default(0)
-  otLosses                 Int                @default(0)
-  goalsAgainst             Int                @default(0) @map("goals_against")
-  goalsFor                 Int                @default(0) @map("goals_for")
-  matchesPlayed            Int                @default(0) @map("matches_played")
-  penaltyKillGoalsAgainst  Int                @default(0) @map("penalty_kill_goals_against")
-  penaltyKillOpportunities Int                @default(0) @map("penalty_kill_opportunities")
-  powerplayGoals           Int                @default(0) @map("powerplay_goals")
-  powerplayOpportunities   Int                @default(0) @map("powerplay_opportunities")
-  shots                    Int                @default(0)
-  shotsAgainst             Int                @default(0) @map("shots_against")
-  timeOnAttack             Int                @default(0) @map("time_on_attack")
+  id                       String @id @default(uuid())
+  teamId                   String @map("team_id")
+  tierId                   String @map("tier_id")
+  wins                     Int    @default(0)
+  losses                   Int    @default(0)
+  otLosses                 Int    @default(0)
+  goalsAgainst             Int    @default(0) @map("goals_against")
+  goalsFor                 Int    @default(0) @map("goals_for")
+  matchesPlayed            Int    @default(0) @map("matches_played")
+  penaltyKillGoalsAgainst  Int    @default(0) @map("penalty_kill_goals_against")
+  penaltyKillOpportunities Int    @default(0) @map("penalty_kill_opportunities")
+  powerplayGoals           Int    @default(0) @map("powerplay_goals")
+  powerplayOpportunities   Int    @default(0) @map("powerplay_opportunities")
+  shots                    Int    @default(0)
+  shotsAgainst             Int    @default(0) @map("shots_against")
+  timeOnAttack             Int    @default(0) @map("time_on_attack")
 
-  createdAt                DateTime           @default(now()) @map("created_at")
-  updatedAt                DateTime           @updatedAt @map("updated_at")
-  team                     Team               @relation(fields: [teamId], references: [id])
-  tier                     Tier               @relation(fields: [tierId], references: [id])
-  matches                  Match[]
-  players                  PlayerTeamSeason[]
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  team      Team               @relation(fields: [teamId], references: [id])
+  tier      Tier               @relation(fields: [tierId], references: [id])
+  matches   Match[]
+  players   PlayerTeamSeason[]
 }
 
 // --------- Player Season & Stats ---------
 model PlayerSeason {
-  id            String              @id @default(uuid())
-  playerId      String              @map("player_id")
-  seasonId      String              @map("season_id")
-  position      String
-  gamesPlayed   Int?                @map("games_played")
-  goals         Int?
-  assists       Int?
-  plusMinus     Int?                @map("plus_minus")
-  shots         Int?
-  hits          Int?
-  takeaways     Int?
-  giveaways     Int?
-  penaltyMinutes Int?               @map("penalty_minutes")
-  saves         Int?
-  goalsAgainst  Int?                @map("goals_against")
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt @map("updated_at")
-  player        Player              @relation(fields: [playerId], references: [id])
-  season        Season              @relation(fields: [seasonId], references: [id])
-  teamSeasons   PlayerTeamSeason[]
-  tierHistory   PlayerTierHistory[]
-  contract      Contract?           // One-to-one relation with Contract
+  id             String              @id @default(uuid())
+  playerId       String              @map("player_id")
+  seasonId       String              @map("season_id")
+  position       String
+  gamesPlayed    Int?                @map("games_played")
+  goals          Int?
+  assists        Int?
+  plusMinus      Int?                @map("plus_minus")
+  shots          Int?
+  hits           Int?
+  takeaways      Int?
+  giveaways      Int?
+  penaltyMinutes Int?                @map("penalty_minutes")
+  saves          Int?
+  goalsAgainst   Int?                @map("goals_against")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
+  player         Player              @relation(fields: [playerId], references: [id])
+  season         Season              @relation(fields: [seasonId], references: [id])
+  teamSeasons    PlayerTeamSeason[]
+  tierHistory    PlayerTierHistory[]
+  contract       Contract? // One-to-one relation with Contract
 
   @@map("player_seasons")
 }
 
 model PlayerTierHistory {
-  id            String      @id @default(uuid())
-  playerSeasonId String     @map("player_season_id")
-  tierId        String     @map("tier_id")
-  startDate     DateTime   @default(now()) @map("start_date")
-  endDate       DateTime?  @map("end_date")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  playerSeason  PlayerSeason @relation(fields: [playerSeasonId], references: [id])
-  tier          Tier        @relation(fields: [tierId], references: [id])
+  id             String       @id @default(uuid())
+  playerSeasonId String       @map("player_season_id")
+  tierId         String       @map("tier_id")
+  startDate      DateTime     @default(now()) @map("start_date")
+  endDate        DateTime?    @map("end_date")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id])
+  tier           Tier         @relation(fields: [tierId], references: [id])
 }
 
 model PlayerTeamSeason {
@@ -208,23 +244,23 @@ model Contract {
   id             String       @id @default(uuid())
   playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id])
   playerSeasonId String       @unique @map("player_season_id")
-  amount         Int          // Contract amount in dollars
+  amount         Int // Contract amount in dollars
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
-  bids           Bid[]        // One-to-many relation with Bid
+  bids           Bid[] // One-to-many relation with Bid
 
   @@map("contracts")
 }
 
 model Bid {
-  id          String    @id @default(uuid())
-  contract    Contract  @relation(fields: [contractId], references: [id])
-  contractId  String    @map("contract_id")
-  teamId      String    @map("team_id") // ID of the team making the bid
-  amount      Int       // Bid amount in dollars
-  status      BidStatus @default(PENDING)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id         String    @id @default(uuid())
+  contract   Contract  @relation(fields: [contractId], references: [id])
+  contractId String    @map("contract_id")
+  teamId     String    @map("team_id") // ID of the team making the bid
+  amount     Int // Bid amount in dollars
+  status     BidStatus @default(PENDING)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
 
   @@map("bids")
 }
@@ -296,17 +332,17 @@ enum NotificationStatus {
 }
 
 model Notification {
-  id          String            @id @default(cuid())
-  userId      String            @map("user_id")
-  type        NotificationType
-  title       String
-  message     String
-  status      NotificationStatus @default(UNREAD)
-  link        String?           // Optional link to related content
-  metadata    Json?             // Flexible metadata for different notification types
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime          @updatedAt @map("updated_at")
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String             @id @default(cuid())
+  userId    String             @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  status    NotificationStatus @default(UNREAD)
+  link      String? // Optional link to related content
+  metadata  Json? // Flexible metadata for different notification types
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -329,20 +365,20 @@ enum ReactionType {
 }
 
 model ForumPost {
-  id          String      @id @default(cuid())
+  id          String                  @id @default(cuid())
   title       String
   content     String
-  status      ForumPostStatus @default(PUBLISHED)
-  authorId    String      @map("author_id")
-  leagueId    String      @map("league_id")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-  author      User        @relation(fields: [authorId], references: [id])
+  status      ForumPostStatus         @default(PUBLISHED)
+  authorId    String                  @map("author_id")
+  leagueId    String                  @map("league_id")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  author      User                    @relation(fields: [authorId], references: [id])
   comments    ForumComment[]
   reactions   ForumReaction[]
   followers   ForumFollower[]
   subscribers ForumPostSubscription[]
-  gif         Json?       // { id: string, url: string, title: string, width: string, height: string }
+  gif         Json? // { id: string, url: string, title: string, width: string, height: string }
 
   @@index([authorId])
   @@index([leagueId])
@@ -351,15 +387,15 @@ model ForumPost {
 }
 
 model ForumReaction {
-  id          String       @id @default(cuid())
-  type        ReactionType
-  userId      String       @map("user_id")
-  postId      String?      @map("post_id")
-  commentId   String?      @map("comment_id")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  user        User         @relation(fields: [userId], references: [id])
-  post        ForumPost?   @relation(fields: [postId], references: [id])
-  comment     ForumComment? @relation(fields: [commentId], references: [id])
+  id        String        @id @default(cuid())
+  type      ReactionType
+  userId    String        @map("user_id")
+  postId    String?       @map("post_id")
+  commentId String?       @map("comment_id")
+  createdAt DateTime      @default(now()) @map("created_at")
+  user      User          @relation(fields: [userId], references: [id])
+  post      ForumPost?    @relation(fields: [postId], references: [id])
+  comment   ForumComment? @relation(fields: [commentId], references: [id])
 
   @@unique([userId, postId, commentId, type])
   @@index([userId])
@@ -369,12 +405,12 @@ model ForumReaction {
 }
 
 model ForumFollower {
-  id          String    @id @default(cuid())
-  userId      String    @map("user_id")
-  postId      String    @map("post_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  user        User      @relation(fields: [userId], references: [id])
-  post        ForumPost @relation(fields: [postId], references: [id])
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  postId    String    @map("post_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id])
+  post      ForumPost @relation(fields: [postId], references: [id])
 
   @@unique([userId, postId])
   @@index([userId])
@@ -397,20 +433,20 @@ model ForumPostSubscription {
 }
 
 model ForumComment {
-  id            String          @id @default(cuid())
-  content       String
-  status        ForumPostStatus @default(PUBLISHED)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  author        User      @relation(fields: [authorId], references: [id])
-  authorId      String    @map("author_id")
-  post          ForumPost @relation(fields: [postId], references: [id])
-  postId        String    @map("post_id")
-  quotedComment ForumComment? @relation("QuotedComment", fields: [quotedCommentId], references: [id])
-  quotedCommentId String?  @map("quoted_comment_id")
-  quotedBy      ForumComment[] @relation("QuotedComment")
-  reactions     ForumReaction[]
-  gif           Json?       // { id: string, url: string, title: string, width: string, height: string }
+  id              String          @id @default(cuid())
+  content         String
+  status          ForumPostStatus @default(PUBLISHED)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  author          User            @relation(fields: [authorId], references: [id])
+  authorId        String          @map("author_id")
+  post            ForumPost       @relation(fields: [postId], references: [id])
+  postId          String          @map("post_id")
+  quotedComment   ForumComment?   @relation("QuotedComment", fields: [quotedCommentId], references: [id])
+  quotedCommentId String?         @map("quoted_comment_id")
+  quotedBy        ForumComment[]  @relation("QuotedComment")
+  reactions       ForumReaction[]
+  gif             Json? // { id: string, url: string, title: string, width: string, height: string }
 
   @@index([authorId])
   @@index([postId])

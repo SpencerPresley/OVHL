@@ -32,10 +32,7 @@ export async function POST(
 
     // Validate input
     if (!type) {
-      return NextResponse.json(
-        { error: 'Reaction type is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Reaction type is required' }, { status: 400 });
     }
 
     // Check if post exists and is published
@@ -47,10 +44,7 @@ export async function POST(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post not found or not published' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Post not found or not published' }, { status: 404 });
     }
 
     // If commentId is provided, check if the comment exists and belongs to the post
@@ -64,10 +58,7 @@ export async function POST(
       });
 
       if (!comment) {
-        return NextResponse.json(
-          { error: 'Comment not found or not published' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Comment not found or not published' }, { status: 404 });
       }
     }
 
@@ -76,9 +67,7 @@ export async function POST(
       where: {
         userId: decoded.id,
         type,
-        ...(commentId
-          ? { commentId }
-          : { postId: params.postId }),
+        ...(commentId ? { commentId } : { postId: params.postId }),
       },
     });
 
@@ -98,9 +87,7 @@ export async function POST(
       data: {
         type,
         userId: decoded.id,
-        ...(commentId
-          ? { commentId }
-          : { postId: params.postId }),
+        ...(commentId ? { commentId } : { postId: params.postId }),
       },
       include: {
         user: {
@@ -116,11 +103,8 @@ export async function POST(
     return NextResponse.json({ reaction }, { status: 201 });
   } catch (error) {
     console.error('Error handling reaction:', error);
-    return NextResponse.json(
-      { error: 'Failed to handle reaction' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to handle reaction' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

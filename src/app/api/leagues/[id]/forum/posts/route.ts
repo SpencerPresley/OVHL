@@ -71,4 +71,4 @@ export async function POST(request: Request, { params }: { params: { id: string 
     console.error('Error creating forum post:', error);
     return NextResponse.json({ error: 'Failed to create forum post' }, { status: 500 });
   }
-} 
+}

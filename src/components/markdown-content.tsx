@@ -21,53 +21,87 @@ hljs.registerLanguage('json', json);
 hljs.registerLanguage('plaintext', bash);
 
 interface MarkdownContentProps {
-  content: string
+  content: string;
 }
 
 export function MarkdownContent({ content }: MarkdownContentProps) {
   const processedContent = useMemo(() => {
     const renderer = new marked.Renderer();
-    
+
     // Only configure code block rendering with syntax highlighting
-    renderer.code = function({ text, lang }: Tokens.Code) {
+    renderer.code = function ({ text, lang }: Tokens.Code) {
       const language = hljs.getLanguage(lang || '') ? lang : 'plaintext';
       const highlightedCode = language ? hljs.highlight(text, { language }).value : text;
       return `<pre><code class="hljs language-${language}">${highlightedCode}</code></pre>`;
     };
-    
+
     // Configure marked
     marked.setOptions({
       renderer,
       breaks: true,
       gfm: true,
       pedantic: false,
-      async: false
+      async: false,
     });
-    
+
     // Parse the markdown
     const html = marked.parse(content) as string;
-    
+
     // Sanitize the HTML
     return DOMPurify.sanitize(html, {
       ADD_TAGS: [
-        'iframe', 'pre', 'code', 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'strong', 'em', 'b', 'i', 'del', 'blockquote', 'ul', 'ol', 'li', 'hr',
-        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'br', 'a', 'img'
+        'iframe',
+        'pre',
+        'code',
+        'p',
+        'div',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'strong',
+        'em',
+        'b',
+        'i',
+        'del',
+        'blockquote',
+        'ul',
+        'ol',
+        'li',
+        'hr',
+        'table',
+        'thead',
+        'tbody',
+        'tr',
+        'th',
+        'td',
+        'br',
+        'a',
+        'img',
       ],
       ADD_ATTR: [
-        'class', 'target', 'rel', 'href', 'src', 'alt', 'title',
-        'width', 'height', 'style'
+        'class',
+        'target',
+        'rel',
+        'href',
+        'src',
+        'alt',
+        'title',
+        'width',
+        'height',
+        'style',
       ],
       FORBID_TAGS: ['script'],
-      FORBID_ATTR: ['onerror', 'onload']
+      FORBID_ATTR: ['onerror', 'onload'],
     });
   }, [content]);
 
   return (
-    <div 
+    <div
       className="markdown-content whitespace-pre-wrap"
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
   );
-} 
-
+}

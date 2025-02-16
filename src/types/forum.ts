@@ -1,4 +1,7 @@
-import { ForumPostStatus as PrismaForumPostStatus, ReactionType as PrismaReactionType } from '@prisma/client';
+import {
+  ForumPostStatus as PrismaForumPostStatus,
+  ReactionType as PrismaReactionType,
+} from '@prisma/client';
 
 // Re-export the enums as values and types
 export { PrismaForumPostStatus as ForumPostStatus, PrismaReactionType as ReactionType };
@@ -63,4 +66,4 @@ export interface ForumPost {
     comments: number;
     reactions: number;
   };
-} 
+}

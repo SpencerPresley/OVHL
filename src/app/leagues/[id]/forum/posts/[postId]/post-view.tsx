@@ -46,7 +46,11 @@ interface PostViewProps {
 
 export function PostView({ league, post: initialPost }: PostViewProps) {
   const [post, setPost] = useState<ForumPost>(initialPost);
-  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; isAdmin: boolean } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    name: string;
+    isAdmin: boolean;
+  } | null>(null);
   const [comment, setComment] = useState('');
   const [quotedComment, setQuotedComment] = useState<ForumComment | null>(null);
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -277,7 +281,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
   ];
 
   const toggleQuoteExpansion = (commentId: string) => {
-    setExpandedQuotes(prev => {
+    setExpandedQuotes((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(commentId)) {
         newSet.delete(commentId);
@@ -349,11 +353,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                   </span>
                 </div>
                 {currentUser?.isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete()}
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete()}>
                     Delete Post
                   </Button>
                 )}
@@ -390,9 +390,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                     }`}
                   >
                     <Icon className="w-4 h-4" />
-                    <span>
-                      {post.reactions?.filter((r) => r.type === type).length || 0}
-                    </span>
+                    <span>{post.reactions?.filter((r) => r.type === type).length || 0}</span>
                   </Button>
                 ))}
               </div>
@@ -407,19 +405,17 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
             </h2>
             <div className="space-y-4">
               {post.comments?.map((comment) => (
-                <div 
-                  key={comment.id} 
-                  id={`comment-${comment.id}`} 
-                  className="scroll-mt-24"
-                >
+                <div key={comment.id} id={`comment-${comment.id}`} className="scroll-mt-24">
                   <Card className="card-gradient">
                     <CardContent className="p-4">
                       {comment.quotedComment && (
                         <div className="mb-4">
-                          <div 
+                          <div
                             className="p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
                             onClick={() => {
-                              const element = document.getElementById(`comment-${comment.quotedComment!.id}`);
+                              const element = document.getElementById(
+                                `comment-${comment.quotedComment!.id}`
+                              );
                               if (element) {
                                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                 const card = element.querySelector('.card-gradient');
@@ -436,30 +432,30 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                               <span className="text-sm text-gray-400">
                                 {comment.quotedComment.author.name} wrote:
                               </span>
-                              {comment.quotedComment.content && comment.quotedComment.content.length > 150 && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleQuoteExpansion(comment.id);
-                                  }}
-                                >
-                                  {expandedQuotes.has(comment.id) ? (
-                                    <ChevronUp className="w-4 h-4" />
-                                  ) : (
-                                    <ChevronDown className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              )}
+                              {comment.quotedComment.content &&
+                                comment.quotedComment.content.length > 150 && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleQuoteExpansion(comment.id);
+                                    }}
+                                  >
+                                    {expandedQuotes.has(comment.id) ? (
+                                      <ChevronUp className="w-4 h-4" />
+                                    ) : (
+                                      <ChevronDown className="w-4 h-4" />
+                                    )}
+                                  </Button>
+                                )}
                             </div>
                             <div className="text-gray-300">
-                              {comment.quotedComment?.content && (
-                                expandedQuotes.has(comment.id) 
+                              {comment.quotedComment?.content &&
+                                (expandedQuotes.has(comment.id)
                                   ? renderQuotedContent(comment.quotedComment.content)
-                                  : renderTruncatedContent(comment.quotedComment.content)
-                              )}
+                                  : renderTruncatedContent(comment.quotedComment.content))}
                             </div>
                           </div>
                         </div>
@@ -553,11 +549,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                       <span className="text-sm text-gray-400">
                         Quoting {quotedComment.author.name}:
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setQuotedComment(null)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setQuotedComment(null)}>
                         Cancel Quote
                       </Button>
                     </div>
@@ -577,12 +569,7 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                       {isMobile ? (
                         <Dialog open={showGifPicker} onOpenChange={setShowGifPicker}>
                           <DialogTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="gap-2"
-                            >
+                            <Button type="button" variant="outline" size="sm" className="gap-2">
                               <ImageIcon className="w-4 h-4" />
                               GIF
                             </Button>
@@ -597,21 +584,12 @@ export function PostView({ league, post: initialPost }: PostViewProps) {
                       ) : (
                         <Popover open={showGifPicker} onOpenChange={setShowGifPicker}>
                           <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="gap-2"
-                            >
+                            <Button type="button" variant="outline" size="sm" className="gap-2">
                               <ImageIcon className="w-4 h-4" />
                               GIF
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent
-                            className="p-0 w-auto"
-                            align="start"
-                            side="top"
-                          >
+                          <PopoverContent className="p-0 w-auto" align="start" side="top">
                             <GifPicker
                               onGifSelect={handleGifComment}
                               onClose={() => setShowGifPicker(false)}

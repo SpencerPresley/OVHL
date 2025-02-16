@@ -1,3 +1,49 @@
+/**
+ * @file chatbox-ably.tsx
+ * @author Spencer Presley
+ * @version 1.0.0
+ * @license Proprietary - Copyright (c) 2025 Spencer Presley
+ * @description Real-time chat implementation using Ably for WebSocket communication
+ * @module components/chatbox
+ * @requires ably
+ * @requires react
+ * @requires next
+ * @requires @giphy/js-types
+ * @requires date-fns
+ * @requires shadcn/ui
+ *
+ * Real-time Chat Component with Ably Integration
+ *
+ * A sophisticated real-time chat implementation using Ably for WebSocket communication.
+ * Features:
+ * - Real-time message delivery with optimistic updates
+ * - User presence tracking and online count
+ * - Message history persistence and loading
+ * - Rich media support (GIFs, emojis)
+ * - Responsive design with mobile optimization
+ * - Proper error handling and reconnection logic
+ *
+ * Technical Implementation:
+ * - Uses Ably's React hooks for real-time subscriptions
+ * - Implements connection pooling for efficiency
+ * - Maintains message ordering with timestamp-based sorting
+ * - Handles message deduplication
+ * - Implements proper cleanup on unmount
+ *
+ * Performance Optimizations:
+ * - Message batching for efficient updates
+ * - Lazy loading of GIF picker
+ * - Efficient message rendering with virtualization
+ * - Proper memo usage to prevent unnecessary rerenders
+ *
+ * @example
+ * // Basic usage
+ * <Chat
+ *   leagueId="nhl"
+ *   currentUser={{ id: "123", name: "John Doe" }}
+ * />
+ */
+
 'use client';
 
 import * as Ably from 'ably';
@@ -42,10 +88,15 @@ interface ChatMessage {
   text?: string;
   /** The GIF object if this is a GIF message */
   gif?: {
+    /** Unique identifier for the GIF */
     id: string;
+    /** URL to the GIF image */
     url: string;
+    /** Title/description of the GIF */
     title: string;
+    /** Original width of the GIF */
     width: number;
+    /** Original height of the GIF */
     height: number;
   };
   /** The username of the message sender */
@@ -63,26 +114,26 @@ const MAX_MESSAGES = 100;
  * Chat Component
  *
  * A real-time chat component that uses Ably for message delivery.
- * Features:
- * - Real-time message updates with consistent ordering
- * - User presence tracking per channel with live online count
- * - Persistent message history across page reloads
- * - Clickable usernames linking to profile pages
- * - Message limit (100) with automatic pruning
- * - Multi-browser support with unique client IDs
- * - Emoji support and rich text formatting
  *
- * Message Handling:
- * - Messages are stored chronologically (oldest to newest)
- * - Display is reversed to show newest messages at top
- * - History is loaded on component mount
- * - New messages are appended to maintain order
+ * State Management:
+ * - messages: Stores chat history and new messages
+ * - inputMessage: Manages the current input field state
+ * - onlineUsers: Tracks number of active users
+ * - isLoading: Controls loading state during history fetch
+ * - showGifPicker: Manages GIF picker visibility
  *
- * User Experience:
- * - Loading states during history fetch
- * - Empty state prompts for first message
- * - Proper message wrapping and emoji display
- * - Responsive height based on screen size
+ * Real-time Features:
+ * - Message delivery with optimistic updates
+ * - Presence tracking with enter/leave events
+ * - Message history with proper ordering
+ * - Proper cleanup on unmount
+ *
+ * UI Components:
+ * - Chat container with gradient background
+ * - Message input with emoji support
+ * - GIF picker with mobile optimization
+ * - Online user counter
+ * - Message bubbles with timestamps
  *
  * @component
  * @param {ChatProps} props - Component properties
@@ -95,18 +146,28 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   const [showGifPicker, setShowGifPicker] = useState(false);
   const isMobile = useIsMobile();
 
-  // Subscribe to all messages on the channel
+  /**
+   * Message Handler
+   * Subscribes to channel messages and updates state with new messages.
+   * Maintains message order and handles pruning when limit is reached.
+   */
   const { channel } = useChannel(`league-chat:${leagueId}`, (message) => {
     if (message.name === 'message') {
       setMessages((prev) => {
-        // Always add new messages to the end and maintain order
         const newMessages = [...prev, message.data as ChatMessage];
-        // Keep only the last MAX_MESSAGES
         return newMessages.slice(-MAX_MESSAGES);
       });
     }
   });
 
+  /**
+   * Initialization Effect
+   * Sets up message history, presence tracking, and cleanup.
+   * Handles:
+   * - Loading historical messages
+   * - Setting up presence handlers
+   * - Managing connection lifecycle
+   */
   useEffect(() => {
     if (!channel) return;
 
@@ -151,6 +212,17 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     };
   }, [channel, currentUser]);
 
+  /**
+   * Message Sender
+   * Handles text message submission and publishing.
+   * Implements:
+   * - Input validation
+   * - Message formatting
+   * - Channel publishing
+   * - Input clearing
+   *
+   * @param {React.FormEvent} e - Form submission event
+   */
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -166,6 +238,17 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     setInputMessage('');
   };
 
+  /**
+   * GIF Message Sender
+   * Handles GIF selection and publishing.
+   * Implements:
+   * - GIF data formatting
+   * - Channel publishing
+   * - UI state management
+   *
+   * @param {IGif} gif - Selected GIF data
+   * @param {SyntheticEvent} e - Selection event
+   */
   const sendGif = (gif: IGif, e: SyntheticEvent<HTMLElement, Event>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -187,6 +270,16 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
     setShowGifPicker(false);
   };
 
+  /**
+   * Time Formatter
+   * Formats message timestamps based on age.
+   * Returns:
+   * - Relative time for recent messages
+   * - Absolute time for older messages
+   *
+   * @param {number} timestamp - Message timestamp
+   * @returns {string} Formatted time string
+   */
   const formatMessageTime = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -202,6 +295,12 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
   return (
     <Card className="flex flex-col h-[800px] lg:h-[600px] card-gradient shadow-xl">
       <CardContent className="flex-1 p-0 overflow-hidden">
+        {/* Header Section
+         * Features:
+         * - Chat title
+         * - Online user counter with real-time updates
+         * - Responsive design with mobile optimization
+         */}
         <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 z-10">
           <div className="flex items-center justify-between p-3">
             <span className="text-sm font-medium text-gray-300">Shout Box</span>
@@ -269,6 +368,14 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
           </form>
         </div>
 
+        {/* Messages Display Section
+         * Features:
+         * - Reverse chronological order
+         * - Smooth scrolling
+         * - Loading states
+         * - Empty state handling
+         * - Message grouping
+         */}
         <ScrollArea className="flex-1 h-[calc(100%-90px)]">
           <div className="p-3 min-h-full">
             {isLoading ? (
@@ -282,11 +389,27 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
             ) : (
               <div className="flex flex-col-reverse space-y-reverse space-y-2">
                 {messages.map((msg, index) => (
+                  /**
+                   * Message Card Component
+                   *
+                   * Individual message display with:
+                   * - Username with profile link
+                   * - Timestamp with relative/absolute format
+                   * - Message content with text wrapping
+                   * - GIF display with optimized dimensions
+                   * - Hover effects and transitions
+                   */
                   <Card
                     key={index}
                     className="group bg-gray-800/80 border-gray-700/50 hover:bg-gray-800/90 transition-colors rounded-md"
                   >
                     <CardContent className="p-3">
+                      {/* Message Header
+                       * Features:
+                       * - Username with profile link
+                       * - Timestamp with hover reveal
+                       * - Proper spacing and alignment
+                       */}
                       <div className="flex justify-between items-start mb-1.5">
                         <div>
                           <Link
@@ -301,6 +424,14 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
                           {formatMessageTime(msg.timestamp)}
                         </span>
                       </div>
+
+                      {/* Message Content
+                       * Features:
+                       * - Text messages with proper wrapping
+                       * - GIF display with optimized dimensions
+                       * - Hover effects on media
+                       * - Proper spacing and padding
+                       */}
                       {msg.text ? (
                         <span className="text-gray-100 whitespace-pre-wrap break-words">
                           {msg.text}

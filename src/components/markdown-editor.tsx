@@ -1,28 +1,37 @@
 'use client';
 
-import { useState } from 'react'
-import { Textarea } from '@/components/ui/textarea'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Toggle } from '@/components/ui/toggle'
-import { Bold, Italic, List, Heading2, Code, Quote as QuoteIcon, Eye, ChevronDown } from 'lucide-react'
-import { MarkdownContent } from './markdown-content'
-import { cn } from '@/lib/utils'
+import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Toggle } from '@/components/ui/toggle';
+import {
+  Bold,
+  Italic,
+  List,
+  Heading2,
+  Code,
+  Quote as QuoteIcon,
+  Eye,
+  ChevronDown,
+} from 'lucide-react';
+import { MarkdownContent } from './markdown-content';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 
 interface MarkdownEditorProps {
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  className?: string
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
 export function MarkdownEditor({ value, onChange, placeholder, className }: MarkdownEditorProps) {
-  const [isPreview, setIsPreview] = useState(false)
+  const [isPreview, setIsPreview] = useState(false);
 
   const insertMarkdown = (prefix: string, suffix: string = prefix) => {
     const textarea = document.querySelector('textarea');
@@ -40,11 +49,11 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
       if (selectedText) {
         const listItems = selectedText
           .split('\n')
-          .map(line => line.trim() ? `- ${line}` : '')
+          .map((line) => (line.trim() ? `- ${line}` : ''))
           .join('\n');
         const newText = `${beforeText}\n${listItems}\n${afterText}`;
         onChange(newText);
-        
+
         // Set cursor position after the list
         setTimeout(() => {
           textarea.focus();
@@ -72,7 +81,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
     if (prefix.startsWith('#') || prefix.startsWith('>')) {
       // Add a new line before if we're not at the start of a line
       const needsNewLine = beforeText.length > 0 && !beforeText.endsWith('\n');
-      const newText = selectedText 
+      const newText = selectedText
         ? `${beforeText}${needsNewLine ? '\n' : ''}${prefix}${selectedText}${afterText}`
         : `${beforeText}${needsNewLine ? '\n' : ''}${prefix}text${afterText}`;
 
@@ -81,7 +90,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
       // Set cursor position after update
       setTimeout(() => {
         textarea.focus();
-        const newCursorPos = selectedText 
+        const newCursorPos = selectedText
           ? start + prefix.length + selectedText.length + (needsNewLine ? 1 : 0)
           : start + prefix.length + 4 + (needsNewLine ? 1 : 0); // 4 is length of "text"
         textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -90,7 +99,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
     }
 
     // Normal wrapping for bold, italic, etc.
-    const newText = selectedText 
+    const newText = selectedText
       ? `${beforeText}${prefix}${selectedText}${suffix}${afterText}`
       : `${beforeText}${prefix}text${suffix}${afterText}`;
 
@@ -99,7 +108,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
     // Set cursor position after update
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = selectedText 
+      const newCursorPos = selectedText
         ? start + prefix.length + selectedText.length + suffix.length
         : start + prefix.length + 4; // 4 is length of "text"
       textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -111,7 +120,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
     { icon: Italic, label: 'Italic', prefix: '_' },
     { icon: List, label: 'List', prefix: '- ' },
     { icon: Code, label: 'Code', prefix: '`' },
-    { icon: QuoteIcon, label: 'Quote', prefix: '> ' }
+    { icon: QuoteIcon, label: 'Quote', prefix: '> ' },
   ];
 
   const headerLevels = [
@@ -139,21 +148,14 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
           ))}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <ToggleGroupItem
-                value="heading"
-                aria-label="Add heading"
-                className="gap-1"
-              >
+              <ToggleGroupItem value="heading" aria-label="Add heading" className="gap-1">
                 <Heading2 className="h-4 w-4" />
                 <ChevronDown className="h-3 w-3" />
               </ToggleGroupItem>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {headerLevels.map(({ level, label, prefix }) => (
-                <DropdownMenuItem
-                  key={level}
-                  onClick={() => insertMarkdown(prefix)}
-                >
+                <DropdownMenuItem key={level} onClick={() => insertMarkdown(prefix)}>
                   {label}
                 </DropdownMenuItem>
               ))}
@@ -170,7 +172,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
           Preview
         </Toggle>
       </div>
-      
+
       {isPreview ? (
         <div className="min-h-[100px] p-3 bg-muted rounded-md">
           <MarkdownContent content={value} />
@@ -184,5 +186,5 @@ export function MarkdownEditor({ value, onChange, placeholder, className }: Mark
         />
       )}
     </div>
-  )
-} 
+  );
+}

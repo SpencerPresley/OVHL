@@ -41,4 +41,4 @@ export async function GET() {
     console.error('Error checking auth:', error);
     return NextResponse.json({ user: null });
   }
-} 
+}

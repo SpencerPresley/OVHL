@@ -32,4 +32,4 @@ export async function verifyAuth(token: string) {
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

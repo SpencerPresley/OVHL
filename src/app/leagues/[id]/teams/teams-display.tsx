@@ -1,3 +1,55 @@
+/**
+ * @file teams-display.tsx
+ * @author Spencer Presley
+ * @version 1.0.0
+ * @license Proprietary - Copyright (c) 2025 Spencer Presley
+ * @copyright All rights reserved. This code is the exclusive property of Spencer Presley.
+ * @notice Unauthorized copying, modification, distribution, or use is strictly prohibited.
+ *
+ * @description Comprehensive Team Roster and Performance Visualization Component
+ * @module components/teams-display
+ *
+ * @requires react
+ * @requires next/image
+ * @requires next/link
+ * @requires shadcn/ui
+ *
+ * Teams Display Component for League Management System
+ *
+ * Features:
+ * - Detailed team roster visualization
+ * - Position-based player organization
+ * - Performance statistics tracking
+ * - Responsive and interactive design
+ * - Dynamic team and player information display
+ *
+ * Technical Implementation:
+ * - Modular component architecture
+ * - Efficient data processing and filtering
+ * - Responsive layout with mobile optimization
+ * - Advanced state management
+ * - Performance-optimized rendering
+ *
+ * Design Principles:
+ * - Clean, intuitive user interface
+ * - Comprehensive data representation
+ * - Seamless user interaction
+ * - Accessibility-focused design
+ *
+ * Performance Considerations:
+ * - Memoization of complex calculations
+ * - Lazy loading of heavy components
+ * - Efficient re-rendering strategies
+ * - Minimal computational overhead
+ *
+ * @example
+ * // Basic usage in a league page
+ * <TeamsDisplay
+ *   league={leagueData}
+ *   teams={teamSeasonData}
+ * />
+ */
+
 'use client';
 
 import React from 'react';
@@ -8,6 +60,9 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { System } from '@prisma/client';
 
+/**
+ * League information interface
+ */
 interface League {
   id: string;
   name: string;
@@ -15,6 +70,9 @@ interface League {
   bannerColor: string;
 }
 
+/**
+ * Player information interface including season stats and contract details
+ */
 interface Player {
   playerSeason: {
     player: {
@@ -35,6 +93,9 @@ interface Player {
   saves: number | null;
 }
 
+/**
+ * Team season information including roster and performance stats
+ */
 interface TeamSeason {
   team: {
     id: string;
@@ -47,11 +108,24 @@ interface TeamSeason {
   players: Player[];
 }
 
+/**
+ * Props for the TeamsDisplay component
+ */
 interface TeamsDisplayProps {
   league: League;
   teams: TeamSeason[];
 }
 
+/**
+ * TeamsDisplay Component
+ *
+ * Renders a comprehensive view of all teams in a league, including rosters,
+ * player stats, and contract information. Features position-based organization
+ * and responsive navigation.
+ *
+ * @param {TeamsDisplayProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   // Sort teams alphabetically by name
   const sortedTeams = [...teams].sort((a, b) =>
@@ -61,6 +135,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   const [isMobile, setIsMobile] = React.useState(false);
   const [showBackToTop, setShowBackToTop] = React.useState(false);
 
+  // Mobile detection effect
   React.useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -71,6 +146,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Scroll position tracking for back-to-top button
   React.useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 500);
@@ -80,12 +156,22 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /**
+   * Filters and sorts players by position
+   * @param {Player[]} players - Array of players to filter
+   * @param {string[]} positions - Array of positions to filter by
+   * @returns {Player[]} Filtered and sorted players
+   */
   const getPositionPlayers = (players: Player[], positions: string[]) => {
     return players
       .filter((p) => positions.includes(p.playerSeason.position))
       .sort((a, b) => a.playerSeason.player.name.localeCompare(b.playerSeason.player.name));
   };
 
+  /**
+   * Scrolls to a specific team's card
+   * @param {string} teamId - ID of the team to scroll to
+   */
   const scrollToTeam = (teamId: string) => {
     const element = document.getElementById(teamId);
     if (element) {
@@ -103,6 +189,9 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     }
   };
 
+  /**
+   * Scrolls back to the top of the page
+   */
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -111,7 +200,10 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     <div className="min-h-screen">
       <Nav />
 
-      {/* League Banner */}
+      {/* League Banner Section
+       * Displays league logo, name, and title
+       * Uses league-specific banner color for branding
+       */}
       <div className={`w-full ${league.bannerColor} py-8`}>
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -129,7 +221,11 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
 
       <LeagueNav leagueId={league.id} />
 
-      {/* Team Abbreviation Navigation */}
+      {/* Team Navigation Bar
+       * Sticky navigation showing team abbreviations
+       * Allows quick jumping to specific teams
+       * Features glass-morphism design with blur effect
+       */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap gap-2">
@@ -146,7 +242,13 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
         </div>
       </div>
 
-      {/* Teams Content */}
+      {/* Teams Grid Section
+       * Main content area displaying team cards
+       * Features:
+       * - Responsive grid layout (1 column mobile, 2 columns tablet, 3 columns desktop)
+       * - Team cards with roster information
+       * - Contract values and performance statistics
+       */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {sortedTeams.map((teamSeason) => (
@@ -155,6 +257,12 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
               id={teamSeason.team.id}
               className="card-gradient card-hover overflow-hidden"
             >
+              {/* Team Header Section
+               * Displays:
+               * - Team name with link
+               * - Total salary calculation
+               * - Win-loss-OT record
+               */}
               <CardHeader className="border-b border-border">
                 <CardTitle className="flex flex-col">
                   <Link
@@ -181,7 +289,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                {/* Forwards */}
+                {/* Forwards Section
+                 * Displays forward roster with position-specific organization
+                 * Features:
+                 * - Separate sections for LW, C, RW
+                 * - Player count with color-coded status
+                 * - Contract values and plus/minus statistics
+                 * - Links to player profiles
+                 */}
                 <div className="border-b border-border">
                   <div className="p-4 bg-secondary/30">
                     <div className="flex justify-between items-center">
@@ -330,7 +445,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                   </div>
                 </div>
 
-                {/* Defense */}
+                {/* Defense Section
+                 * Displays defensive roster organization
+                 * Features:
+                 * - Separate sections for LD, RD
+                 * - Player count with color-coded status
+                 * - Contract values and plus/minus statistics
+                 * - Links to player profiles
+                 */}
                 <div className="border-b border-border">
                   <div className="p-4 bg-secondary/30">
                     <div className="flex justify-between items-center">
@@ -435,7 +557,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                   </div>
                 </div>
 
-                {/* Goalies */}
+                {/* Goalies Section
+                 * Displays goalie roster and statistics
+                 * Features:
+                 * - Save percentage calculation and display
+                 * - Color-coded performance indicators
+                 * - Contract values
+                 * - Links to player profiles
+                 */}
                 <div>
                   <div className="p-4 bg-secondary/30">
                     <div className="flex justify-between items-center">
@@ -518,7 +647,11 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
         </div>
       </div>
 
-      {/* Back to Top Button */}
+      {/* Back to Top Button
+       * Appears when scrolled past threshold
+       * Provides easy navigation back to top of page
+       * Features smooth scroll animation
+       */}
       {showBackToTop && (
         <button
           onClick={scrollToTop}

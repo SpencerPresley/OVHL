@@ -39,7 +39,8 @@ const leagues: Record<string, League> = {
 };
 
 export default async function TeamsPage({ params }: { params: { id: string } }) {
-  const league = leagues[params.id.toLowerCase()];
+  const parameters = await params;
+  const league = leagues[parameters.id.toLowerCase()];
   if (!league) {
     notFound();
   }

@@ -20,7 +20,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 interface League {
   id: string;
@@ -67,7 +67,9 @@ export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayP
   const refreshPosts = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/leagues/${league.id}/forum/posts?page=${pagination.currentPage}`);
+      const response = await fetch(
+        `/api/leagues/${league.id}/forum/posts?page=${pagination.currentPage}`
+      );
       if (!response.ok) throw new Error('Failed to fetch posts');
       const data = await response.json();
       setPosts(data.posts);
@@ -119,7 +121,11 @@ export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayP
               leagueId={league.id}
               userId={currentUser.id}
               onPostCreated={refreshPosts}
-              trigger={<Button variant="secondary" size="lg">Create New Post</Button>}
+              trigger={
+                <Button variant="secondary" size="lg">
+                  Create New Post
+                </Button>
+              }
             />
           ) : (
             <Button variant="secondary" size="lg" onClick={handleCreatePost}>
@@ -173,18 +179,18 @@ export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayP
               <PaginationContent>
                 {pagination.currentPage > 1 && (
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(pagination.currentPage - 1);
-                      }} 
+                      }}
                     />
                   </PaginationItem>
                 )}
 
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                  .filter(page => {
+                  .filter((page) => {
                     // Show first page, last page, and pages around current page
                     const diff = Math.abs(page - pagination.currentPage);
                     return diff <= 1 || page === 1 || page === pagination.totalPages;
@@ -217,12 +223,12 @@ export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayP
 
                 {pagination.currentPage < pagination.totalPages && (
                   <PaginationItem>
-                    <PaginationNext 
+                    <PaginationNext
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(pagination.currentPage + 1);
-                      }} 
+                      }}
                     />
                   </PaginationItem>
                 )}
@@ -233,4 +239,4 @@ export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayP
       </div>
     </div>
   );
-} 
+}

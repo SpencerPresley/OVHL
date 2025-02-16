@@ -39,9 +39,12 @@ const leagues: Record<string, League> = {
   },
 };
 
-export default async function ForumPage({ params, searchParams }: { 
-  params: { id: string }, 
-  searchParams: { page?: string } 
+export default async function ForumPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { page?: string };
 }) {
   const { id } = params;
   const page = Number(searchParams.page) || 1;
@@ -53,7 +56,7 @@ export default async function ForumPage({ params, searchParams }: {
 
   try {
     const db = new PrismaClient();
-    
+
     // Get total count for pagination
     const [{ total }] = await db.$queryRaw<[{ total: number }]>`
       SELECT COUNT(DISTINCT fp.id) as total
@@ -85,7 +88,7 @@ export default async function ForumPage({ params, searchParams }: {
     `;
 
     // Transform Prisma data to match our frontend types
-    const posts = (prismaData as any[]).map(post => ({
+    const posts = (prismaData as any[]).map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,
@@ -109,8 +112,8 @@ export default async function ForumPage({ params, searchParams }: {
     })) satisfies ForumPost[];
 
     return (
-      <ForumDisplay 
-        league={league} 
+      <ForumDisplay
+        league={league}
         initialPosts={posts}
         pagination={{
           currentPage: page,
@@ -121,8 +124,8 @@ export default async function ForumPage({ params, searchParams }: {
   } catch (error) {
     console.error('Error loading forum posts:', error);
     return (
-      <ForumDisplay 
-        league={league} 
+      <ForumDisplay
+        league={league}
         initialPosts={[]}
         pagination={{
           currentPage: 1,
@@ -131,4 +134,4 @@ export default async function ForumPage({ params, searchParams }: {
       />
     );
   }
-} 
+}

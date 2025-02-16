@@ -107,17 +107,19 @@ function transformComment(comment: PrismaComment, includeQuoted = true): ForumCo
   const base = {
     id: comment.id,
     content: comment.content || '',
-    gif: comment.gif ? {
-      id: comment.gif.id,
-      title: comment.gif.title,
-      images: {
-        original: {
-          url: comment.gif.images.original.url,
-          width: comment.gif.images.original.width,
-          height: comment.gif.images.original.height
+    gif: comment.gif
+      ? {
+          id: comment.gif.id,
+          title: comment.gif.title,
+          images: {
+            original: {
+              url: comment.gif.images.original.url,
+              width: comment.gif.images.original.width,
+              height: comment.gif.images.original.height,
+            },
+          },
         }
-      }
-    } : null,
+      : null,
     createdAt: comment.createdAt,
     updatedAt: comment.updatedAt,
     status: comment.status as unknown as import('@/types/forum').ForumPostStatus,
@@ -129,7 +131,7 @@ function transformComment(comment: PrismaComment, includeQuoted = true): ForumCo
       name: comment.author.name || comment.author.username,
       username: comment.author.username,
     },
-    reactions: comment.reactions.map(reaction => ({
+    reactions: comment.reactions.map((reaction) => ({
       id: reaction.id,
       type: reaction.type as unknown as ReactionType,
       createdAt: reaction.createdAt,
@@ -146,9 +148,10 @@ function transformComment(comment: PrismaComment, includeQuoted = true): ForumCo
 
   return {
     ...base,
-    quotedComment: includeQuoted && comment.quotedComment 
-      ? transformComment(comment.quotedComment, false) 
-      : null,
+    quotedComment:
+      includeQuoted && comment.quotedComment
+        ? transformComment(comment.quotedComment, false)
+        : null,
   };
 }
 
@@ -162,7 +165,7 @@ export default async function PostPage({ params }: { params: { id: string; postI
       notFound();
     }
 
-    const post = await prisma.forumPost.findUnique({
+    const post = (await prisma.forumPost.findUnique({
       where: {
         id: postId,
       },
@@ -189,7 +192,7 @@ export default async function PostPage({ params }: { params: { id: string; postI
           },
         },
       },
-    }) as unknown as PrismaPost | null;
+    })) as unknown as PrismaPost | null;
 
     if (!post) {
       notFound();
@@ -200,17 +203,19 @@ export default async function PostPage({ params }: { params: { id: string; postI
       id: post.id,
       title: post.title,
       content: post.content || '',
-      gif: post.gif ? {
-        id: post.gif.id,
-        title: post.gif.title,
-        images: {
-          original: {
-            url: post.gif.images.original.url,
-            width: post.gif.images.original.width,
-            height: post.gif.images.original.height
+      gif: post.gif
+        ? {
+            id: post.gif.id,
+            title: post.gif.title,
+            images: {
+              original: {
+                url: post.gif.images.original.url,
+                width: post.gif.images.original.width,
+                height: post.gif.images.original.height,
+              },
+            },
           }
-        }
-      } : null,
+        : null,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       status: post.status,
@@ -221,7 +226,7 @@ export default async function PostPage({ params }: { params: { id: string; postI
         name: post.author.name || post.author.username,
         username: post.author.username,
       },
-      reactions: post.reactions.map(reaction => ({
+      reactions: post.reactions.map((reaction) => ({
         id: reaction.id,
         type: reaction.type,
         createdAt: reaction.createdAt,
@@ -234,16 +239,14 @@ export default async function PostPage({ params }: { params: { id: string; postI
           username: reaction.user.username,
         },
       })),
-      comments: post.comments.map(comment => transformComment(comment)),
+      comments: post.comments.map((comment) => transformComment(comment)),
     };
 
-    return (
-      <PostView league={league} post={transformedPost} />
-    );
+    return <PostView league={league} post={transformedPost} />;
   } catch (error) {
     console.error('Error fetching post:', error);
     notFound();
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

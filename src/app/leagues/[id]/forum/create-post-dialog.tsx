@@ -83,7 +83,8 @@ export function CreatePostDialog({
         <DialogHeader>
           <DialogTitle>Create New Post</DialogTitle>
           <DialogDescription>
-            Create a new post in the forum. All fields are required. You can use markdown to format your post.
+            Create a new post in the forum. All fields are required. You can use markdown to format
+            your post.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -119,4 +120,4 @@ export function CreatePostDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}
