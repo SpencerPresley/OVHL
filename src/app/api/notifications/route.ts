@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const prisma = globalForPrisma.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+import { UserService } from '@/lib/services/user-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,15 +18,7 @@ export async function GET() {
       id: string;
     };
 
-    const notifications = await prisma.notification.findMany({
-      where: {
-        userId: decoded.id,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
+    const notifications = await UserService.getUserNotifications(decoded.id);
     return NextResponse.json({ notifications });
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
@@ -63,15 +47,13 @@ export async function POST(request: Request) {
 
     const { userId, type, title, message, link, metadata } = await request.json();
 
-    const notification = await prisma.notification.create({
-      data: {
-        userId,
-        type,
-        title,
-        message,
-        link,
-        metadata,
-      },
+    const notification = await UserService.createNotification({
+      userId,
+      type,
+      title,
+      message,
+      link,
+      metadata,
     });
 
     return NextResponse.json({ notification });

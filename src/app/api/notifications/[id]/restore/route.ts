@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
-import { prisma } from '@/lib/prisma';
+import { UserService } from '@/lib/services/user-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,9 +19,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     };
 
     // Verify the notification belongs to the user
-    const notification = await prisma.notification.findUnique({
-      where: { id: params.id },
-    });
+    const notification = await UserService.getNotificationById(params.id);
 
     if (!notification) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
@@ -31,10 +29,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const updatedNotification = await prisma.notification.update({
-      where: { id: params.id },
-      data: { status: 'READ' },
-    });
+    const updatedNotification = await UserService.restoreNotification(params.id);
 
     return NextResponse.json({ notification: updatedNotification });
   } catch (error) {

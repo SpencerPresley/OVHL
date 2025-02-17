@@ -35,6 +35,7 @@ export async function POST(request: Request) {
       data: {
         email,
         username,
+        name: username, // Set initial name to username
         password: hashedPassword,
       },
     });
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         username: user.username,
+        name: user.name,
       },
     });
   } catch (error) {

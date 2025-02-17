@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
-import {
-  PrismaClient,
-  NotificationType,
-  NotificationStatus,
-  Prisma,
-  ForumPostStatus,
-} from '@prisma/client';
+import { ForumPostStatus } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import { UserService } from '@/lib/services/user-service';
+import { ForumService } from '@/lib/services/forum-service';
 
 type Subscriber = {
   userId: string;
@@ -19,35 +13,6 @@ type Subscriber = {
   };
 };
 
-// Helper function to verify auth
-async function verifyAuth(token: string) {
-  try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
-
-    const decoded = verify(token, secret) as { id: string };
-    if (!decoded?.id) {
-      return null;
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        isAdmin: true,
-      },
-    });
-
-    return user;
-  } catch (error) {
-    console.error('Error verifying auth:', error);
-    return null;
-  }
-}
-
 export async function POST(
   request: Request,
   { params }: { params: { id: string; postId: string } }
@@ -55,143 +20,74 @@ export async function POST(
   try {
     const { id, postId } = await params;
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('token');
+
     if (!token) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const user = await verifyAuth(token);
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const { content = '', quotedCommentId, gif } = await request.json();
-
-    if (!content && !gif) {
-      return NextResponse.json({ error: 'Content or GIF is required' }, { status: 400 });
-    }
-
-    // Check if post exists and is published
-    const post = await prisma.forumPost.findUnique({
-      where: {
-        id: postId,
-      },
-      include: {
-        author: true,
-      },
-    });
-
-    if (!post) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
-    }
-
-    // Create the comment with proper type for gif
-    const commentData: Prisma.ForumCommentCreateInput = {
-      content: content || '', // Ensure content is never undefined
-      author: { connect: { id: user.id } },
-      post: { connect: { id: postId } },
-      ...(quotedCommentId && { quotedComment: { connect: { id: quotedCommentId } } }),
-      ...(gif && { gif }), // Store the GIF data directly as JSON
+    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
+      id: string;
+      name: string;
     };
 
-    const comment = await prisma.forumComment.create({
-      data: commentData,
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-          },
-        },
-        quotedComment: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
-          },
-        },
-        reactions: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
-          },
-        },
-      },
+    const user = {
+      id: decoded.id,
+      name: decoded.name,
+    };
+
+    const post = await ForumService.getPostBasicInfo(postId);
+
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found or not published' }, { status: 404 });
+    }
+
+    const { content, quotedCommentId, gif } = await request.json();
+
+    const comment = await ForumService.createComment({
+      content,
+      authorId: user.id,
+      postId,
+      quotedCommentId: quotedCommentId || undefined,
+      gif,
     });
 
-    // Add the commenter as a subscriber if they're not already
-    await prisma.forumPostSubscription.upsert({
-      where: {
-        userId_postId: {
-          userId: user.id,
-          postId: postId,
-        },
-      },
-      create: {
-        userId: user.id,
-        postId: postId,
-      },
-      update: {},
-    });
+    // Add the commenter as a subscriber
+    await ForumService.upsertSubscription(user.id, postId);
 
-    // Create notifications for subscribers
-    const subscribers = await prisma.forumPostSubscription.findMany({
-      where: {
-        postId: postId,
-      },
-      include: {
-        user: true,
-      },
-    });
+    // Get subscribers and create notifications
+    const subscribers = await ForumService.getSubscribers(postId);
 
+    // Create notifications for subscribers (excluding the commenter)
     const notificationPromises = subscribers
-      .filter((sub: Subscriber) => sub.userId !== user.id) // Don't notify the commenter
-      .map((sub: Subscriber) => {
-        const notificationData: Prisma.NotificationCreateInput = {
-          user: { connect: { id: sub.userId } },
-          type: NotificationType.FORUM,
-          title: 'New Comment',
-          message: `${user.name} commented on "${post.title}"`,
-          status: NotificationStatus.UNREAD,
-          link: `/leagues/${id}/forum/posts/${postId}#comment-${comment.id}`,
-          metadata: {
-            postId: postId,
-            commentId: comment.id,
-            leagueId: id,
-          },
-        };
-        return prisma.notification.create({ data: notificationData });
-      });
+      .filter((sub: Subscriber) => sub.userId !== user.id)
+      .map((sub: Subscriber) =>
+        UserService.createForumCommentNotification({
+          userId: sub.userId,
+          commenterName: user.name,
+          postTitle: post.title,
+          postId: post.id,
+          commentId: comment.id,
+          leagueId: id,
+        })
+      );
 
     // Also notify the post author if they're not already a subscriber
     if (
       !subscribers.some((sub: Subscriber) => sub.userId === post.authorId) &&
       post.authorId !== user.id
     ) {
-      const authorNotificationData: Prisma.NotificationCreateInput = {
-        user: { connect: { id: post.authorId } },
-        type: NotificationType.FORUM,
-        title: 'New Comment on Your Post',
-        message: `${user.name} commented on your post "${post.title}"`,
-        status: NotificationStatus.UNREAD,
-        link: `/leagues/${id}/forum/posts/${postId}#comment-${comment.id}`,
-        metadata: {
-          postId: postId,
+      notificationPromises.push(
+        UserService.createForumCommentNotification({
+          userId: post.authorId,
+          commenterName: user.name,
+          postTitle: post.title,
+          postId: post.id,
           commentId: comment.id,
           leagueId: id,
-        },
-      };
-      notificationPromises.push(prisma.notification.create({ data: authorNotificationData }));
+          isAuthorNotification: true,
+        })
+      );
     }
 
     // Wait for all notifications to be created
@@ -201,8 +97,6 @@ export async function POST(
   } catch (error) {
     console.error('Error creating comment:', error);
     return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -211,52 +105,10 @@ export async function GET(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const comments = await prisma.forumComment.findMany({
-      where: {
-        postId: params.postId,
-        status: ForumPostStatus.PUBLISHED,
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-          },
-        },
-        quotedComment: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
-          },
-        },
-        reactions: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
+    const comments = await ForumService.getComments(params.postId);
     return NextResponse.json({ comments });
   } catch (error) {
     console.error('Error fetching comments:', error);
     return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
