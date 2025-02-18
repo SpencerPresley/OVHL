@@ -6,6 +6,7 @@ import { default as dynamicImport } from 'next/dynamic';
 import { PrismaClient } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
+import { LeagueQuickStats } from '@/components/league-quick-stats';
 
 // Use nodejs runtime to avoid edge runtime issues with crypto
 export const runtime = 'nodejs';
@@ -62,6 +63,179 @@ const leagues: Record<string, League> = {
     bannerColor: 'bg-teal-600',
   },
 };
+
+async function getLeagueStats(leagueId: string) {
+  // Get the latest season
+  const season = await prisma.season.findFirst({
+    where: { isLatest: true },
+  });
+
+  if (!season) return null;
+
+  // Get the tier for this league
+  const tier = await prisma.tier.findFirst({
+    where: {
+      seasonId: season.id,
+      name: leagueId.toUpperCase(),
+    },
+  });
+
+  if (!tier) return null;
+
+  // Get all player stats in this tier
+  const players = await prisma.playerTeamSeason.findMany({
+    where: {
+      teamSeason: {
+        tierId: tier.id,
+      },
+    },
+    include: {
+      playerSeason: {
+        include: {
+          player: {
+            include: {
+              gamertags: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
+            },
+          },
+        },
+      },
+      teamSeason: {
+        include: {
+          team: true,
+        },
+      },
+    },
+    orderBy: [
+      { goals: 'desc' },
+      { assists: 'desc' },
+    ],
+  });
+
+  // Get team stats
+  const teamSeasons = await prisma.teamSeason.findMany({
+    where: {
+      tierId: tier.id,
+    },
+    include: {
+      team: true,
+    },
+  });
+
+  // Transform team stats
+  const transformedTeams = teamSeasons.map(t => ({
+    id: t.team.id,
+    name: t.team.officialName,
+    teamIdentifier: t.team.teamIdentifier,
+    wins: t.wins,
+    powerplayGoals: t.powerplayGoals,
+    powerplayOpportunities: t.powerplayOpportunities,
+    penaltyKillGoalsAgainst: t.penaltyKillGoalsAgainst,
+    penaltyKillOpportunities: t.penaltyKillOpportunities,
+  }));
+
+  // Transform and sort the data
+  const transformedPlayers = players.map(p => ({
+    id: p.playerSeason.player.id,
+    name: p.playerSeason.player.name,
+    gamertag: p.playerSeason.player.gamertags[0]?.gamertag || p.playerSeason.player.name,
+    teamIdentifier: p.teamSeason.team.teamIdentifier,
+    goals: p.goals,
+    assists: p.assists,
+    points: p.goals + p.assists,
+    plusMinus: p.plusMinus,
+    saves: p.saves,
+    goalsAgainst: p.goalsAgainst,
+    gamesPlayed: p.gamesPlayed,
+  }));
+
+  return {
+    points: [...transformedPlayers].sort((a, b) => b.points - a.points).slice(0, 10).map(p => ({
+      id: p.id,
+      name: p.name,
+      gamertag: p.gamertag,
+      teamIdentifier: p.teamIdentifier,
+      value: p.points
+    })),
+    goals: [...transformedPlayers].sort((a, b) => b.goals - a.goals).slice(0, 10).map(p => ({
+      id: p.id,
+      name: p.name,
+      gamertag: p.gamertag,
+      teamIdentifier: p.teamIdentifier,
+      value: p.goals
+    })),
+    assists: [...transformedPlayers].sort((a, b) => b.assists - a.assists).slice(0, 10).map(p => ({
+      id: p.id,
+      name: p.name,
+      gamertag: p.gamertag,
+      teamIdentifier: p.teamIdentifier,
+      value: p.assists
+    })),
+    plusMinus: [...transformedPlayers].sort((a, b) => b.plusMinus - a.plusMinus).slice(0, 10).map(p => ({
+      id: p.id,
+      name: p.name,
+      gamertag: p.gamertag,
+      teamIdentifier: p.teamIdentifier,
+      value: p.plusMinus
+    })),
+    savePercentage: [...transformedPlayers]
+      .filter(p => p.saves !== null && p.goalsAgainst !== null)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        gamertag: p.gamertag,
+        teamIdentifier: p.teamIdentifier,
+        value: p.saves! / (p.saves! + p.goalsAgainst!)
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10),
+    gaa: [...transformedPlayers]
+      .filter(p => p.goalsAgainst !== null && p.gamesPlayed > 0)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        gamertag: p.gamertag,
+        teamIdentifier: p.teamIdentifier,
+        value: p.goalsAgainst! / p.gamesPlayed // GAA is already per game, no need to multiply
+      }))
+      .sort((a, b) => a.value - b.value) // Sort ascending since lower GAA is better
+      .slice(0, 10),
+    teamWins: [...transformedTeams]
+      .sort((a, b) => b.wins - a.wins)
+      .slice(0, 10)
+      .map(t => ({
+        id: t.id,
+        name: t.name,
+        gamertag: t.teamIdentifier,
+        teamIdentifier: t.teamIdentifier,
+        value: t.wins
+      })),
+    teamPowerPlay: [...transformedTeams]
+      .filter(t => t.powerplayOpportunities > 0)
+      .map(t => ({
+        id: t.id,
+        name: t.name,
+        gamertag: t.teamIdentifier,
+        teamIdentifier: t.teamIdentifier,
+        value: t.powerplayGoals / t.powerplayOpportunities
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10),
+    teamPenaltyKill: [...transformedTeams]
+      .filter(t => t.penaltyKillOpportunities > 0)
+      .map(t => ({
+        id: t.id,
+        name: t.name,
+        gamertag: t.teamIdentifier,
+        teamIdentifier: t.teamIdentifier,
+        value: 1 - (t.penaltyKillGoalsAgainst / t.penaltyKillOpportunities)
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10),
+  };
+}
 
 /**
  * League Page Component
@@ -124,6 +298,8 @@ export default async function LeaguePage({ params }: { params: { id: string } })
     }
   }
 
+  const stats = await getLeagueStats(league.id);
+
   console.log('LeaguePage: Rendering page');
 
   return (
@@ -175,7 +351,7 @@ export default async function LeaguePage({ params }: { params: { id: string } })
           </div>
           <div className="card-gradient rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Quick Stats</h2>
-            {/* Add stats content */}
+            {stats && <LeagueQuickStats stats={stats} />}
           </div>
         </div>
       </div>
