@@ -15,10 +15,14 @@ import {
  * Props for the UserNav component
  * @property {Object} user - The authenticated user object
  * @property {string} user.email - The user's email address, used for display and avatar
+ * @property {string | null} user.name - The user's name, if available
+ * @property {string | null} user.avatarUrl - The user's avatar URL, if available
  */
 interface UserNavProps {
   user: {
     email: string;
+    name: string | null;
+    avatarUrl: string | null;
   };
 }
 
@@ -38,7 +42,9 @@ interface UserNavProps {
  * @returns {JSX.Element} Rendered user navigation menu
  */
 export function UserNav({ user }: UserNavProps) {
-  const initials = user.email.charAt(0).toUpperCase();
+  const initials = user.name 
+    ? user.name.charAt(0).toUpperCase()
+    : user.email.charAt(0).toUpperCase();
 
   /**
    * Handles user sign out
@@ -63,7 +69,7 @@ export function UserNav({ user }: UserNavProps) {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent h-8 w-8 p-0">
             <Avatar className="h-8 w-8 cursor-pointer border border-white/20">
-              <AvatarImage src="" alt={user.email} />
+              <AvatarImage src={user.avatarUrl || ""} alt={user.name || user.email} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </NavigationMenuTrigger>

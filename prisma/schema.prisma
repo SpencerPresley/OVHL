@@ -50,6 +50,7 @@ model User {
   username            String                  @unique
   password            String
   name                String?
+  avatarUrl           String?                 @map("avatar_url")
   isAdmin             Boolean                 @default(false) @map("is_admin")
   resetToken          String?                 @unique
   resetTokenExpiresAt DateTime?

@@ -25,6 +25,8 @@ import { NotificationBell } from '@/components/notification-bell';
 interface User {
   id: string;
   email: string;
+  name: string | null;
+  avatarUrl: string | null;
 }
 
 /**

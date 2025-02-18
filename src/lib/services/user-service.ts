@@ -93,7 +93,37 @@ export interface PlayerProfile {
 
 export type FormattedUserProfile = NoPlayerProfile | PlayerProfile;
 
+interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  username: string | null;
+  isAdmin: boolean;
+  avatarUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  password: string;
+  resetToken: string | null;
+  resetTokenExpiresAt: Date | null;
+}
+
 export class UserService {
+  static async getCurrentUser() {
+    try {
+      const response = await fetch('/api/auth/user', {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Not authenticated');
+      }
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      console.error('Failed to fetch current user:', error);
+      return null;
+    }
+  }
+
   static async getUserById(id: string) {
     return await prisma.user.findUnique({
       where: { id },
@@ -391,6 +421,71 @@ export class UserService {
       currentContract,
       careerStats,
     };
+  }
+
+  static async updateAvatar(userId: string, file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // First upload to Cloudinary
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const error = await uploadResponse.json();
+        throw new Error(error.message || 'Failed to upload file');
+      }
+
+      const uploadData = await uploadResponse.json();
+
+      // Then update the user's avatarUrl
+      const updateResponse = await fetch(`/api/users/${userId}/avatar`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ avatarUrl: uploadData.url }),
+      });
+
+      const responseData = await updateResponse.json();
+
+      if (!updateResponse.ok) {
+        throw new Error(responseData.message || responseData.details || 'Failed to update user avatar');
+      }
+
+      return responseData.user;
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      throw error;
+    }
+  }
+
+  static async removeAvatar(userId: string) {
+    try {
+      const response = await fetch(`/api/users/${userId}/avatar`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to remove avatar');
+      }
+
+      const { user } = await response.json();
+      return user;
+    } catch (error) {
+      console.error('Error removing avatar:', error);
+      throw error;
+    }
   }
 }
 
