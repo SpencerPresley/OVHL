@@ -17,7 +17,9 @@ export function ProfileForm({ formData, onSubmit, onChange }: ProfileFormProps) 
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-gray-200">Display Name</Label>
+          <Label htmlFor="name" className="text-gray-200">
+            Display Name
+          </Label>
           <div className="flex items-center gap-2">
             <UserIcon className="h-4 w-4 text-gray-400" />
             <Input
@@ -30,7 +32,9 @@ export function ProfileForm({ formData, onSubmit, onChange }: ProfileFormProps) 
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-gray-200">Username</Label>
+          <Label htmlFor="username" className="text-gray-200">
+            Username
+          </Label>
           <div className="flex items-center gap-2">
             <span className="text-gray-400">@</span>
             <Input
@@ -44,8 +48,10 @@ export function ProfileForm({ formData, onSubmit, onChange }: ProfileFormProps) 
         </div>
       </div>
       <div className="flex justify-end">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Save Changes</Button>
+        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+          Save Changes
+        </Button>
       </div>
     </form>
   );
-} 
+}

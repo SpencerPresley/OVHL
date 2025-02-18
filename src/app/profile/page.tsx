@@ -36,9 +36,9 @@ export default function ProfilePage() {
     name: '',
     username: '',
     email: '',
-    avatarUrl: null as string | null
+    avatarUrl: null as string | null,
   });
-  
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -54,7 +54,7 @@ export default function ProfilePage() {
           name: userData.name || '',
           username: userData.username || '',
           email: userData.email,
-          avatarUrl: userData.avatarUrl
+          avatarUrl: userData.avatarUrl,
         });
       } catch (error) {
         console.error('Failed to fetch user:', error);
@@ -75,39 +75,39 @@ export default function ProfilePage() {
       const updatedUser = await UserService.updateProfile(user.id, formData);
       setUser({
         ...updatedUser,
-        avatarUrl: user.avatarUrl // Preserve the avatar URL since it's not part of the update
+        avatarUrl: user.avatarUrl, // Preserve the avatar URL since it's not part of the update
       });
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated.',
       });
     } catch (error) {
       console.error('Failed to update profile:', error);
       toast({
-        title: "Update Failed",
-        description: "Failed to update your profile. Please try again.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: 'Failed to update your profile. Please try again.',
+        variant: 'destructive',
       });
     }
   };
 
   const handleFieldChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleResetPassword = async () => {
     // TODO: Implement password reset
     toast({
-      title: "Coming Soon",
-      description: "Password reset functionality will be available soon.",
+      title: 'Coming Soon',
+      description: 'Password reset functionality will be available soon.',
     });
   };
 
   const handleDeleteAccount = async () => {
     // TODO: Implement account deletion
     toast({
-      title: "Coming Soon",
-      description: "Account deletion functionality will be available soon.",
+      title: 'Coming Soon',
+      description: 'Account deletion functionality will be available soon.',
     });
   };
 
@@ -117,20 +117,20 @@ export default function ProfilePage() {
     try {
       const updatedUser = await UserService.updateAvatar(user.id, file);
       setUser(updatedUser);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        avatarUrl: updatedUser.avatarUrl
+        avatarUrl: updatedUser.avatarUrl,
       }));
       toast({
-        title: "Avatar Updated",
-        description: "Your avatar has been successfully updated.",
+        title: 'Avatar Updated',
+        description: 'Your avatar has been successfully updated.',
       });
     } catch (error) {
       console.error('Failed to upload avatar:', error);
       toast({
-        title: "Upload Failed",
-        description: "Failed to upload avatar. Please try again.",
-        variant: "destructive",
+        title: 'Upload Failed',
+        description: 'Failed to upload avatar. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -141,27 +141,29 @@ export default function ProfilePage() {
     try {
       const updatedUser = await UserService.removeAvatar(user.id);
       setUser(updatedUser);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        avatarUrl: null
+        avatarUrl: null,
       }));
       toast({
-        title: "Avatar Removed",
-        description: "Your avatar has been successfully removed.",
+        title: 'Avatar Removed',
+        description: 'Your avatar has been successfully removed.',
       });
     } catch (error) {
       console.error('Failed to remove avatar:', error);
       toast({
-        title: "Removal Failed",
-        description: "Failed to remove avatar. Please try again.",
-        variant: "destructive",
+        title: 'Removal Failed',
+        description: 'Failed to remove avatar. Please try again.',
+        variant: 'destructive',
       });
     }
   };
 
   if (loading || !user) return null;
 
-  const initials = user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+  const initials = user.name
+    ? user.name.charAt(0).toUpperCase()
+    : user.email.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

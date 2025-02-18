@@ -7,10 +7,7 @@ import { Prisma } from '@prisma/client';
 export const dynamic = 'force-dynamic';
 
 // Update avatar URL
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = await params;
     const cookieStore = await cookies();
@@ -34,8 +31,8 @@ export async function PUT(
     try {
       const user = await prisma.user.update({
         where: { id },
-        data: { 
-          avatarUrl 
+        data: {
+          avatarUrl,
         },
       });
 
@@ -43,24 +40,27 @@ export async function PUT(
     } catch (prismaError) {
       if (prismaError instanceof Prisma.PrismaClientKnownRequestError) {
         console.error('Prisma error:', prismaError.message);
-        return NextResponse.json({ message: `Database error: ${prismaError.message}` }, { status: 500 });
+        return NextResponse.json(
+          { message: `Database error: ${prismaError.message}` },
+          { status: 500 }
+        );
       }
       throw prismaError;
     }
   } catch (error: any) {
     console.error('Failed to update avatar:', error);
-    return NextResponse.json({ 
-      message: error.message || 'Failed to update avatar',
-      details: error.toString()
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: error.message || 'Failed to update avatar',
+        details: error.toString(),
+      },
+      { status: 500 }
+    );
   }
 }
 
 // Remove avatar
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = await params;
     const cookieStore = await cookies();
@@ -82,8 +82,8 @@ export async function DELETE(
     try {
       const user = await prisma.user.update({
         where: { id },
-        data: { 
-          avatarUrl: null 
+        data: {
+          avatarUrl: null,
         },
       });
 
@@ -91,15 +91,21 @@ export async function DELETE(
     } catch (prismaError) {
       if (prismaError instanceof Prisma.PrismaClientKnownRequestError) {
         console.error('Prisma error:', prismaError.message);
-        return NextResponse.json({ message: `Database error: ${prismaError.message}` }, { status: 500 });
+        return NextResponse.json(
+          { message: `Database error: ${prismaError.message}` },
+          { status: 500 }
+        );
       }
       throw prismaError;
     }
   } catch (error: any) {
     console.error('Failed to remove avatar:', error);
-    return NextResponse.json({ 
-      message: error.message || 'Failed to remove avatar',
-      details: error.toString()
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: error.message || 'Failed to remove avatar',
+        details: error.toString(),
+      },
+      { status: 500 }
+    );
   }
-} 
+}

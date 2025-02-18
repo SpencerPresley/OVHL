@@ -42,7 +42,7 @@ interface UserNavProps {
  * @returns {JSX.Element} Rendered user navigation menu
  */
 export function UserNav({ user }: UserNavProps) {
-  const initials = user.name 
+  const initials = user.name
     ? user.name.charAt(0).toUpperCase()
     : user.email.charAt(0).toUpperCase();
 
@@ -69,7 +69,7 @@ export function UserNav({ user }: UserNavProps) {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent h-8 w-8 p-0">
             <Avatar className="h-8 w-8 cursor-pointer border border-white/20">
-              <AvatarImage src={user.avatarUrl || ""} alt={user.name || user.email} />
+              <AvatarImage src={user.avatarUrl || ''} alt={user.name || user.email} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </NavigationMenuTrigger>

@@ -22,13 +22,13 @@ interface AvatarUploadProps {
   onRemove: () => Promise<void>;
 }
 
-export function AvatarUpload({ 
-  imageUrl, 
-  initials, 
-  name, 
-  username, 
+export function AvatarUpload({
+  imageUrl,
+  initials,
+  name,
+  username,
   onUpload,
-  onRemove 
+  onRemove,
 }: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +59,7 @@ export function AvatarUpload({
             <AvatarFallback className="text-2xl bg-gray-800">{initials}</AvatarFallback>
           )}
         </Avatar>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -99,10 +99,8 @@ export function AvatarUpload({
 
       <div className="space-y-1">
         <h3 className="text-2xl font-medium">{name || 'Add your name'}</h3>
-        <p className="text-gray-300">
-          {username ? `@${username}` : 'Set a username'}
-        </p>
+        <p className="text-gray-300">{username ? `@${username}` : 'Set a username'}</p>
       </div>
     </div>
   );
-} 
+}

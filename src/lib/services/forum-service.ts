@@ -254,4 +254,4 @@ export class ForumService {
     });
     return !!comment;
   }
-} 
+}

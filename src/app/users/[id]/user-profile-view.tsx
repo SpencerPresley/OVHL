@@ -5,7 +5,12 @@ import { Nav } from '@/components/nav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { UserService, type UserProfileResponse, type FormattedUserProfile, type PlayerProfile } from '@/lib/services/user-service';
+import {
+  UserService,
+  type UserProfileResponse,
+  type FormattedUserProfile,
+  type PlayerProfile,
+} from '@/lib/services/user-service';
 
 interface UserProfileViewProps {
   user: UserProfileResponse;
@@ -44,7 +49,14 @@ export function UserProfileView({ user }: UserProfileViewProps) {
     );
   }
 
-  const { currentGamertag, initials, system, currentContract, careerStats, user: { player } } = profileData;
+  const {
+    currentGamertag,
+    initials,
+    system,
+    currentContract,
+    careerStats,
+    user: { player },
+  } = profileData;
 
   return (
     <div>

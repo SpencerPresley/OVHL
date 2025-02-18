@@ -14,10 +14,7 @@ export async function POST(request: Request) {
     const token = cookieStore.get('token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { message: 'No authentication token found' },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: 'No authentication token found' }, { status: 401 });
     }
 
     try {
@@ -34,10 +31,7 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { message: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'No file provided' }, { status: 400 });
     }
 
     // Convert File to base64
@@ -49,9 +43,7 @@ export async function POST(request: Request) {
       // Upload to Cloudinary
       const result = await cloudinary.uploader.upload(fileBase64, {
         folder: 'avatars',
-        transformation: [
-          { width: 200, height: 200, crop: 'fill', gravity: 'face' }
-        ]
+        transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }],
       });
 
       return NextResponse.json({ url: result.secure_url });
@@ -64,9 +56,6 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json(
-      { message: 'Failed to process upload request' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Failed to process upload request' }, { status: 500 });
   }
-} 
+}

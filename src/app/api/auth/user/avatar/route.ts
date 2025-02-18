@@ -62,4 +62,4 @@ export async function DELETE(request: Request) {
     console.error('Failed to remove avatar:', error);
     return NextResponse.json({ error: 'Failed to remove avatar' }, { status: 500 });
   }
-} 
+}

@@ -12,12 +12,12 @@ interface AccountFormProps {
   onDeleteAccount: () => void;
 }
 
-export function AccountForm({ 
-  email, 
-  isAdmin, 
-  onEmailChange, 
-  onResetPassword, 
-  onDeleteAccount 
+export function AccountForm({
+  email,
+  isAdmin,
+  onEmailChange,
+  onResetPassword,
+  onDeleteAccount,
 }: AccountFormProps) {
   return (
     <div className="space-y-6">
@@ -44,23 +44,21 @@ export function AccountForm({
           <Shield className="h-5 w-5 text-blue-400" />
           <div>
             <h4 className="font-medium text-white">Administrator Account</h4>
-            <p className="text-sm text-gray-300">
-              This account has administrative privileges
-            </p>
+            <p className="text-sm text-gray-300">This account has administrative privileges</p>
           </div>
         </div>
       )}
 
       <div className="flex justify-between">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="border-white/10 text-white hover:bg-gray-800/50"
           onClick={onResetPassword}
         >
           Reset Password
         </Button>
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           className="bg-red-600 hover:bg-red-700"
           onClick={onDeleteAccount}
         >
@@ -69,4 +67,4 @@ export function AccountForm({
       </div>
     </div>
   );
-} 
+}

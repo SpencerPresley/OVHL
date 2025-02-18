@@ -1,9 +1,9 @@
-import { 
-    Prisma, 
-    NotificationType, 
-    NotificationStatus, 
-    ForumPostStatus, 
-    System,
+import {
+  Prisma,
+  NotificationType,
+  NotificationStatus,
+  ForumPostStatus,
+  System,
 } from '@prisma/client';
 import { prisma } from '../prisma';
 
@@ -159,67 +159,62 @@ export class UserService {
     });
   }
 
-
   static async findByEmail(email: string) {
     return prisma.user.findUnique({
-        where: { email },
+      where: { email },
     });
   }
 
   static async findByUsername(username: string) {
     return prisma.user.findUnique({
-        where: { username },
+      where: { username },
     });
   }
 
   static async updateProfile(
     id: string,
     data: {
-        name?: string;
-        email?: string;
-        username?: string;
+      name?: string;
+      email?: string;
+      username?: string;
     }
   ) {
     return prisma.user.update({
-        where: { id },
-        data,
+      where: { id },
+      data,
     });
   }
 
-
-  static async getUserNotifications(
-    userId: string,
-    status?: NotificationStatus,
-  ) {
+  static async getUserNotifications(userId: string, status?: NotificationStatus) {
     return prisma.notification.findMany({
-        where: {
-            userId,
-            status: status || undefined,
-        },
-        orderBy: {
-            createdAt: 'desc',
-        },
+      where: {
+        userId,
+        status: status || undefined,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
   static async getUserForumPosts(userId: string) {
     return prisma.forumPost.findMany({
-        where: {
-          authorId: userId,
-          status: 'PUBLISHED',
-        },
-        include: {
-          _count: {
-            select: {
-              comments: true,
-              reactions: true,
-            },
+      where: {
+        authorId: userId,
+        status: 'PUBLISHED',
+      },
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            reactions: true,
           },
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   static async getUserForumActivity(userId: string) {
@@ -263,7 +258,7 @@ export class UserService {
       },
     });
   }
-  
+
   // For type safety in components
   static readonly UserProfileInclude = {
     player: {
@@ -455,7 +450,9 @@ export class UserService {
       const responseData = await updateResponse.json();
 
       if (!updateResponse.ok) {
-        throw new Error(responseData.message || responseData.details || 'Failed to update user avatar');
+        throw new Error(
+          responseData.message || responseData.details || 'Failed to update user avatar'
+        );
       }
 
       return responseData.user;

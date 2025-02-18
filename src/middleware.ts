@@ -2,11 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Define protected routes that require authentication
-const protectedRoutes = [
-  '/profile',
-  '/api/upload',
-  '/api/users',
-];
+const protectedRoutes = ['/profile', '/api/upload', '/api/users'];
 
 /**
  * Authentication Middleware
@@ -28,7 +24,7 @@ export function middleware(request: NextRequest) {
   const hasToken = request.cookies.has('token');
 
   // Check if the current path is a protected route
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   // If it's a protected route and no token exists, redirect to sign-in
   if (isProtectedRoute && !hasToken) {
@@ -42,9 +38,5 @@ export function middleware(request: NextRequest) {
  * Configure which routes the middleware should run on
  */
 export const config = {
-  matcher: [
-    '/profile/:path*',
-    '/api/upload/:path*',
-    '/api/users/:path*',
-  ],
+  matcher: ['/profile/:path*', '/api/upload/:path*', '/api/users/:path*'],
 };

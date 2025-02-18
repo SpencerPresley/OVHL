@@ -79,11 +79,9 @@ export default async function Home() {
 
         {/* CTA Section */}
         <HomeCTA />
-
       </main>
 
       <Footer />
-
     </div>
   );
 }
