@@ -4,6 +4,7 @@ import { NHL_TEAMS } from '@/lib/teams/nhl';
 import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
+import { NHLDivision, AHLDivision, ECHLDivision } from '@/lib/teams/types';
 
 const prisma = new PrismaClient();
 
@@ -18,15 +19,46 @@ const LEAGUE_LEVELS: Record<string, number> = {
 
 // Helper function to get division for a team
 function getTeamDivision(teamIdentifier: string, leagueId: string) {
+  const teamId = teamIdentifier.toLowerCase();
+  console.log('Looking up division for:', { teamId, leagueId });
+
   switch (leagueId) {
-    case 'nhl':
-      return NHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
-    case 'ahl':
-      return AHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
-    case 'echl':
-      return ECHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
-    case 'chl':
-      return CHL_TEAMS.find((t) => t.id.toUpperCase() === teamIdentifier)?.division;
+    case 'nhl': {
+      const team = NHL_TEAMS.find((t) => t.id === teamId);
+      console.log('Found NHL team:', { team, validDivisions: Object.values(NHLDivision) });
+      // Verify it's an NHL division
+      if (team?.division && Object.values(NHLDivision).includes(team.division)) {
+        return team.division;
+      }
+      return null;
+    }
+    case 'ahl': {
+      const team = AHL_TEAMS.find((t) => t.id === teamId);
+      console.log('Found AHL team:', { team, validDivisions: Object.values(AHLDivision) });
+      // Verify it's an AHL division
+      if (team?.division && Object.values(AHLDivision).includes(team.division)) {
+        return team.division;
+      }
+      return null;
+    }
+    case 'echl': {
+      const team = ECHL_TEAMS.find((t) => t.id === teamId);
+      console.log('Found ECHL team:', { team, validDivisions: Object.values(ECHLDivision) });
+      // Verify it's an ECHL division
+      if (team?.division && Object.values(ECHLDivision).includes(team.division)) {
+        return team.division;
+      }
+      return null;
+    }
+    case 'chl': {
+      const team = CHL_TEAMS.find((t) => t.id === teamId);
+      console.log('Found CHL team:', { team });
+      // For CHL we also check the league property
+      if (team?.division && team.league) {
+        return team.division;
+      }
+      return null;
+    }
     default:
       return null;
   }
@@ -55,7 +87,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const tier = await prisma.tier.findFirst({
       where: {
         seasonId: latestSeason.id,
-        leagueLevel,
+        name: leagueId.toUpperCase(),
       },
     });
 
@@ -73,6 +105,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
     });
 
+    console.log('Found team seasons:', teamSeasons.map(ts => ({
+      teamId: ts.teamId,
+      identifier: ts.team.teamIdentifier,
+      name: ts.team.officialName
+    })));
+
     // Calculate stats and group teams by division
     const teamsByDivision = new Map<string, any[]>();
 
@@ -80,9 +118,28 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       const division = getTeamDivision(ts.team.teamIdentifier, leagueId);
       if (!division) return;
 
+      // Get the correct team data from the league-specific data
+      let teamData;
+      switch (leagueId) {
+        case 'nhl':
+          teamData = NHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
+          break;
+        case 'ahl':
+          teamData = AHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
+          break;
+        case 'echl':
+          teamData = ECHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
+          break;
+        case 'chl':
+          teamData = CHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
+          break;
+      }
+
+      if (!teamData) return;
+
       const teamStats = {
         teamId: ts.teamId,
-        teamName: ts.team.officialName,
+        teamName: teamData.name,  // Use the name from league data instead of database
         teamIdentifier: ts.team.teamIdentifier,
         gamesPlayed: ts.matchesPlayed,
         wins: ts.wins,
