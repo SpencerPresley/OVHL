@@ -6,8 +6,9 @@ import { UserService } from '@/lib/services/user-service';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
+    const { id } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
 
@@ -34,7 +35,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: 'No active season found' }, { status: 404 });
     }
 
-    const teams = await prisma.team.findMany({
+    const team = await prisma.team.findUnique({
+      where: { id },
       include: {
         nhlAffiliate: true,
         ahlAffiliate: true,
@@ -51,16 +53,45 @@ export async function GET(request: Request) {
             createdAt: 'desc'
           },
           take: 1
+        },
+        managers: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                player: {
+                  include: {
+                    gamertags: {
+                      orderBy: {
+                        createdAt: 'desc'
+                      },
+                      take: 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          orderBy: {
+            role: 'asc'
+          }
         }
-      },
+      }
     });
 
-    return NextResponse.json({ teams });
+    if (!team) {
+      return NextResponse.json({ message: 'Team not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ team });
   } catch (error: any) {
-    console.error('Failed to fetch teams:', error);
+    console.error('Failed to fetch team:', error);
     return NextResponse.json(
-      { message: error.message || 'Failed to fetch teams' },
+      { message: error.message || 'Failed to fetch team' },
       { status: 500 }
     );
   }
-}
+} 

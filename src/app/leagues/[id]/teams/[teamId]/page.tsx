@@ -72,7 +72,11 @@ export default async function TeamPage({ params }: { params: { id: string; teamI
                 include: {
                   player: {
                     include: {
-                      gamertags: true,
+                      user: true,
+                      gamertags: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                      },
                     },
                   },
                   contract: true,
@@ -80,6 +84,29 @@ export default async function TeamPage({ params }: { params: { id: string; teamI
               },
             },
           },
+        },
+      },
+      managers: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              username: true,
+              player: {
+                include: {
+                  gamertags: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          role: 'asc',
         },
       },
     },
@@ -91,5 +118,23 @@ export default async function TeamPage({ params }: { params: { id: string; teamI
 
   const teamSeason = team.seasons[0];
 
-  return <TeamDisplay league={league} team={team} teamSeason={teamSeason} />;
+  // Debug log to check the data structure
+  console.log('Team Data:', {
+    managers: team.managers.map(m => ({
+      role: m.role,
+      userId: m.user.id,
+    })),
+    players: teamSeason.players.map(p => ({
+      name: p.playerSeason.player.name,
+      userId: p.playerSeason.player.user?.id,
+      contract: p.playerSeason.contract,
+    }))
+  });
+
+  return <TeamDisplay 
+    league={league} 
+    team={team} 
+    teamSeason={teamSeason} 
+    managers={team.managers} 
+  />;
 }

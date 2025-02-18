@@ -63,6 +63,7 @@ model User {
   forumReactions      ForumReaction[]
   forumFollowing      ForumFollower[]
   forumSubscriptions  ForumPostSubscription[]
+  teamManagement      TeamManager[]
 
   @@map("User")
 }
@@ -132,6 +133,7 @@ model Team {
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   seasons        TeamSeason[]
+  managers       TeamManager[]
 
   // Affiliation relationships
   nhlAffiliateId String? @map("nhl_affiliate_id")
@@ -180,6 +182,7 @@ model PlayerSeason {
   id             String              @id @default(uuid())
   playerId       String              @map("player_id")
   seasonId       String              @map("season_id")
+  contractId     String              @unique @map("contract_id")
   position       String
   gamesPlayed    Int?                @map("games_played")
   goals          Int?
@@ -196,9 +199,9 @@ model PlayerSeason {
   updatedAt      DateTime            @updatedAt @map("updated_at")
   player         Player              @relation(fields: [playerId], references: [id])
   season         Season              @relation(fields: [seasonId], references: [id])
+  contract       Contract            @relation(fields: [contractId], references: [id])
   teamSeasons    PlayerTeamSeason[]
   tierHistory    PlayerTierHistory[]
-  contract       Contract? // One-to-one relation with Contract
 
   @@map("player_seasons")
 }
@@ -243,11 +246,10 @@ model PlayerTeamSeason {
 // New models for contracts and bidding
 model Contract {
   id             String       @id @default(uuid())
-  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id])
-  playerSeasonId String       @unique @map("player_season_id")
-  amount         Int // Contract amount in dollars
+  amount         Int // Contract amount in dollars, required
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
+  playerSeason   PlayerSeason?
   bids           Bid[] // One-to-many relation with Bid
 
   @@map("contracts")
@@ -452,4 +454,27 @@ model ForumComment {
   @@index([authorId])
   @@index([postId])
   @@map("forum_comments")
+}
+
+enum TeamManagementRole {
+  OWNER
+  GM
+  AGM
+  PAGM
+}
+
+model TeamManager {
+  id        String              @id @default(cuid())
+  userId    String             @map("user_id")
+  teamId    String             @map("team_id")
+  role      TeamManagementRole
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  user      User               @relation(fields: [userId], references: [id])
+  team      Team               @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId, role])
+  @@index([userId])
+  @@index([teamId])
+  @@map("team_managers")
 }

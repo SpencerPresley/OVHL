@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { System } from '@prisma/client';
+import { System, TeamManagementRole } from '@prisma/client';
 import { POSITION_COLORS } from '@/lib/constants';
 
 interface League {
@@ -14,6 +14,28 @@ interface League {
   name: string;
   logo: string;
   bannerColor: string;
+}
+
+interface Manager {
+  role: TeamManagementRole;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    username: string | null;
+    player: {
+      id: string;
+      gamertags: {
+        gamertag: string;
+      }[];
+    } | null;
+  };
+}
+
+interface Team {
+  id: string;
+  officialName: string;
+  managers: Manager[];
 }
 
 interface PlayerCard {
@@ -29,30 +51,39 @@ interface PlayerCard {
   plusMinus: number;
   contract: {
     amount: number;
-  } | null;
+  };
+  isManager: boolean;
 }
 
 interface TeamDisplayProps {
   league: League;
-  team: any;
+  team: Team;
   teamSeason: any;
+  managers: Manager[];
 }
 
-export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
+export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayProps) {
   // Process players into position groups
-  const players = teamSeason.players.map((ps: any) => ({
-    id: ps.playerSeason.player.id,
-    name: ps.playerSeason.player.name,
-    position: ps.playerSeason.position,
-    system: ps.playerSeason.player.activeSystem,
-    gamertag: ps.playerSeason.player.gamertags[0]?.gamertag || ps.playerSeason.player.name,
-    gamesPlayed: ps.gamesPlayed,
-    goals: ps.goals,
-    assists: ps.assists,
-    points: ps.goals + ps.assists,
-    plusMinus: ps.plusMinus,
-    contract: ps.playerSeason.contract,
-  }));
+  const players = teamSeason.players.map((ps: any) => {
+    const manager = managers.find(
+      (m: Manager) => m.user.id === ps.playerSeason.player.user?.id
+    );
+
+    return {
+      id: ps.playerSeason.player.id,
+      name: ps.playerSeason.player.name,
+      position: ps.playerSeason.position,
+      system: ps.playerSeason.player.activeSystem,
+      gamertag: ps.playerSeason.player.gamertags[0]?.gamertag || ps.playerSeason.player.name,
+      gamesPlayed: ps.gamesPlayed,
+      goals: ps.goals,
+      assists: ps.assists,
+      points: ps.goals + ps.assists,
+      plusMinus: ps.plusMinus,
+      contract: ps.playerSeason.contract,
+      isManager: !!manager
+    };
+  });
 
   console.log('All available colors:', POSITION_COLORS);
   console.log(
@@ -126,8 +157,46 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
 
       <LeagueNav leagueId={league.id} />
 
-      {/* Roster Content */}
+      {/* Team Management */}
       <div className="container mx-auto px-4 py-8">
+        <Card className="mb-8 card-gradient card-hover">
+          <CardHeader>
+            <CardTitle>Team Management</CardTitle>
+            <CardDescription>Current team management staff</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {['OWNER', 'GM', 'AGM', 'PAGM'].map((role) => {
+                const manager = managers.find(m => m.role === role);
+                const isHigherRole = ['OWNER', 'GM', 'AGM'].includes(role);
+                
+                return (
+                  <div 
+                    key={role}
+                    className={`p-4 rounded-lg ${isHigherRole ? 'bg-gray-800/50' : 'bg-gray-700/30'} border border-white/10`}
+                  >
+                    <h3 className="font-semibold mb-2">{role}</h3>
+                    {manager ? (
+                      <Link 
+                        href={`/users/${manager.user.id}`}
+                        className="text-sm hover:text-blue-400"
+                      >
+                        {manager.user.name || 
+                         manager.user.username || 
+                         manager.user.player?.gamertags[0]?.gamertag || 
+                         manager.user.email}
+                      </Link>
+                    ) : (
+                      <span className="text-sm text-gray-400">Vacant</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Roster Content */}
         {/* Forwards */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Forwards</h2>
@@ -149,7 +218,8 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                       {player.gamertag}
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
-                      Contract: ${(player.contract?.amount || 500000).toLocaleString()}
+                      Contract: ${player.contract.amount.toLocaleString()}
+                      {player.isManager && " (Management)"}
                     </div>
                   </CardDescription>
                 </CardHeader>
@@ -204,7 +274,8 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                       {player.gamertag}
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
-                      Contract: ${(player.contract?.amount || 500000).toLocaleString()}
+                      Contract: ${player.contract.amount.toLocaleString()}
+                      {player.isManager && " (Management)"}
                     </div>
                   </CardDescription>
                 </CardHeader>
@@ -259,7 +330,8 @@ export function TeamDisplay({ league, team, teamSeason }: TeamDisplayProps) {
                       {player.gamertag}
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
-                      Contract: ${(player.contract?.amount || 500000).toLocaleString()}
+                      Contract: ${player.contract.amount.toLocaleString()}
+                      {player.isManager && " (Management)"}
                     </div>
                   </CardDescription>
                 </CardHeader>

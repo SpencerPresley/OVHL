@@ -118,15 +118,15 @@ export async function POST() {
             // Create a player season with stats
             const playerSeason = await prisma.playerSeason.create({
               data: {
-                playerId: player.id,
-                seasonId: season.id,
+                player: { connect: { id: player.id } },
+                season: { connect: { id: season.id } },
                 position: pos,
                 ...stats,
                 contract: {
                   create: {
-                    amount: 500000,
-                  },
-                },
+                    amount: Math.floor(Math.random() * 1500000) + 500000
+                  }
+                }
               },
             });
 

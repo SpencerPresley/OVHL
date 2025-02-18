@@ -237,6 +237,32 @@ export default function AdminPage() {
         </Card>
       </div>
 
+      {/* League Management Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-8">
+        {['NHL', 'AHL', 'ECHL', 'CHL'].map((league) => (
+          <Card key={league}>
+            <CardHeader>
+              <CardTitle>{league} Management</CardTitle>
+              <CardDescription>
+                Manage {league} team staff positions (
+                {league === 'NHL' || league === 'CHL'
+                  ? 'Owner, GM, AGM, PAGM'
+                  : 'GM, AGM, PAGM'}
+                )
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                onClick={() => router.push(`/admin/leagues/${league.toLowerCase()}/management`)}
+              >
+                Manage {league} Teams
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       {/* EA Club ID Management */}
       <Card className="mt-8">
         <CardHeader>

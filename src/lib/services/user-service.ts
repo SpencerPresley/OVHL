@@ -404,7 +404,7 @@ export class UserService {
     const currentGamertag = user.player.gamertags[0]?.gamertag || 'Unknown Player';
     const initials = currentGamertag.charAt(0).toUpperCase();
     const system = user.player.gamertags[0]?.system || 'Unknown System';
-    const currentContract = user.player.seasons[0]?.contract?.amount || 500000;
+    const currentContract = user.player.seasons[0].contract.amount;
     const careerStats = this.calculateCareerStats(user.player.seasons);
 
     return {
