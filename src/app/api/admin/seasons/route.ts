@@ -13,10 +13,10 @@ export const dynamic = 'force-dynamic';
 
 // League tiers configuration with their teams
 const LEAGUE_TIERS = [
-  { name: 'NHL', level: 1, teams: NHL_TEAMS },
-  { name: 'AHL', level: 2, teams: AHL_TEAMS },
-  { name: 'ECHL', level: 3, teams: ECHL_TEAMS },
-  { name: 'CHL', level: 4, teams: CHL_TEAMS },
+  { name: 'NHL', level: 1, teams: NHL_TEAMS, salaryCap: 45000000 },
+  { name: 'AHL', level: 2, teams: AHL_TEAMS, salaryCap: 35000000 },
+  { name: 'ECHL', level: 3, teams: ECHL_TEAMS, salaryCap: 25000000 },
+  { name: 'CHL', level: 4, teams: CHL_TEAMS, salaryCap: 25000000 },
 ] as const;
 
 export async function POST(request: NextRequest) {
@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
           seasonId: season.id,
           name: tierData.name,
           leagueLevel: tierData.level,
+          salaryCap: tierData.salaryCap,
         },
       });
 
@@ -87,6 +88,19 @@ export async function POST(request: NextRequest) {
           data: {
             teamId: team.id,
             tierId: tier.id,
+            wins: 0,
+            losses: 0,
+            otLosses: 0,
+            goalsAgainst: 0,
+            goalsFor: 0,
+            matchesPlayed: 0,
+            penaltyKillGoalsAgainst: 0,
+            penaltyKillOpportunities: 0,
+            powerplayGoals: 0,
+            powerplayOpportunities: 0,
+            shots: 0,
+            shotsAgainst: 0,
+            timeOnAttack: 0,
           },
         });
       }

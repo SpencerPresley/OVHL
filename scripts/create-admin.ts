@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, System } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -26,7 +26,29 @@ async function createAdmin() {
       },
     });
 
-    console.log('Admin user created successfully:', admin.id);
+    // Create player record for admin
+    const player = await prisma.player.create({
+      data: {
+        id: admin.id,
+        ea_id: 'EA_ADMIN',
+        name: 'Admin',
+        activeSystem: System.PS,
+      },
+    });
+
+    // Create gamertag history
+    await prisma.gamertagHistory.create({
+      data: {
+        playerId: player.id,
+        system: System.PS,
+        gamertag: 'AdminGT',
+      },
+    });
+
+    console.log('Admin user and player created successfully:', {
+      userId: admin.id,
+      playerId: player.id,
+    });
   } catch (error) {
     console.error('Failed to create admin:', error);
   } finally {

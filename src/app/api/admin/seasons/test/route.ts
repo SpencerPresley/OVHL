@@ -65,6 +65,19 @@ export async function GET() {
           data: {
             teamId: team.id,
             tierId: tier.id,
+            wins: 0,
+            losses: 0,
+            otLosses: 0,
+            goalsAgainst: 0,
+            goalsFor: 0,
+            matchesPlayed: 0,
+            penaltyKillGoalsAgainst: 0,
+            penaltyKillOpportunities: 0,
+            powerplayGoals: 0,
+            powerplayOpportunities: 0,
+            shots: 0,
+            shotsAgainst: 0,
+            timeOnAttack: 0,
           },
         });
       }

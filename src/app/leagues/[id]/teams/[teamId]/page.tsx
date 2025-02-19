@@ -66,6 +66,7 @@ export default async function TeamPage({ params }: { params: { id: string; teamI
           },
         },
         include: {
+          tier: true,
           players: {
             include: {
               playerSeason: {
@@ -128,13 +129,18 @@ export default async function TeamPage({ params }: { params: { id: string; teamI
       name: p.playerSeason.player.name,
       userId: p.playerSeason.player.user?.id,
       contract: p.playerSeason.contract,
-    }))
+    })),
+    tier: teamSeason.tier,
+    salaryCap: teamSeason.tier.salaryCap
   });
 
   return <TeamDisplay 
     league={league} 
     team={team} 
-    teamSeason={teamSeason} 
+    teamSeason={{
+      ...teamSeason,
+      tier: teamSeason.tier
+    }}
     managers={team.managers} 
   />;
 }

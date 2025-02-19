@@ -38,6 +38,16 @@ interface Team {
   managers: Manager[];
 }
 
+interface TeamSeason {
+  players: any[];
+  tier: {
+    salaryCap: number;
+  };
+  wins: number;
+  losses: number;
+  otLosses: number;
+}
+
 interface PlayerCard {
   id: string;
   name: string;
@@ -58,7 +68,7 @@ interface PlayerCard {
 interface TeamDisplayProps {
   league: League;
   team: Team;
-  teamSeason: any;
+  teamSeason: TeamSeason;
   managers: Manager[];
 }
 
@@ -130,6 +140,26 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
   const teamRecord = `${teamSeason.wins}-${teamSeason.losses}-${teamSeason.otLosses}`;
   const points = teamSeason.wins * 2 + teamSeason.otLosses;
 
+  const totalSalary = players.reduce((total, player) => total + player.contract.amount, 0);
+  const salaryCap = teamSeason.tier?.salaryCap ?? 0;
+  let salaryColor = 'text-white';
+  if (totalSalary > salaryCap) {
+    salaryColor = 'text-red-500';
+  } else if (totalSalary === salaryCap) {
+    salaryColor = 'text-green-500';
+  }
+
+  // Debug log for salary data
+  console.log('Salary Data:', {
+    totalSalary,
+    salaryCap,
+    tier: teamSeason.tier,
+    players: players.map(p => ({
+      name: p.name,
+      contractAmount: p.contract.amount
+    }))
+  });
+
   return (
     <div className="min-h-screen">
       <Nav />
@@ -147,9 +177,14 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
             />
             <div>
               <h1 className="text-4xl font-bold text-white">{team.officialName}</h1>
-              <p className="text-xl text-white/80">
-                Record: {teamRecord} ({points} pts)
-              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-xl text-white/80">
+                  Record: {teamRecord} ({(teamSeason.wins * 2) + teamSeason.otLosses} pts)
+                </p>
+                <p className={`text-xl ${salaryColor}`}>
+                  Salary: ${totalSalary.toLocaleString()} / ${salaryCap.toLocaleString()}
+                </p>
+              </div>
             </div>
           </div>
         </div>

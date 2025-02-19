@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const decoded = verify(token.value, process.env.JWT_SECRET || '') as {
-      userId: string;
+      id: string;
       email: string;
     };
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     // Get player record
     const player = await prisma.player.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
     });
 
     if (!player) {
@@ -73,12 +73,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Already signed up for this season' }, { status: 400 });
     }
 
-    // Create player season record
+    // Create contract first
+    const contract = await prisma.contract.create({
+      data: {
+        amount: 500000 // Default contract amount
+      }
+    });
+
+    // Create player season record with contract
     await prisma.playerSeason.create({
       data: {
-        playerId: player.id,
-        seasonId: season.id,
+        player: { connect: { id: player.id } },
+        season: { connect: { id: season.id } },
+        contract: { connect: { id: contract.id } },
         position: position,
+        gamesPlayed: 0,
+        goals: 0,
+        assists: 0,
+        plusMinus: 0,
+        shots: 0,
+        hits: 0,
+        takeaways: 0,
+        giveaways: 0,
+        penaltyMinutes: 0,
+        ...(position === 'G' ? { saves: 0, goalsAgainst: 0 } : {})
       },
     });
 

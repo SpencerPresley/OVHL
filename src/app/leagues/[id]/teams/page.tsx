@@ -114,27 +114,24 @@ export default async function TeamsPage({ params }: { params: { id: string } }) 
     notFound();
   }
 
-  // Debug log to check contract data
-  console.log('Contract Debug:', tier.teams.map(teamSeason => ({
-    team: teamSeason.team.officialName,
-    players: teamSeason.players.map(p => ({
-      name: p.playerSeason.player.name,
-      userId: p.playerSeason.player.user.id,
-      contract: p.playerSeason.contract,
-      managers: teamSeason.team.managers
-        .filter(m => m.user.id === p.playerSeason.player.user.id)
-        .map(m => ({ role: m.role }))
-    }))
-  })));
+  // Debug log for tier data
+  console.log('Tier Data:', {
+    name: tier.name,
+    salaryCap: tier.salaryCap,
+    teamsCount: tier.teams.length
+  });
 
   // Map the data structure to match what TeamsDisplay expects
   const teams = tier.teams.map((teamSeason) => {
     // Debug log for team season data
-    console.log('Team Season Players:', JSON.stringify(teamSeason.players.map(p => ({
-      playerId: p.playerSeason.player.id,
-      contract: p.playerSeason.contract,
-      position: p.playerSeason.position
-    })), null, 2));
+    console.log('Team Season Data:', {
+      teamName: teamSeason.team.officialName,
+      salaryCap: tier.salaryCap,
+      players: teamSeason.players.map(p => ({
+        name: p.playerSeason.player.name,
+        contract: p.playerSeason.contract.amount
+      }))
+    });
 
     return {
       team: {
@@ -143,17 +140,13 @@ export default async function TeamsPage({ params }: { params: { id: string } }) 
         teamIdentifier: teamSeason.team.teamIdentifier,
         managers: teamSeason.team.managers
       },
+      tier: {
+        salaryCap: tier.salaryCap
+      },
       wins: teamSeason.wins || 0,
       losses: teamSeason.losses || 0,
       otLosses: teamSeason.otLosses || 0,
       players: teamSeason.players.map(player => {
-        // Debug log for individual player contract
-        console.log('Player Contract:', {
-          playerId: player.playerSeason.player.id,
-          playerName: player.playerSeason.player.name,
-          contract: player.playerSeason.contract
-        });
-
         return {
           playerSeason: {
             player: {
@@ -182,13 +175,11 @@ export default async function TeamsPage({ params }: { params: { id: string } }) 
   });
 
   // Debug log for final mapped data
-  console.log('Final Teams Data:', JSON.stringify(teams.map(t => ({
+  console.log('Final Teams Data:', teams.map(t => ({
     teamName: t.team.officialName,
-    players: t.players.map(p => ({
-      name: p.playerSeason.player.name,
-      contract: p.playerSeason.contract
-    }))
-  })), null, 2));
+    salaryCap: t.tier.salaryCap,
+    totalSalary: t.players.reduce((sum, p) => sum + p.playerSeason.contract.amount, 0)
+  })));
 
   return <TeamsDisplay league={league} teams={teams} />;
 }

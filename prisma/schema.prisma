@@ -113,12 +113,15 @@ model Tier {
   id            String              @id @default(uuid())
   seasonId      String              @map("season_id")
   leagueLevel   Int                 @map("league_level")
-  name          String // Add this to store NHL, AHL, CHL, etc.
+  name          String              // NHL, AHL, CHL, etc.
+  salaryCap     Int                 @default(0) @map("salary_cap") // Added salary cap at tier level
   createdAt     DateTime            @default(now()) @map("created_at")
   updatedAt     DateTime            @updatedAt @map("updated_at")
   season        Season              @relation(fields: [seasonId], references: [id])
   teams         TeamSeason[]
   playerHistory PlayerTierHistory[]
+
+  @@index([seasonId])
 }
 
 // --------- Team Structure ---------
@@ -155,6 +158,11 @@ model TeamSeason {
   id                       String @id @default(uuid())
   teamId                   String @map("team_id")
   tierId                   String @map("tier_id")
+  // Roster counts
+  forwardCount            Int    @default(0) @map("forward_count")
+  defenseCount            Int    @default(0) @map("defense_count")
+  goalieCount             Int    @default(0) @map("goalie_count")
+  // Team stats
   wins                     Int    @default(0)
   losses                   Int    @default(0)
   otLosses                 Int    @default(0)
@@ -175,6 +183,10 @@ model TeamSeason {
   tier      Tier               @relation(fields: [tierId], references: [id])
   matches   Match[]
   players   PlayerTeamSeason[]
+  bids      Bid[]              @relation("TeamSeasonBids")
+
+  @@index([teamId])
+  @@index([tierId])
 }
 
 // --------- Player Season & Stats ---------
@@ -195,6 +207,7 @@ model PlayerSeason {
   penaltyMinutes Int?                @map("penalty_minutes")
   saves          Int?
   goalsAgainst   Int?                @map("goals_against")
+  isInBidding    Boolean             @default(true) @map("is_in_bidding")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
   player         Player              @relation(fields: [playerId], references: [id])
@@ -256,15 +269,18 @@ model Contract {
 }
 
 model Bid {
-  id         String    @id @default(uuid())
-  contract   Contract  @relation(fields: [contractId], references: [id])
-  contractId String    @map("contract_id")
-  teamId     String    @map("team_id") // ID of the team making the bid
-  amount     Int // Bid amount in dollars
-  status     BidStatus @default(PENDING)
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  id            String      @id @default(uuid())
+  contract      Contract    @relation(fields: [contractId], references: [id])
+  contractId    String      @map("contract_id")
+  teamSeason    TeamSeason  @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
+  teamSeasonId  String      @map("team_season_id")
+  amount        Int         // Bid amount in dollars
+  status        BidStatus   @default(PENDING)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
+  @@index([contractId])
+  @@index([teamSeasonId])
   @@map("bids")
 }
 

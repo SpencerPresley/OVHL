@@ -145,6 +145,24 @@ export default function AdminPage() {
     }
   }
 
+  async function createSeasonPlayers() {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/seasons/players', {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to create season players');
+      const data = await response.json();
+      alert(`Successfully created ${data.playersCreated} players for the current season!`);
+      router.refresh();
+    } catch (error) {
+      console.error('Error creating season players:', error);
+      alert('Failed to create season players');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function handleCreateSeason() {
     if (!seasonId) {
       alert('Please enter a season ID');
@@ -215,6 +233,15 @@ export default function AdminPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={createSeasonPlayers}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating Players...' : 'Create Season Players'}
+            </Button>
 
             <Button
               variant="secondary"
