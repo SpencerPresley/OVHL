@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface LeagueNavProps {
   leagueId: string;
@@ -36,24 +37,27 @@ export function LeagueNav({ leagueId }: LeagueNavProps) {
 
   return (
     <div className="border-b border-white/10">
-      <div className="container mx-auto px-4">
-        <nav className="flex gap-6">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'py-4 text-sm font-medium transition-colors hover:text-blue-400',
-                pathname === link.href
-                  ? 'border-b-2 border-blue-400 text-blue-400'
-                  : 'text-gray-300'
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      <ScrollArea className="w-full">
+        <div className="container mx-auto px-2 md:px-4">
+          <nav className="flex whitespace-nowrap">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'py-3 md:py-4 px-2 md:px-3 text-sm font-medium transition-colors hover:text-blue-400',
+                  pathname === link.href
+                    ? 'border-b-2 border-blue-400 text-blue-400'
+                    : 'text-gray-300'
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <ScrollBar orientation="horizontal" className="invisible" />
+      </ScrollArea>
     </div>
   );
 }

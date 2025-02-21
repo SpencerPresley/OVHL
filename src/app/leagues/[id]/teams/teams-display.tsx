@@ -52,13 +52,14 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Nav } from '@/components/nav';
 import { LeagueNav } from '@/components/league-nav';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { System, TeamManagementRole } from '@prisma/client';
+import { BackToTop } from '@/components/back-to-top';
 
 /**
  * League information interface
@@ -203,11 +204,9 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     a.team.officialName.localeCompare(b.team.officialName)
   );
 
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [showBackToTop, setShowBackToTop] = React.useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Mobile detection effect
-  React.useEffect(() => {
+  useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -217,18 +216,8 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Scroll position tracking for back-to-top button
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 500);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   // Add debug logging at the start of the component
-  React.useEffect(() => {
+  useEffect(() => {
     teams.forEach(teamSeason => {
       teamSeason.players.forEach(player => {
         console.log('Player Contract Debug:', {
@@ -258,25 +247,8 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   const scrollToTeam = (teamId: string) => {
     const element = document.getElementById(teamId);
     if (element) {
-      const navHeight = 64; // Main nav height
-      const leagueNavHeight = 48; // League nav height
-      const teamNavHeight = 48; // Team nav height
-      const padding = isMobile ? 80 : -40; // More padding on mobile, negative on desktop
-      const totalOffset = navHeight + leagueNavHeight + teamNavHeight + padding;
-
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({
-        top: elementPosition - totalOffset,
-        behavior: 'smooth',
-      });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  /**
-   * Scrolls back to the top of the page
-   */
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -794,32 +766,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
         </div>
       </div>
 
-      {/* Back to Top Button
-       * Appears when scrolled past threshold
-       * Provides easy navigation back to top of page
-       * Features smooth scroll animation
-       */}
-      {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity"
-          aria-label="Back to top"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m18 15-6-6-6 6" />
-          </svg>
-        </button>
-      )}
+      <BackToTop />
     </div>
   );
 }
