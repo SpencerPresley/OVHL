@@ -19,10 +19,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FiltersProps {
-  positionFilter: string;
-  setPositionFilter: (value: string) => void;
+  positionFilter: string[];
+  setPositionFilter: (value: string[]) => void;
   bidStatusFilter: string;
   setBidStatusFilter: (value: string) => void;
   priceSort: 'asc' | 'desc' | null;
@@ -36,6 +37,23 @@ interface FiltersProps {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
+
+const POSITIONS = [
+  { id: 'C', label: 'Center', color: 'text-red-400', group: 'forwards' },
+  { id: 'LW', label: 'Left Wing', color: 'text-green-400', group: 'forwards' },
+  { id: 'RW', label: 'Right Wing', color: 'text-blue-400', group: 'forwards' },
+  { id: 'LD', label: 'Left Defense', color: 'text-teal-400', group: 'defense' },
+  { id: 'RD', label: 'Right Defense', color: 'text-yellow-400', group: 'defense' },
+  { id: 'G', label: 'Goalie', color: 'text-purple-400', group: 'goalie' },
+] as const;
+
+type PositionGroup = 'all' | 'forwards' | 'defense';
+
+const POSITION_GROUPS: Record<PositionGroup, { label: string; positions: string[] }> = {
+  all: { label: 'All Positions', positions: POSITIONS.map(p => p.id) },
+  forwards: { label: 'All Forwards', positions: POSITIONS.filter(p => p.group === 'forwards').map(p => p.id) },
+  defense: { label: 'All Defense', positions: POSITIONS.filter(p => p.group === 'defense').map(p => p.id) },
+};
 
 export function Filters({
   positionFilter,
@@ -53,10 +71,46 @@ export function Filters({
   isOpen,
   setIsOpen,
 }: FiltersProps) {
-  const hasActiveFilters = positionFilter !== 'all' || 
+  const hasActiveFilters = positionFilter.length > 0 || 
                           bidStatusFilter !== 'all' || 
                           priceSort !== null || 
                           searchQuery !== '';
+
+  const isAllSelected = POSITION_GROUPS.all.positions.every(p => positionFilter.includes(p));
+  const isForwardsSelected = POSITION_GROUPS.forwards.positions.every(p => positionFilter.includes(p));
+  const isDefenseSelected = POSITION_GROUPS.defense.positions.every(p => positionFilter.includes(p));
+
+  const handleGroupChange = (group: 'all' | 'forwards' | 'defense', checked: boolean) => {
+    if (checked) {
+      if (group === 'all') {
+        setPositionFilter(POSITION_GROUPS.all.positions);
+      } else {
+        const otherPositions = positionFilter.filter(p => !POSITION_GROUPS[group].positions.includes(p));
+        setPositionFilter([...otherPositions, ...POSITION_GROUPS[group].positions]);
+      }
+    } else {
+      if (group === 'all') {
+        setPositionFilter([]);
+      } else {
+        setPositionFilter(positionFilter.filter(p => !POSITION_GROUPS[group].positions.includes(p)));
+      }
+    }
+  };
+
+  const handlePositionChange = (position: string, checked: boolean) => {
+    if (checked) {
+      setPositionFilter([...positionFilter, position]);
+    } else {
+      setPositionFilter(positionFilter.filter(p => p !== position));
+    }
+  };
+
+  const isPositionDisabled = (position: string) => {
+    if (isAllSelected) return true;
+    if (isForwardsSelected && POSITIONS.find(p => p.id === position)?.group === 'forwards') return true;
+    if (isDefenseSelected && POSITIONS.find(p => p.id === position)?.group === 'defense') return true;
+    return false;
+  };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="card-gradient rounded-lg">
@@ -74,32 +128,134 @@ export function Filters({
 
       <CollapsibleContent>
         <div className="px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <div className="space-y-2">
-              <Label>Position</Label>
-              <Select
-                value={positionFilter}
-                onValueChange={setPositionFilter}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Positions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Positions</SelectItem>
-                  <SelectItem value="forward">All Forwards</SelectItem>
-                  <SelectItem value="C">Center</SelectItem>
-                  <SelectItem value="LW">Left Wing</SelectItem>
-                  <SelectItem value="RW">Right Wing</SelectItem>
-                  <SelectItem value="defense">All Defense</SelectItem>
-                  <SelectItem value="LD">Left Defense</SelectItem>
-                  <SelectItem value="RD">Right Defense</SelectItem>
-                  <SelectItem value="G">Goalie</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Position filters */}
+          <div>
+            <Label className="mb-4 block">Positions</Label>
+            {/* Group selectors */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="position-all"
+                  checked={isAllSelected}
+                  onCheckedChange={(checked) => handleGroupChange('all', checked as boolean)}
+                />
+                <label
+                  htmlFor="position-all"
+                  className="text-sm font-medium leading-none"
+                >
+                  All Positions
+                </label>
+              </div>
+              <div className="flex items-center space-x-2 lg:-ml-2">
+                <Checkbox
+                  id="position-forwards"
+                  checked={isForwardsSelected}
+                  disabled={isAllSelected}
+                  onCheckedChange={(checked) => handleGroupChange('forwards', checked as boolean)}
+                />
+                <label
+                  htmlFor="position-forwards"
+                  className={`text-sm font-medium leading-none ${isAllSelected ? 'opacity-50' : ''}`}
+                >
+                  All Forwards
+                </label>
+              </div>
+              <div className="flex items-center space-x-2 lg:-ml-2">
+                <Checkbox
+                  id="position-defense"
+                  checked={isDefenseSelected}
+                  disabled={isAllSelected}
+                  onCheckedChange={(checked) => handleGroupChange('defense', checked as boolean)}
+                />
+                <label
+                  htmlFor="position-defense"
+                  className={`text-sm font-medium leading-none ${isAllSelected ? 'opacity-50' : ''}`}
+                >
+                  All Defense
+                </label>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Bid Status</Label>
+            {/* Individual positions */}
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:flex lg:flex-row lg:gap-8">
+              {/* Forwards */}
+              <div className="contents lg:flex lg:flex-row lg:gap-4">
+                {POSITIONS.filter(p => p.group === 'forwards').map((position) => (
+                  <div key={position.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`position-${position.id}`}
+                      checked={positionFilter.includes(position.id)}
+                      disabled={isPositionDisabled(position.id)}
+                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                    />
+                    <label
+                      htmlFor={`position-${position.id}`}
+                      className={cn(
+                        'text-sm font-medium leading-none peer-disabled:cursor-not-allowed whitespace-nowrap',
+                        position.color,
+                        isPositionDisabled(position.id) ? 'opacity-50' : ''
+                      )}
+                    >
+                      {position.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Defense */}
+              <div className="contents lg:flex lg:flex-row lg:gap-4">
+                {POSITIONS.filter(p => p.group === 'defense').map((position) => (
+                  <div key={position.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`position-${position.id}`}
+                      checked={positionFilter.includes(position.id)}
+                      disabled={isPositionDisabled(position.id)}
+                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                    />
+                    <label
+                      htmlFor={`position-${position.id}`}
+                      className={cn(
+                        'text-sm font-medium leading-none peer-disabled:cursor-not-allowed whitespace-nowrap',
+                        position.color,
+                        isPositionDisabled(position.id) ? 'opacity-50' : ''
+                      )}
+                    >
+                      {position.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Goalie */}
+              <div className="contents lg:block">
+                {POSITIONS.filter(p => p.group === 'goalie').map((position) => (
+                  <div key={position.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`position-${position.id}`}
+                      checked={positionFilter.includes(position.id)}
+                      disabled={isPositionDisabled(position.id)}
+                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                    />
+                    <label
+                      htmlFor={`position-${position.id}`}
+                      className={cn(
+                        'text-sm font-medium leading-none peer-disabled:cursor-not-allowed whitespace-nowrap',
+                        position.color,
+                        isPositionDisabled(position.id) ? 'opacity-50' : ''
+                      )}
+                    >
+                      {position.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <Label className="mb-2 block">Bid Status</Label>
               <Select
                 value={bidStatusFilter}
                 onValueChange={setBidStatusFilter}
@@ -115,8 +271,8 @@ export function Filters({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Sort by Price</Label>
+            <div>
+              <Label className="mb-2 block">Sort by Price</Label>
               <Select
                 value={priceSort || 'none'}
                 onValueChange={(value) => setPriceSort(value as 'asc' | 'desc' | null)}
@@ -132,8 +288,8 @@ export function Filters({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Search</Label>
+            <div>
+              <Label className="mb-2 block">Search</Label>
               <Input
                 type="text"
                 placeholder="Search players..."
@@ -142,9 +298,9 @@ export function Filters({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>View</Label>
-              <div className="flex items-center space-x-2 pt-2">
+            <div>
+              <Label className="mb-3 block">View</Label>
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id="detailed-view"
                   checked={isDetailedView}
@@ -167,12 +323,12 @@ export function Filters({
             <p className="text-sm text-muted-foreground">
               Showing {filteredCount} of {totalPlayers} players
             </p>
-            <div className="flex gap-2">
-              {positionFilter !== 'all' && (
-                <Badge variant="secondary" className="text-xs">
-                  {positionFilter}
+            <div className="flex flex-wrap gap-2">
+              {positionFilter.map(pos => (
+                <Badge key={pos} variant="secondary" className="text-xs">
+                  {POSITIONS.find(p => p.id === pos)?.label || pos}
                 </Badge>
-              )}
+              ))}
               {bidStatusFilter !== 'all' && (
                 <Badge variant="secondary" className="text-xs">
                   {bidStatusFilter}

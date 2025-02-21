@@ -89,7 +89,7 @@ function PlayerListSkeleton() {
 
 export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardProps) {
   // State for filters
-  const [positionFilter, setPositionFilter] = useState<string>('all');
+  const [positionFilter, setPositionFilter] = useState<string[]>([]);
   const [bidStatusFilter, setBidStatusFilter] = useState<string>('all');
   const [priceSort, setPriceSort] = useState<'asc' | 'desc' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,12 +116,8 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
     return availablePlayers
       .filter(player => {
         // Position filter
-        if (positionFilter !== 'all') {
-          // Group filters
-          if (positionFilter === 'forward' && !['C', 'LW', 'RW'].includes(player.position)) return false;
-          if (positionFilter === 'defense' && !['LD', 'RD'].includes(player.position)) return false;
-          // Specific position filters
-          if (['C', 'LW', 'RW', 'LD', 'RD', 'G'].includes(positionFilter) && player.position !== positionFilter) return false;
+        if (positionFilter.length > 0 && !positionFilter.includes(player.position)) {
+          return false;
         }
 
         // Bid status filter
