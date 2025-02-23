@@ -351,7 +351,7 @@ export default async function LeaguePage({ params }: { params: { id: string } })
           </div>
           <div className="card-gradient rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Quick Stats</h2>
-            {stats && <LeagueQuickStats stats={stats} />}
+            <LeagueQuickStats leagueId={league.id} />
           </div>
         </div>
       </div>
