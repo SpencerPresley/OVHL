@@ -185,7 +185,11 @@ export class TeamManagementService {
             console.log('Creating new contract with amount 0');
             await tx.contract.create({
               data: {
-                playerSeasonId: currentSeason.id,
+                playerSeason: {
+                  connect: {
+                    id: currentSeason.id
+                  }
+                },
                 amount: 0,
               },
             });

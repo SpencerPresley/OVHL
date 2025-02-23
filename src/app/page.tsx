@@ -11,6 +11,8 @@ import { News } from '@/components/news';
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Home Page Component
  *

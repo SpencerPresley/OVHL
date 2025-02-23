@@ -4,8 +4,13 @@
  * @returns The base API URL for the current environment
  */
 export function getApiUrl(): string {
-  const isDev = process.env.NODE_ENV === 'development';
-  return isDev
-    ? process.env.NEXT_PUBLIC_API_URL_DEV || 'http://localhost:3000'
-    : process.env.NEXT_PUBLIC_API_URL_PROD || '';
+  if (typeof window === 'undefined') {
+    // Server-side: use environment variables or default to localhost
+    const isDev = process.env.NODE_ENV === 'development';
+    return isDev 
+      ? 'http://localhost:3000'
+      : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  }
+  // Client-side: use window.location.origin
+  return window.location.origin;
 }
