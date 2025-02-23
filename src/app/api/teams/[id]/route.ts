@@ -43,16 +43,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
         seasons: {
           where: {
             tier: {
-              seasonId: latestSeason.id
-            }
+              seasonId: latestSeason.id,
+            },
           },
           include: {
-            tier: true
+            tier: true,
           },
           orderBy: {
-            createdAt: 'desc'
+            createdAt: 'desc',
           },
-          take: 1
+          take: 1,
         },
         managers: {
           include: {
@@ -66,20 +66,20 @@ export async function GET(request: Request, { params }: { params: { id: string }
                   include: {
                     gamertags: {
                       orderBy: {
-                        createdAt: 'desc'
+                        createdAt: 'desc',
                       },
-                      take: 1
-                    }
-                  }
-                }
-              }
-            }
+                      take: 1,
+                    },
+                  },
+                },
+              },
+            },
           },
           orderBy: {
-            role: 'asc'
-          }
-        }
-      }
+            role: 'asc',
+          },
+        },
+      },
     });
 
     if (!team) {
@@ -89,9 +89,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ team });
   } catch (error: any) {
     console.error('Failed to fetch team:', error);
-    return NextResponse.json(
-      { message: error.message || 'Failed to fetch team' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: error.message || 'Failed to fetch team' }, { status: 500 });
   }
-} 
+}

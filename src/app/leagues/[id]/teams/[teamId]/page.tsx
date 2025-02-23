@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { notFound } from 'next/navigation';
 import { TeamDisplay } from './team-display';
-
-const prisma = new PrismaClient();
+import { getApiUrl } from '@/lib/utils/api';
 
 interface League {
   id: string;
@@ -39,108 +37,31 @@ const leagues: Record<string, League> = {
 };
 
 export default async function TeamPage({ params }: { params: { id: string; teamId: string } }) {
-  // Get league info
   const paramsData = await params;
   const league = leagues[paramsData.id.toLowerCase()];
   if (!league) {
     notFound();
   }
 
-  // Get the latest season
-  const season = await prisma.season.findFirst({
-    where: { isLatest: true },
-  });
+  // Fetch team data from the API
+  const url = new URL(`/api/leagues/${league.id}/teams/${paramsData.teamId}`, getApiUrl());
+  const response = await fetch(url, { cache: 'no-store' });
 
-  if (!season) {
-    notFound();
+  if (!response.ok) {
+    if (response.status === 404) {
+      notFound();
+    }
+    throw new Error('Failed to fetch team');
   }
 
-  // Get the team and its current season data
-  const team = await prisma.team.findFirst({
-    where: { teamIdentifier: paramsData.teamId.toUpperCase() },
-    include: {
-      seasons: {
-        where: {
-          tier: {
-            seasonId: season.id,
-          },
-        },
-        include: {
-          tier: true,
-          players: {
-            include: {
-              playerSeason: {
-                include: {
-                  player: {
-                    include: {
-                      user: true,
-                      gamertags: {
-                        orderBy: { createdAt: 'desc' },
-                        take: 1,
-                      },
-                    },
-                  },
-                  contract: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      managers: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              username: true,
-              player: {
-                include: {
-                  gamertags: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 1,
-                  },
-                },
-              },
-            },
-          },
-        },
-        orderBy: {
-          role: 'asc',
-        },
-      },
-    },
-  });
+  const data = await response.json();
 
-  if (!team || !team.seasons[0]) {
-    notFound();
-  }
-
-  const teamSeason = team.seasons[0];
-
-  // Debug log to check the data structure
-  console.log('Team Data:', {
-    managers: team.managers.map(m => ({
-      role: m.role,
-      userId: m.user.id,
-    })),
-    players: teamSeason.players.map(p => ({
-      name: p.playerSeason.player.name,
-      userId: p.playerSeason.player.user?.id,
-      contract: p.playerSeason.contract,
-    })),
-    tier: teamSeason.tier,
-    salaryCap: teamSeason.tier.salaryCap
-  });
-
-  return <TeamDisplay 
-    league={league} 
-    team={team} 
-    teamSeason={{
-      ...teamSeason,
-      tier: teamSeason.tier
-    }}
-    managers={team.managers} 
-  />;
+  return (
+    <TeamDisplay
+      league={league}
+      team={data.team}
+      teamSeason={data.teamSeason}
+      managers={data.managers}
+    />
+  );
 }

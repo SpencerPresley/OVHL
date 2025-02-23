@@ -40,17 +40,13 @@ export class TeamManagementService {
     });
   }
 
-  static async addTeamManager(data: {
-    userId: string;
-    teamId: string;
-    role: TeamManagementRole;
-  }) {
+  static async addTeamManager(data: { userId: string; teamId: string; role: TeamManagementRole }) {
     console.log('Starting addTeamManager with data:', data);
 
     // First check if the user exists and has a player profile
     const user = await prisma.user.findUnique({
       where: { id: data.userId },
-      include: { 
+      include: {
         player: {
           include: {
             gamertags: true,
@@ -60,17 +56,17 @@ export class TeamManagementService {
                   equals: (
                     await prisma.season.findFirst({
                       where: { isLatest: true },
-                      select: { id: true }
+                      select: { id: true },
                     })
-                  )?.id
-                }
+                  )?.id,
+                },
               },
               include: {
-                contract: true
-              }
-            }
-          }
-        }
+                contract: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -78,7 +74,7 @@ export class TeamManagementService {
       id: user?.id,
       hasPlayer: !!user?.player,
       gamertags: user?.player?.gamertags?.length,
-      seasons: user?.player?.seasons?.length
+      seasons: user?.player?.seasons?.length,
     });
 
     if (!user) {
@@ -105,13 +101,13 @@ export class TeamManagementService {
         seasons: {
           where: {
             tier: {
-              seasonId: latestSeason.id
-            }
+              seasonId: latestSeason.id,
+            },
           },
           include: {
-            tier: true
+            tier: true,
           },
-          take: 1
+          take: 1,
         },
       },
     });
@@ -137,7 +133,7 @@ export class TeamManagementService {
 
     console.log('Current season:', {
       id: currentSeason.id,
-      hasContract: !!currentSeason.contract
+      hasContract: !!currentSeason.contract,
     });
 
     // Start a transaction to handle both team manager creation and contract update
@@ -149,7 +145,7 @@ export class TeamManagementService {
         data: {
           userId: data.userId,
           teamId: data.teamId,
-          role: data.role
+          role: data.role,
         },
         include: {
           user: {
@@ -190,8 +186,8 @@ export class TeamManagementService {
             await tx.contract.create({
               data: {
                 playerSeasonId: currentSeason.id,
-                amount: 0
-              }
+                amount: 0,
+              },
             });
           }
           break;
@@ -235,4 +231,4 @@ export class TeamManagementService {
     });
     return manager?.role || null;
   }
-} 
+}

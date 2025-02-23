@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(request: Request, { params }: { params: { teamId: string } }) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
@@ -37,7 +37,7 @@ export async function PATCH(request: Request, { params }: { params: { teamId: st
 
     // Update the team
     const team = await prisma.team.update({
-      where: { id: params.teamId },
+      where: { id: params.id },
       data: {
         eaClubId,
         eaClubName,

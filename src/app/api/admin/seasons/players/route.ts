@@ -33,11 +33,12 @@ export async function POST() {
 
     const createdPlayers = [];
     // Calculate minimum needed players plus extra
-    const totalPlayers = (32 * 17) + // NHL teams
-                        (32 * 17) + // AHL teams
-                        (28 * 17) + // ECHL teams
-                        (60 * 17) + // CHL teams
-                        200;        // Extra players for free agency
+    const totalPlayers =
+      32 * 17 + // NHL teams
+      32 * 17 + // AHL teams
+      28 * 17 + // ECHL teams
+      60 * 17 + // CHL teams
+      200; // Extra players for free agency
 
     // Create players without team assignments
     for (let i = 0; i < totalPlayers; i++) {
@@ -45,14 +46,17 @@ export async function POST() {
       const timestamp = Date.now();
       const randomNum = Math.floor(Math.random() * 10000);
       const system = Math.random() > 0.5 ? System.PS : System.XBOX;
-      
+
       // Determine position (maintaining same ratio as before)
       let pos;
-      if (i % 17 < 9) { // First 9 of every 17 are forwards
+      if (i % 17 < 9) {
+        // First 9 of every 17 are forwards
         pos = ['C', 'LW', 'RW'][Math.floor(Math.random() * 3)];
-      } else if (i % 17 < 15) { // Next 6 are defense
+      } else if (i % 17 < 15) {
+        // Next 6 are defense
         pos = ['LD', 'RD'][Math.floor(Math.random() * 2)];
-      } else { // Last 2 are goalies
+      } else {
+        // Last 2 are goalies
         pos = 'G';
       }
 
@@ -88,8 +92,8 @@ export async function POST() {
       // Create contract first
       const contract = await prisma.contract.create({
         data: {
-          amount: 500000
-        }
+          amount: 500000,
+        },
       });
 
       // Create player season with contract reference
@@ -108,7 +112,7 @@ export async function POST() {
           takeaways: 0,
           giveaways: 0,
           penaltyMinutes: 0,
-          ...(pos === 'G' ? { saves: 0, goalsAgainst: 0 } : {})
+          ...(pos === 'G' ? { saves: 0, goalsAgainst: 0 } : {}),
         },
       });
 
@@ -118,13 +122,13 @@ export async function POST() {
       });
     }
 
-    return NextResponse.json({ 
-      message: 'Players created successfully for the current season', 
+    return NextResponse.json({
+      message: 'Players created successfully for the current season',
       playersCreated: createdPlayers.length,
-      players: createdPlayers
+      players: createdPlayers,
     });
   } catch (error) {
     console.error('Failed to create players:', error);
     return NextResponse.json({ error: 'Failed to create players' }, { status: 500 });
   }
-} 
+}

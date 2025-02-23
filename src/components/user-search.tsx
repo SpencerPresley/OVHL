@@ -31,9 +31,10 @@ interface User {
 interface UserSearchProps {
   onSelect: (userId: string) => void;
   teamId: string;
+  className?: string;
 }
 
-export function UserSearch({ onSelect, teamId }: UserSearchProps) {
+export function UserSearch({ onSelect, teamId, className }: UserSearchProps) {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -54,7 +55,9 @@ export function UserSearch({ onSelect, teamId }: UserSearchProps) {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/users/search?teamId=${teamId}&q=${encodeURIComponent(query || '')}`);
+      const response = await fetch(
+        `/api/users/search?teamId=${teamId}&q=${encodeURIComponent(query || '')}`
+      );
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to search users');
@@ -76,12 +79,7 @@ export function UserSearch({ onSelect, teamId }: UserSearchProps) {
   };
 
   const getDisplayName = (user: User) => {
-    return (
-      user.name ||
-      user.username ||
-      user.player?.gamertags[0]?.gamertag ||
-      user.email
-    );
+    return user.name || user.username || user.player?.gamertags[0]?.gamertag || user.email;
   };
 
   return (
@@ -91,7 +89,10 @@ export function UserSearch({ onSelect, teamId }: UserSearchProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-gray-800/50 border-white/10 text-white"
+          className={cn(
+            'w-full justify-between bg-gray-800/50 border-white/10 text-white',
+            className
+          )}
         >
           {selectedUser ? getDisplayName(selectedUser) : 'Search users...'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -99,20 +100,12 @@ export function UserSearch({ onSelect, teamId }: UserSearchProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
         <Command>
-          <CommandInput
-            placeholder="Search users..."
-            onValueChange={searchUsers}
-            className="h-9"
-          />
+          <CommandInput placeholder="Search users..." onValueChange={searchUsers} className="h-9" />
           <CommandList>
             <CommandEmpty>{loading ? 'Searching...' : 'No users found.'}</CommandEmpty>
             <CommandGroup>
               {users.map((user) => (
-                <CommandItem
-                  key={user.id}
-                  value={user.id}
-                  onSelect={() => handleSelect(user)}
-                >
+                <CommandItem key={user.id} value={user.id} onSelect={() => handleSelect(user)}>
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
@@ -131,4 +124,4 @@ export function UserSearch({ onSelect, teamId }: UserSearchProps) {
       </PopoverContent>
     </Popover>
   );
-} 
+}

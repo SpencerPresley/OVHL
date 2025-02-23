@@ -48,8 +48,8 @@ export async function GET(request: Request) {
       where: {
         teamId,
         tier: {
-          seasonId: latestSeason.id
-        }
+          seasonId: latestSeason.id,
+        },
       },
       include: {
         players: {
@@ -64,19 +64,19 @@ export async function GET(request: Request) {
                         name: true,
                         email: true,
                         username: true,
-                      }
+                      },
                     },
                     gamertags: {
                       orderBy: { createdAt: 'desc' },
                       take: 1,
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!teamSeason) {
@@ -85,17 +85,17 @@ export async function GET(request: Request) {
 
     // Transform the data to match the expected format and filter by search query if provided
     const users = teamSeason.players
-      .map(playerTeamSeason => ({
+      .map((playerTeamSeason) => ({
         id: playerTeamSeason.playerSeason.player.user.id,
         name: playerTeamSeason.playerSeason.player.user.name,
         email: playerTeamSeason.playerSeason.player.user.email,
         username: playerTeamSeason.playerSeason.player.user.username,
         player: {
           id: playerTeamSeason.playerSeason.player.id,
-          gamertags: playerTeamSeason.playerSeason.player.gamertags
-        }
+          gamertags: playerTeamSeason.playerSeason.player.gamertags,
+        },
       }))
-      .filter(user => {
+      .filter((user) => {
         if (!query) return true;
         const searchStr = query.toLowerCase();
         return (
@@ -114,4 +114,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

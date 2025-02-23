@@ -124,9 +124,9 @@ export async function POST() {
                 ...stats,
                 contract: {
                   create: {
-                    amount: Math.floor(Math.random() * 1500000) + 500000
-                  }
-                }
+                    amount: Math.floor(Math.random() * 1500000) + 500000,
+                  },
+                },
               },
             });
 

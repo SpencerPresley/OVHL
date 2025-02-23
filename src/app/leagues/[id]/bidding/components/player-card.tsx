@@ -1,8 +1,8 @@
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { BidSection } from "./bid-section";
-import Link from "next/link";
-import { getPositionColors } from "@/lib/utils";
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { BidSection } from './bid-section';
+import Link from 'next/link';
+import { getPositionColors } from '@/lib/utils';
 
 interface PlayerCardProps {
   player: {
@@ -42,17 +42,17 @@ export function PlayerCard({ player, onPlaceBid }: PlayerCardProps) {
             </Link>
             <p className="text-sm text-muted-foreground">{player.gamertag}</p>
           </div>
-          <Badge variant="outline" className={cn(
-            "font-semibold bg-black/30",
-            {
+          <Badge
+            variant="outline"
+            className={cn('font-semibold bg-black/30', {
               'text-red-400 border-red-400/30': player.position === 'C',
               'text-green-400 border-green-400/30': player.position === 'LW',
               'text-blue-400 border-blue-400/30': player.position === 'RW',
               'text-teal-400 border-teal-400/30': player.position === 'LD',
               'text-yellow-400 border-yellow-400/30': player.position === 'RD',
               'text-purple-400 border-purple-400/30': player.position === 'G',
-            }
-          )}>
+            })}
+          >
             {player.position}
           </Badge>
         </div>
@@ -62,9 +62,7 @@ export function PlayerCard({ player, onPlaceBid }: PlayerCardProps) {
           <div className="text-center p-2 rounded-lg bg-black/30 border border-white/5">
             <p className="text-sm text-muted-foreground">Current Bid</p>
             <p className="font-mono font-bold">
-              {player.currentBid 
-                ? `$${player.currentBid.toLocaleString()}` 
-                : 'No Bids'}
+              {player.currentBid ? `$${player.currentBid.toLocaleString()}` : 'No Bids'}
             </p>
           </div>
           <div className="text-center p-2 rounded-lg bg-black/30 border border-white/5">
@@ -72,7 +70,7 @@ export function PlayerCard({ player, onPlaceBid }: PlayerCardProps) {
             <p className="font-mono font-bold">${player.contract.amount.toLocaleString()}</p>
           </div>
         </div>
-        
+
         {/* Player Stats */}
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
           <div className="p-2 rounded-lg bg-black/30 border border-white/5">
@@ -89,21 +87,20 @@ export function PlayerCard({ player, onPlaceBid }: PlayerCardProps) {
           </div>
           <div className="p-2 rounded-lg bg-black/30 border border-white/5">
             <p className="text-xs text-muted-foreground">+/-</p>
-            <p className={cn("font-medium", {
-              'text-green-400': player.stats.plusMinus > 0,
-              'text-red-400': player.stats.plusMinus < 0
-            })}>
+            <p
+              className={cn('font-medium', {
+                'text-green-400': player.stats.plusMinus > 0,
+                'text-red-400': player.stats.plusMinus < 0,
+              })}
+            >
               {player.stats.plusMinus > 0 ? `+${player.stats.plusMinus}` : player.stats.plusMinus}
             </p>
           </div>
         </div>
 
         {/* Bid Button */}
-        <BidSection 
-          playerId={player.id}
-          onPlaceBid={onPlaceBid}
-        />
+        <BidSection playerId={player.id} onPlaceBid={onPlaceBid} />
       </div>
     </div>
   );
-} 
+}

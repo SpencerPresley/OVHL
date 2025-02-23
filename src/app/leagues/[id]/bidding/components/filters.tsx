@@ -7,19 +7,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FiltersProps {
   positionFilter: string[];
@@ -50,9 +46,15 @@ const POSITIONS = [
 type PositionGroup = 'all' | 'forwards' | 'defense';
 
 const POSITION_GROUPS: Record<PositionGroup, { label: string; positions: string[] }> = {
-  all: { label: 'All Positions', positions: POSITIONS.map(p => p.id) },
-  forwards: { label: 'All Forwards', positions: POSITIONS.filter(p => p.group === 'forwards').map(p => p.id) },
-  defense: { label: 'All Defense', positions: POSITIONS.filter(p => p.group === 'defense').map(p => p.id) },
+  all: { label: 'All Positions', positions: POSITIONS.map((p) => p.id) },
+  forwards: {
+    label: 'All Forwards',
+    positions: POSITIONS.filter((p) => p.group === 'forwards').map((p) => p.id),
+  },
+  defense: {
+    label: 'All Defense',
+    positions: POSITIONS.filter((p) => p.group === 'defense').map((p) => p.id),
+  },
 };
 
 export function Filters({
@@ -71,28 +73,37 @@ export function Filters({
   isOpen,
   setIsOpen,
 }: FiltersProps) {
-  const hasActiveFilters = positionFilter.length > 0 || 
-                          bidStatusFilter !== 'all' || 
-                          priceSort !== null || 
-                          searchQuery !== '';
+  const hasActiveFilters =
+    positionFilter.length > 0 ||
+    bidStatusFilter !== 'all' ||
+    priceSort !== null ||
+    searchQuery !== '';
 
-  const isAllSelected = POSITION_GROUPS.all.positions.every(p => positionFilter.includes(p));
-  const isForwardsSelected = POSITION_GROUPS.forwards.positions.every(p => positionFilter.includes(p));
-  const isDefenseSelected = POSITION_GROUPS.defense.positions.every(p => positionFilter.includes(p));
+  const isAllSelected = POSITION_GROUPS.all.positions.every((p) => positionFilter.includes(p));
+  const isForwardsSelected = POSITION_GROUPS.forwards.positions.every((p) =>
+    positionFilter.includes(p)
+  );
+  const isDefenseSelected = POSITION_GROUPS.defense.positions.every((p) =>
+    positionFilter.includes(p)
+  );
 
   const handleGroupChange = (group: 'all' | 'forwards' | 'defense', checked: boolean) => {
     if (checked) {
       if (group === 'all') {
         setPositionFilter(POSITION_GROUPS.all.positions);
       } else {
-        const otherPositions = positionFilter.filter(p => !POSITION_GROUPS[group].positions.includes(p));
+        const otherPositions = positionFilter.filter(
+          (p) => !POSITION_GROUPS[group].positions.includes(p)
+        );
         setPositionFilter([...otherPositions, ...POSITION_GROUPS[group].positions]);
       }
     } else {
       if (group === 'all') {
         setPositionFilter([]);
       } else {
-        setPositionFilter(positionFilter.filter(p => !POSITION_GROUPS[group].positions.includes(p)));
+        setPositionFilter(
+          positionFilter.filter((p) => !POSITION_GROUPS[group].positions.includes(p))
+        );
       }
     }
   };
@@ -101,14 +112,16 @@ export function Filters({
     if (checked) {
       setPositionFilter([...positionFilter, position]);
     } else {
-      setPositionFilter(positionFilter.filter(p => p !== position));
+      setPositionFilter(positionFilter.filter((p) => p !== position));
     }
   };
 
   const isPositionDisabled = (position: string) => {
     if (isAllSelected) return true;
-    if (isForwardsSelected && POSITIONS.find(p => p.id === position)?.group === 'forwards') return true;
-    if (isDefenseSelected && POSITIONS.find(p => p.id === position)?.group === 'defense') return true;
+    if (isForwardsSelected && POSITIONS.find((p) => p.id === position)?.group === 'forwards')
+      return true;
+    if (isDefenseSelected && POSITIONS.find((p) => p.id === position)?.group === 'defense')
+      return true;
     return false;
   };
 
@@ -123,7 +136,9 @@ export function Filters({
             </Badge>
           )}
         </div>
-        <ChevronDown className={`h-5 w-5 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+        <ChevronDown
+          className={`h-5 w-5 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
+        />
       </CollapsibleTrigger>
 
       <CollapsibleContent>
@@ -139,10 +154,7 @@ export function Filters({
                   checked={isAllSelected}
                   onCheckedChange={(checked) => handleGroupChange('all', checked as boolean)}
                 />
-                <label
-                  htmlFor="position-all"
-                  className="text-sm font-medium leading-none"
-                >
+                <label htmlFor="position-all" className="text-sm font-medium leading-none">
                   All Positions
                 </label>
               </div>
@@ -180,13 +192,15 @@ export function Filters({
             <div className="grid grid-cols-2 gap-6 lg:grid-cols-none lg:flex lg:flex-row lg:gap-8">
               {/* Forwards */}
               <div className="contents lg:flex lg:flex-row lg:gap-4">
-                {POSITIONS.filter(p => p.group === 'forwards').map((position) => (
+                {POSITIONS.filter((p) => p.group === 'forwards').map((position) => (
                   <div key={position.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`position-${position.id}`}
                       checked={positionFilter.includes(position.id)}
                       disabled={isPositionDisabled(position.id)}
-                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handlePositionChange(position.id, checked as boolean)
+                      }
                     />
                     <label
                       htmlFor={`position-${position.id}`}
@@ -204,13 +218,15 @@ export function Filters({
 
               {/* Defense */}
               <div className="contents lg:flex lg:flex-row lg:gap-4">
-                {POSITIONS.filter(p => p.group === 'defense').map((position) => (
+                {POSITIONS.filter((p) => p.group === 'defense').map((position) => (
                   <div key={position.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`position-${position.id}`}
                       checked={positionFilter.includes(position.id)}
                       disabled={isPositionDisabled(position.id)}
-                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handlePositionChange(position.id, checked as boolean)
+                      }
                     />
                     <label
                       htmlFor={`position-${position.id}`}
@@ -228,13 +244,15 @@ export function Filters({
 
               {/* Goalie */}
               <div className="contents lg:block">
-                {POSITIONS.filter(p => p.group === 'goalie').map((position) => (
+                {POSITIONS.filter((p) => p.group === 'goalie').map((position) => (
                   <div key={position.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`position-${position.id}`}
                       checked={positionFilter.includes(position.id)}
                       disabled={isPositionDisabled(position.id)}
-                      onCheckedChange={(checked) => handlePositionChange(position.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handlePositionChange(position.id, checked as boolean)
+                      }
                     />
                     <label
                       htmlFor={`position-${position.id}`}
@@ -256,10 +274,7 @@ export function Filters({
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label className="mb-2 block">Bid Status</Label>
-              <Select
-                value={bidStatusFilter}
-                onValueChange={setBidStatusFilter}
-              >
+              <Select value={bidStatusFilter} onValueChange={setBidStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
@@ -324,9 +339,9 @@ export function Filters({
               Showing {filteredCount} of {totalPlayers} players
             </p>
             <div className="flex flex-wrap gap-2">
-              {positionFilter.map(pos => (
+              {positionFilter.map((pos) => (
                 <Badge key={pos} variant="secondary" className="text-xs">
-                  {POSITIONS.find(p => p.id === pos)?.label || pos}
+                  {POSITIONS.find((p) => p.id === pos)?.label || pos}
                 </Badge>
               ))}
               {bidStatusFilter !== 'all' && (
@@ -345,4 +360,4 @@ export function Filters({
       </CollapsibleContent>
     </Collapsible>
   );
-} 
+}

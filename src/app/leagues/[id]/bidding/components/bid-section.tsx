@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface BidSectionProps {
   playerId: string;
@@ -19,13 +19,13 @@ export function BidSection({ playerId, onPlaceBid, isCompact = false }: BidSecti
   };
 
   return (
-    <Button 
-      className={`bg-white/5 hover:bg-white/10 border border-white/10 ${isCompact ? "px-4" : "w-full"}`}
+    <Button
+      className={`bg-white/5 hover:bg-white/10 border border-white/10 ${isCompact ? 'px-4' : 'w-full'}`}
       variant="ghost"
-      size={isCompact ? "sm" : "default"}
+      size={isCompact ? 'sm' : 'default'}
       onClick={handlePlaceBid}
     >
       Place Bid
     </Button>
   );
-} 
+}

@@ -111,27 +111,29 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
     fetchStats();
   }, [category, id]);
 
-  const filteredStats = stats.filter(stat => {
+  const filteredStats = stats.filter((stat) => {
     console.log('Filtering stat:', {
       stat,
       divisionFilter,
       matches: {
         division: stat.division === divisionFilter,
         conference: stat.conference === divisionFilter,
-        league: stat.league === divisionFilter
-      }
+        league: stat.league === divisionFilter,
+      },
     });
 
-    const searchMatch = searchTerm.toLowerCase().trim() === '' ||
+    const searchMatch =
+      searchTerm.toLowerCase().trim() === '' ||
       stat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       stat.teamIdentifier?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const positionMatch = positionFilter === 'all' || stat.position === positionFilter;
-    const divisionMatch = divisionFilter === 'all' || 
+    const divisionMatch =
+      divisionFilter === 'all' ||
       stat.division === divisionFilter ||
       stat.conference === divisionFilter ||
       stat.league === divisionFilter;
-    
+
     if (category === 'players') return searchMatch && positionMatch;
     if (category === 'teams') return searchMatch && divisionMatch;
     return searchMatch;
@@ -155,16 +157,18 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
     <Button
       variant="ghost"
       onClick={() => handleSort(column)}
-      className={cn(
-        'h-8 flex items-center gap-2 w-full px-0 justify-end text-right'
-      )}
+      className={cn('h-8 flex items-center gap-2 w-full px-0 justify-end text-right')}
     >
       {label}
-      {sortColumn === column 
-        ? sortDirection === 'asc'
-          ? <ArrowUp className="h-4 w-4 shrink-0" />
-          : <ArrowDown className="h-4 w-4 shrink-0" />
-        : <ChevronsUpDown className="h-4 w-4 shrink-0" />}
+      {sortColumn === column ? (
+        sortDirection === 'asc' ? (
+          <ArrowUp className="h-4 w-4 shrink-0" />
+        ) : (
+          <ArrowDown className="h-4 w-4 shrink-0" />
+        )
+      ) : (
+        <ChevronsUpDown className="h-4 w-4 shrink-0" />
+      )}
     </Button>
   );
 
@@ -197,7 +201,9 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
             <TableCell className="text-right">{player.goals}</TableCell>
             <TableCell className="text-right">{player.assists}</TableCell>
             <TableCell className="text-right">{player.points}</TableCell>
-            <TableCell className="text-right">{player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}</TableCell>
+            <TableCell className="text-right">
+              {player.plusMinus > 0 ? `+${player.plusMinus}` : player.plusMinus}
+            </TableCell>
             <TableCell className="text-right">{player.pim}</TableCell>
           </TableRow>
         ))}
@@ -214,7 +220,9 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
           <TableHead className="text-right">{renderSortableHeader('GP', 'gamesPlayed')}</TableHead>
           <TableHead className="text-right">{renderSortableHeader('GA', 'goalsAgainst')}</TableHead>
           <TableHead className="text-right">{renderSortableHeader('GAA', 'gaa')}</TableHead>
-          <TableHead className="text-right">{renderSortableHeader('SV%', 'savePercentage')}</TableHead>
+          <TableHead className="text-right">
+            {renderSortableHeader('SV%', 'savePercentage')}
+          </TableHead>
           <TableHead className="text-right">{renderSortableHeader('SO', 'shutouts')}</TableHead>
         </TableRow>
       </TableHeader>
@@ -257,15 +265,23 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
         <TableHeader>
           <TableRow>
             <TableHead>Team</TableHead>
-            <TableHead className="text-right">{renderSortableHeader('GP', 'gamesPlayed')}</TableHead>
+            <TableHead className="text-right">
+              {renderSortableHeader('GP', 'gamesPlayed')}
+            </TableHead>
             <TableHead className="text-right">{renderSortableHeader('W', 'wins')}</TableHead>
             <TableHead className="text-right">{renderSortableHeader('L', 'losses')}</TableHead>
             <TableHead className="text-right">{renderSortableHeader('OTL', 'otl')}</TableHead>
             <TableHead className="text-right">{renderSortableHeader('PTS', 'points')}</TableHead>
             <TableHead className="text-right">{renderSortableHeader('GF', 'goalsFor')}</TableHead>
-            <TableHead className="text-right">{renderSortableHeader('GA', 'goalsAgainst')}</TableHead>
-            <TableHead className="text-right">{renderSortableHeader('PP%', 'powerplayPercentage')}</TableHead>
-            <TableHead className="text-right">{renderSortableHeader('PK%', 'penaltyKillPercentage')}</TableHead>
+            <TableHead className="text-right">
+              {renderSortableHeader('GA', 'goalsAgainst')}
+            </TableHead>
+            <TableHead className="text-right">
+              {renderSortableHeader('PP%', 'powerplayPercentage')}
+            </TableHead>
+            <TableHead className="text-right">
+              {renderSortableHeader('PK%', 'penaltyKillPercentage')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -281,7 +297,10 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
             return (
               <TableRow key={team.id} style={style}>
                 <TableCell>
-                  <Link href={`/leagues/${id}/teams/${team.teamIdentifier}`} className="hover:text-blue-400">
+                  <Link
+                    href={`/leagues/${id}/teams/${team.teamIdentifier}`}
+                    className="hover:text-blue-400"
+                  >
                     <div className="text-left">
                       <span className="font-bold">{team.teamIdentifier}</span>
                       <span className="text-sm text-gray-400 ml-2">{team.name}</span>
@@ -295,8 +314,12 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
                 <TableCell className="text-right font-bold">{team.points}</TableCell>
                 <TableCell className="text-right">{team.goalsFor}</TableCell>
                 <TableCell className="text-right">{team.goalsAgainst}</TableCell>
-                <TableCell className="text-right">{(team.powerplayPercentage * 100).toFixed(1)}%</TableCell>
-                <TableCell className="text-right">{(team.penaltyKillPercentage * 100).toFixed(1)}%</TableCell>
+                <TableCell className="text-right">
+                  {(team.powerplayPercentage * 100).toFixed(1)}%
+                </TableCell>
+                <TableCell className="text-right">
+                  {(team.penaltyKillPercentage * 100).toFixed(1)}%
+                </TableCell>
               </TableRow>
             );
           })}
@@ -332,7 +355,10 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
           {/* Controls */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
-              <Tabs defaultValue="players" onValueChange={(value) => setCategory(value as StatCategory)}>
+              <Tabs
+                defaultValue="players"
+                onValueChange={(value) => setCategory(value as StatCategory)}
+              >
                 <TabsList>
                   <TabsTrigger value="players">Players</TabsTrigger>
                   <TabsTrigger value="goalies">Goalies</TabsTrigger>
@@ -363,29 +389,43 @@ export default function StatsPage({ params }: { params: Promise<{ id: string }> 
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-white/20">
                     <SelectItem value="all">All Teams</SelectItem>
-                    {id === 'nhl' && (
-                      [...new Set([
-                        ...NHL_TEAMS.map(team => team.conference),
-                        ...NHL_TEAMS.map(team => team.division)
-                      ])].filter(Boolean).map(value => (
-                        <SelectItem key={value} value={value}>{value}</SelectItem>
-                      ))
-                    )}
-                    {id === 'ahl' && (
-                      [...new Set(AHL_TEAMS.map(team => team.division))].filter(Boolean).map(value => (
-                        <SelectItem key={value} value={value}>{value}</SelectItem>
-                      ))
-                    )}
-                    {id === 'echl' && (
-                      [...new Set(ECHL_TEAMS.map(team => team.division))].filter(Boolean).map(value => (
-                        <SelectItem key={value} value={value}>{value}</SelectItem>
-                      ))
-                    )}
-                    {id === 'chl' && (
-                      [...new Set(CHL_TEAMS.map(team => team.league))].filter(Boolean).map(value => (
-                        <SelectItem key={value} value={value}>{value}</SelectItem>
-                      ))
-                    )}
+                    {id === 'nhl' &&
+                      [
+                        ...new Set([
+                          ...NHL_TEAMS.map((team) => team.conference),
+                          ...NHL_TEAMS.map((team) => team.division),
+                        ]),
+                      ]
+                        .filter(Boolean)
+                        .map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                    {id === 'ahl' &&
+                      [...new Set(AHL_TEAMS.map((team) => team.division))]
+                        .filter(Boolean)
+                        .map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                    {id === 'echl' &&
+                      [...new Set(ECHL_TEAMS.map((team) => team.division))]
+                        .filter(Boolean)
+                        .map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                    {id === 'chl' &&
+                      [...new Set(CHL_TEAMS.map((team) => team.league))]
+                        .filter(Boolean)
+                        .map((value) => (
+                          <SelectItem key={value} value={value}>
+                            {value}
+                          </SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               )}

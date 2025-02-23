@@ -247,4 +247,4 @@ export default function TeamManagementPage() {
       </main>
     </div>
   );
-} 
+}

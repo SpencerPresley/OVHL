@@ -1,7 +1,51 @@
 /**
- * @file League Stats API Route
- * @description Handles fetching and formatting of league statistics for both player and team stats.
- * This endpoint consolidates business logic for stat processing that was previously handled client-side.
+ * @file quick-stats/route.ts
+ * @author Spencer Presley
+ * @version 1.0.0
+ * @license Proprietary - Copyright (c) 2025 Spencer Presley
+ * @copyright All rights reserved. This code is the exclusive property of Spencer Presley.
+ * @notice Unauthorized copying, modification, distribution, or use is strictly prohibited.
+ *
+ * @description Frontend-specific Quick Stats API Route for League Statistics Display
+ * @module api/leagues/[id]/quick-stats
+ *
+ * @requires next/server
+ * @requires @prisma/client
+ * @requires zod
+ *
+ * League Quick Stats Processing and Formatting Endpoint
+ * This endpoint is specifically designed for frontend presentation needs and is tightly
+ * coupled with the LeagueQuickStats component. It handles UI-specific transformations
+ * and formatting of league statistics.
+ *
+ * Features:
+ * - Top 10 player/team stats formatting
+ * - Category-specific value formatting
+ * - UI-focused data transformation
+ * - League-specific stat filtering
+ * - Component-specific error handling
+ *
+ * Frontend Coupling:
+ * This endpoint is intentionally kept in the frontend codebase due to its
+ * UI-specific nature. Core statistics processing and business logic should
+ * be moved to the dedicated backend service when implemented.
+ *
+ * Technical Implementation:
+ * - Efficient database queries with proper joins
+ * - Type-safe parameter validation using Zod
+ * - Modular stat processing functions
+ * - Clear separation from core business logic
+ *
+ * Performance Considerations:
+ * - Minimal data transformation overhead
+ * - Efficient query patterns
+ * - Response size optimization (top 10 limit)
+ *
+ * @example
+ * // Component usage
+ * fetch('/api/leagues/nhl/quick-stats?category=Points')
+ *   .then(res => res.json())
+ *   .then(data => updateStatsDisplay(data.stats));
  */
 
 import { NextResponse } from 'next/server';
@@ -14,6 +58,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Represents the different categories of statistics that can be queried
+ * Used for type-safe validation of category parameter
  */
 export const StatCategory = z.enum([
   'Points',
@@ -24,13 +69,15 @@ export const StatCategory = z.enum([
   'GAA',
   'Wins',
   'PP%',
-  'PK%'
+  'PK%',
 ]);
 
 export type StatCategory = z.infer<typeof StatCategory>;
 
 /**
- * Interface for a formatted stat entry, whether player or team
+ * Interface for a formatted stat entry
+ * Represents the standardized format for both player and team statistics
+ * that will be consumed by the frontend component
  */
 interface FormattedStat {
   id: string;
@@ -44,8 +91,13 @@ interface FormattedStat {
 
 /**
  * Formats a numeric value based on the stat category
- * @param value - The raw numeric value
- * @param category - The category of the stat
+ * Handles specific formatting requirements for different stat types:
+ * - Percentages (PP%, PK%, SV%)
+ * - Goals Against Average (GAA)
+ * - Plus/Minus (+/-)
+ *
+ * @param value - The raw numeric value to format
+ * @param category - The category determining formatting rules
  * @returns Formatted string representation of the value
  */
 function formatStatValue(value: number, category: StatCategory): string {
@@ -63,6 +115,8 @@ function formatStatValue(value: number, category: StatCategory): string {
 
 /**
  * Determines if a stat category is team-based
+ * Used to switch between team and player stat processing
+ *
  * @param category - The category to check
  * @returns boolean indicating if the stat is team-based
  */
@@ -71,33 +125,35 @@ function isTeamStat(category: StatCategory): boolean {
 }
 
 /**
- * GET handler for league stats
- * Fetches and formats league statistics based on the requested category
- * 
+ * GET handler for league quick stats
+ * Processes and formats league statistics for frontend display
+ *
+ * Features:
+ * - League-specific stat filtering
+ * - Category-based processing
+ * - Top 10 limitation for display
+ * - Formatted values for UI presentation
+ *
+ * Note: This endpoint is intentionally frontend-focused and handles
+ * UI-specific transformations. Core stat calculations should be moved
+ * to the backend service when implemented.
+ *
  * @param request - The incoming request object
- * @returns Formatted stats for the requested category
- * 
- * @example
- * GET /api/stats/league?category=Points
- * Returns top players by points
- * 
- * @example
- * GET /api/stats/league?category=PP%
- * Returns teams by power play percentage
+ * @param params - Route parameters including league ID
+ * @returns Formatted stats for frontend display
  */
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const leagueId = searchParams.get('leagueId');
+    const resolvedParams = await params;
+    const leagueId = resolvedParams.id;
 
     // Validate parameters
-    const parsedCategory = StatCategory.safeParse(category);
+    const decodedCategory = category ? decodeURIComponent(category) : null;
+    const parsedCategory = StatCategory.safeParse(decodedCategory);
     if (!parsedCategory.success || !leagueId) {
-      return NextResponse.json(
-        { error: 'Invalid parameters' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
     const statCategory = parsedCategory.data;
@@ -109,10 +165,7 @@ export async function GET(request: Request) {
     });
 
     if (!currentSeason) {
-      return NextResponse.json(
-        { error: 'No active season found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
     // Get the tier for this league
@@ -124,10 +177,7 @@ export async function GET(request: Request) {
     });
 
     if (!tier) {
-      return NextResponse.json(
-        { error: 'League tier not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'League tier not found' }, { status: 404 });
     }
 
     let stats: FormattedStat[] = [];
@@ -135,14 +185,14 @@ export async function GET(request: Request) {
     if (isTeamStatCategory) {
       // Fetch team stats
       const teamSeasons = await prisma.teamSeason.findMany({
-        where: { tier: { seasonId: currentSeason.id } },
+        where: { tierId: tier.id },
         include: {
           team: true,
           tier: true,
         },
       });
 
-      stats = teamSeasons.map(teamSeason => {
+      stats = teamSeasons.map((teamSeason) => {
         let value = 0;
         switch (statCategory) {
           case 'Wins':
@@ -152,7 +202,7 @@ export async function GET(request: Request) {
             value = teamSeason.powerplayGoals / teamSeason.powerplayOpportunities;
             break;
           case 'PK%':
-            value = 1 - (teamSeason.penaltyKillGoalsAgainst / teamSeason.penaltyKillOpportunities);
+            value = 1 - teamSeason.penaltyKillGoalsAgainst / teamSeason.penaltyKillOpportunities;
             break;
         }
 
@@ -162,13 +212,22 @@ export async function GET(request: Request) {
           value,
           formattedValue: formatStatValue(value, statCategory),
           teamIdentifier: teamSeason.team.teamIdentifier,
-          isTeamStat: true
+          isTeamStat: true,
         };
       });
     } else {
       // Fetch player stats
       const playerSeasons = await prisma.playerSeason.findMany({
-        where: { seasonId: currentSeason.id },
+        where: {
+          seasonId: currentSeason.id,
+          teamSeasons: {
+            some: {
+              teamSeason: {
+                tierId: tier.id,
+              },
+            },
+          },
+        },
         include: {
           player: {
             include: {
@@ -190,7 +249,7 @@ export async function GET(request: Request) {
         },
       });
 
-      stats = playerSeasons.map(playerSeason => {
+      stats = playerSeasons.map((playerSeason) => {
         let value = 0;
         switch (statCategory) {
           case 'Points':
@@ -206,12 +265,15 @@ export async function GET(request: Request) {
             value = playerSeason.plusMinus || 0;
             break;
           case 'SV%':
-            value = playerSeason.saves ? playerSeason.saves / (playerSeason.saves + (playerSeason.goalsAgainst || 0)) : 0;
+            value = playerSeason.saves
+              ? playerSeason.saves / (playerSeason.saves + (playerSeason.goalsAgainst || 0))
+              : 0;
             break;
           case 'GAA':
-            value = playerSeason.goalsAgainst && playerSeason.gamesPlayed 
-              ? (playerSeason.goalsAgainst / playerSeason.gamesPlayed) 
-              : 0;
+            value =
+              playerSeason.goalsAgainst && playerSeason.gamesPlayed
+                ? playerSeason.goalsAgainst / playerSeason.gamesPlayed
+                : 0;
             break;
         }
 
@@ -224,15 +286,13 @@ export async function GET(request: Request) {
           value,
           formattedValue: formatStatValue(value, statCategory),
           teamIdentifier: currentTeam?.teamIdentifier || 'FA',
-          isTeamStat: false
+          isTeamStat: false,
         };
       });
     }
 
     // Sort stats in descending order (ascending for GAA)
-    stats.sort((a, b) => 
-      statCategory === 'GAA' ? a.value - b.value : b.value - a.value
-    );
+    stats.sort((a, b) => (statCategory === 'GAA' ? a.value - b.value : b.value - a.value));
 
     // Take top 10
     stats = stats.slice(0, 10);
@@ -240,9 +300,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ stats });
   } catch (error) {
     console.error('Failed to fetch league stats:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch league stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch league stats' }, { status: 500 });
   }
-} 
+}

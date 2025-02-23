@@ -50,6 +50,7 @@ import * as Ably from 'ably';
 import { AblyProvider, useChannel, ChannelProvider } from 'ably/react';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { IGif } from '@giphy/js-types';
 import type { SyntheticEvent } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -438,10 +439,12 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
                         </span>
                       ) : msg.gif ? (
                         <div className="mt-2 rounded-lg overflow-hidden">
-                          <img
+                          <Image
                             src={msg.gif.url}
                             alt={msg.gif.title}
-                            className="max-w-full hover:scale-[1.02] transition-transform"
+                            width={msg.gif.width}
+                            height={msg.gif.height}
+                            className="max-w-full hover:scale-[1.02] transition-transform object-contain"
                             style={{
                               maxHeight: '200px',
                               width: 'auto',

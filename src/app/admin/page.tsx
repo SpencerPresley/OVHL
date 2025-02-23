@@ -272,18 +272,22 @@ export default function AdminPage() {
               <CardTitle>{league} Management</CardTitle>
               <CardDescription>
                 Manage {league} team staff positions (
-                {league === 'NHL' || league === 'CHL'
-                  ? 'Owner, GM, AGM, PAGM'
-                  : 'GM, AGM, PAGM'}
-                )
+                {league === 'NHL' || league === 'CHL' ? 'Owner, GM, AGM, PAGM' : 'GM, AGM, PAGM'})
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               <Button
                 className="w-full"
                 onClick={() => router.push(`/admin/leagues/${league.toLowerCase()}/management`)}
               >
-                Manage {league} Teams
+                Manage Staff
+              </Button>
+              <Button
+                className="w-full"
+                variant="secondary"
+                onClick={() => router.push(`/admin/leagues/${league.toLowerCase()}/roster`)}
+              >
+                Manage Roster
               </Button>
             </CardContent>
           </Card>

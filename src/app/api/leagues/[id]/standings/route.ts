@@ -105,11 +105,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
     });
 
-    console.log('Found team seasons:', teamSeasons.map(ts => ({
-      teamId: ts.teamId,
-      identifier: ts.team.teamIdentifier,
-      name: ts.team.officialName
-    })));
+    console.log(
+      'Found team seasons:',
+      teamSeasons.map((ts) => ({
+        teamId: ts.teamId,
+        identifier: ts.team.teamIdentifier,
+        name: ts.team.officialName,
+      }))
+    );
 
     // Calculate stats and group teams by division
     const teamsByDivision = new Map<string, any[]>();
@@ -139,7 +142,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
       const teamStats = {
         teamId: ts.teamId,
-        teamName: teamData.name,  // Use the name from league data instead of database
+        teamName: teamData.name, // Use the name from league data instead of database
         teamIdentifier: ts.team.teamIdentifier,
         gamesPlayed: ts.matchesPlayed,
         wins: ts.wins,

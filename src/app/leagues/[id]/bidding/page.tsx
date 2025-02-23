@@ -145,10 +145,10 @@ export default async function BiddingPage({ params }: { params: { id: string } }
       teamSeasons: {
         none: {
           teamSeason: {
-            tierId: tier.id
-          }
-        }
-      }
+            tierId: tier.id,
+          },
+        },
+      },
     },
     include: {
       player: {
@@ -156,65 +156,70 @@ export default async function BiddingPage({ params }: { params: { id: string } }
           user: true,
           gamertags: {
             orderBy: { createdAt: 'desc' },
-            take: 1
-          }
-        }
+            take: 1,
+          },
+        },
       },
-      contract: true
-    }
+      contract: true,
+    },
   });
 
   // Map the data to a more convenient structure for the client
-  const teams = tier.teams.map(teamSeason => {
-    // Get the correct team data from the league-specific data
-    let teamData: (NHLTeam | AHLTeam | ECHLTeam | CHLTeam) | undefined;
-    switch (league.id) {
-      case 'nhl':
-        teamData = NHL_TEAMS.find(t => t.id === teamSeason.team.teamIdentifier.toLowerCase());
-        break;
-      case 'ahl':
-        teamData = AHL_TEAMS.find(t => t.id === teamSeason.team.teamIdentifier.toLowerCase());
-        break;
-      case 'echl':
-        teamData = ECHL_TEAMS.find(t => t.id === teamSeason.team.teamIdentifier.toLowerCase());
-        break;
-      case 'chl':
-        teamData = CHL_TEAMS.find(t => t.id === teamSeason.team.teamIdentifier.toLowerCase());
-        break;
-    }
+  const teams = tier.teams
+    .map((teamSeason) => {
+      // Get the correct team data from the league-specific data
+      let teamData: (NHLTeam | AHLTeam | ECHLTeam | CHLTeam) | undefined;
+      switch (league.id) {
+        case 'nhl':
+          teamData = NHL_TEAMS.find((t) => t.id === teamSeason.team.teamIdentifier.toLowerCase());
+          break;
+        case 'ahl':
+          teamData = AHL_TEAMS.find((t) => t.id === teamSeason.team.teamIdentifier.toLowerCase());
+          break;
+        case 'echl':
+          teamData = ECHL_TEAMS.find((t) => t.id === teamSeason.team.teamIdentifier.toLowerCase());
+          break;
+        case 'chl':
+          teamData = CHL_TEAMS.find((t) => t.id === teamSeason.team.teamIdentifier.toLowerCase());
+          break;
+      }
 
-    // Skip teams that don't belong to this league
-    if (!teamData) return null;
+      // Skip teams that don't belong to this league
+      if (!teamData) return null;
 
-    const team: Team = {
-      id: teamSeason.team.id,
-      name: teamData.name, // Use the name from league data instead of database
-      identifier: teamSeason.team.teamIdentifier,
-      managers: teamSeason.team.managers.map(m => ({
-        userId: m.user.id,
-        name: m.user.name || m.user.username || m.user.email,
-        role: m.role,
-      })),
-      stats: {
-        wins: teamSeason.wins,
-        losses: teamSeason.losses,
-        otLosses: teamSeason.otLosses,
-      },
-      roster: {
-        forwards: teamSeason.players.filter(p => ['LW', 'C', 'RW'].includes(p.playerSeason.position)).length,
-        defense: teamSeason.players.filter(p => ['LD', 'RD'].includes(p.playerSeason.position)).length,
-        goalies: teamSeason.players.filter(p => p.playerSeason.position === 'G').length,
-      },
-      salary: {
-        current: teamSeason.players.reduce((sum, p) => sum + p.playerSeason.contract.amount, 0),
-        cap: tier.salaryCap,
-      },
-    };
+      const team: Team = {
+        id: teamSeason.team.id,
+        name: teamData.name, // Use the name from league data instead of database
+        identifier: teamSeason.team.teamIdentifier,
+        managers: teamSeason.team.managers.map((m) => ({
+          userId: m.user.id,
+          name: m.user.name || m.user.username || m.user.email,
+          role: m.role,
+        })),
+        stats: {
+          wins: teamSeason.wins,
+          losses: teamSeason.losses,
+          otLosses: teamSeason.otLosses,
+        },
+        roster: {
+          forwards: teamSeason.players.filter((p) =>
+            ['LW', 'C', 'RW'].includes(p.playerSeason.position)
+          ).length,
+          defense: teamSeason.players.filter((p) => ['LD', 'RD'].includes(p.playerSeason.position))
+            .length,
+          goalies: teamSeason.players.filter((p) => p.playerSeason.position === 'G').length,
+        },
+        salary: {
+          current: teamSeason.players.reduce((sum, p) => sum + p.playerSeason.contract.amount, 0),
+          cap: tier.salaryCap,
+        },
+      };
 
-    return team;
-  }).filter((team): team is Team => team !== null);
+      return team;
+    })
+    .filter((team): team is Team => team !== null);
 
-  const mappedPlayers = availablePlayers.map(playerSeason => ({
+  const mappedPlayers = availablePlayers.map((playerSeason) => ({
     id: playerSeason.id,
     name: playerSeason.player.name,
     position: playerSeason.position,
@@ -231,14 +236,10 @@ export default async function BiddingPage({ params }: { params: { id: string } }
     },
     player: {
       user: {
-        id: playerSeason.player.user.id
-      }
-    }
+        id: playerSeason.player.user.id,
+      },
+    },
   }));
 
-  return <BiddingBoard 
-    league={league}
-    teams={teams}
-    availablePlayers={mappedPlayers}
-  />;
-} 
+  return <BiddingBoard league={league} teams={teams} availablePlayers={mappedPlayers} />;
+}

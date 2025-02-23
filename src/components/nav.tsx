@@ -27,6 +27,7 @@ interface User {
   email: string;
   name: string | null;
   avatarUrl: string | null;
+  isAdmin: boolean;
 }
 
 /**
@@ -62,6 +63,7 @@ const leagues: League[] = [
 export function Nav() {
   const [user, setUser] = useState<User | null>(null);
   const [isLeaguesOpen, setIsLeaguesOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -110,7 +112,7 @@ export function Nav() {
           <NavigationMenu>
             <NavigationMenuList className="gap-6">
               {navigationLinks.map((link) => (
-                <NavigationMenuItem key={link.label}>
+                <NavigationMenuItem key={link.label} className="flex">
                   <Link href={link.href} legacyBehavior passHref>
                     <NavigationMenuLink
                       className={cn('nav-menu-trigger', 'cursor-pointer hover:text-blue-400')}
@@ -120,17 +122,17 @@ export function Nav() {
                   </Link>
                 </NavigationMenuItem>
               ))}
-              <NavigationMenuItem>
+              <NavigationMenuItem className="flex">
                 <NavigationMenuTrigger className="nav-menu-trigger cursor-pointer hover:text-blue-400">
                   Leagues
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-md border border-white/10">
                     {leagues.map((league) => (
                       <li key={league.id}>
                         <Link
                           href={`/leagues/${league.id}`}
-                          className="flex items-center space-x-4 rounded-md p-3 hover:bg-accent"
+                          className="flex items-center space-x-4 rounded-md p-3 hover:bg-white/10"
                         >
                           <Image
                             src={league.logo}
@@ -146,7 +148,57 @@ export function Nav() {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              <NavigationMenuItem>
+              {user?.isAdmin && (
+                <NavigationMenuItem className="flex">
+                  <NavigationMenuTrigger className="nav-menu-trigger cursor-pointer hover:text-blue-400">
+                    Admin
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-md border border-white/10">
+                      <li>
+                        <Link href="/admin" className="block rounded-md p-3 hover:bg-white/10">
+                          Dashboard
+                        </Link>
+                      </li>
+                      <li>
+                        <div className="text-sm font-medium mb-2 px-3 text-muted-foreground">
+                          League Management
+                        </div>
+                        <div className="h-px bg-white/10 mx-3 mb-3" />
+                        <div className="grid grid-cols-2 gap-2">
+                          {['NHL', 'AHL', 'ECHL', 'CHL'].map((league) => (
+                            <Link
+                              key={league}
+                              href={`/admin/leagues/${league.toLowerCase()}/management`}
+                              className="block rounded-md p-3 hover:bg-white/10"
+                            >
+                              {league} Management
+                            </Link>
+                          ))}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="text-sm font-medium mb-2 px-3 text-muted-foreground">
+                          Roster Management
+                        </div>
+                        <div className="h-px bg-white/10 mx-3 mb-3" />
+                        <div className="grid grid-cols-2 gap-2">
+                          {['NHL', 'AHL', 'ECHL', 'CHL'].map((league) => (
+                            <Link
+                              key={league}
+                              href={`/admin/leagues/${league.toLowerCase()}/roster`}
+                              className="block rounded-md p-3 hover:bg-white/10"
+                            >
+                              {league} Roster
+                            </Link>
+                          ))}
+                        </div>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              )}
+              <NavigationMenuItem className="flex">
                 {user ? (
                   <div className="flex items-center gap-2">
                     <NotificationBell />
@@ -174,63 +226,127 @@ export function Nav() {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] card-gradient">
-              <SheetHeader>
+            <SheetContent
+              side="right"
+              className="w-[300px] card-gradient overflow-hidden flex flex-col"
+            >
+              <div className="px-4 py-4 border-b border-white/10">
                 <SheetTitle>Navigation</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 mt-8">
-                {navigationLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="text-lg hover:text-blue-400 transition cursor-pointer"
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="flex flex-col gap-4 px-4 py-4">
+                  {navigationLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      className="text-base hover:text-blue-400 transition cursor-pointer"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <Collapsible
+                    open={isLeaguesOpen}
+                    onOpenChange={setIsLeaguesOpen}
+                    className="w-full"
                   >
-                    {link.label}
-                  </Link>
-                ))}
-                <Collapsible
-                  open={isLeaguesOpen}
-                  onOpenChange={setIsLeaguesOpen}
-                  className="w-full"
-                >
-                  <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-lg font-semibold hover:text-blue-400 transition">
-                    <span>Leagues</span>
-                    <ChevronDown
-                      className={cn(
-                        'h-4 w-4 transition-transform duration-200',
-                        isLeaguesOpen ? 'transform rotate-180' : ''
-                      )}
-                    />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2">
-                    {leagues.map((league) => (
-                      <Link
-                        key={league.id}
-                        href={`/leagues/${league.id}`}
-                        className="flex items-center space-x-2 py-2 pl-4 hover:text-blue-400 transition"
-                      >
-                        <Image
-                          src={league.logo}
-                          alt={`${league.name} Logo`}
-                          width={24}
-                          height={24}
-                          className="rounded-sm object-contain"
+                    <CollapsibleTrigger className="flex items-center justify-between w-full text-base hover:text-blue-400 transition">
+                      <span>Leagues</span>
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 transition-transform duration-200',
+                          isLeaguesOpen ? 'transform rotate-180' : ''
+                        )}
+                      />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      {leagues.map((league) => (
+                        <Link
+                          key={league.id}
+                          href={`/leagues/${league.id}`}
+                          className="flex items-center gap-2 py-2 pl-2 hover:text-blue-400 transition"
+                        >
+                          <Image
+                            src={league.logo}
+                            alt={`${league.name} Logo`}
+                            width={24}
+                            height={24}
+                            className="rounded-sm object-contain"
+                          />
+                          <span>{league.name}</span>
+                        </Link>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                  {user?.isAdmin && (
+                    <Collapsible
+                      open={isAdminOpen}
+                      onOpenChange={setIsAdminOpen}
+                      className="w-full"
+                    >
+                      <CollapsibleTrigger className="flex items-center justify-between w-full text-base hover:text-blue-400 transition">
+                        <span>Admin</span>
+                        <ChevronDown
+                          className={cn(
+                            'h-4 w-4 transition-transform duration-200',
+                            isAdminOpen ? 'transform rotate-180' : ''
+                          )}
                         />
-                        <span>{league.name}</span>
-                      </Link>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-                {user ? (
-                  <div className="flex items-center gap-2">
-                    <NotificationBell />
-                    <UserNav user={user} />
-                  </div>
-                ) : (
-                  <Button asChild>
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
-                )}
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-2">
+                        <Link
+                          href="/admin"
+                          className="block py-2 pl-2 hover:text-blue-400 transition"
+                        >
+                          Dashboard
+                        </Link>
+                        <div className="mt-4">
+                          <div className="text-sm font-medium text-muted-foreground pl-2">
+                            League Management
+                          </div>
+                          <div className="h-px bg-white/10 my-2" />
+                          <div>
+                            {['NHL', 'AHL', 'ECHL', 'CHL'].map((league) => (
+                              <Link
+                                key={league}
+                                href={`/admin/leagues/${league.toLowerCase()}/management`}
+                                className="block py-2 pl-2 hover:text-blue-400 transition"
+                              >
+                                {league} Management
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <div className="text-sm font-medium text-muted-foreground pl-2">
+                            Roster Management
+                          </div>
+                          <div className="h-px bg-white/10 my-2" />
+                          <div>
+                            {['NHL', 'AHL', 'ECHL', 'CHL'].map((league) => (
+                              <Link
+                                key={league}
+                                href={`/admin/leagues/${league.toLowerCase()}/roster`}
+                                className="block py-2 pl-2 hover:text-blue-400 transition"
+                              >
+                                {league} Roster
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+                  {user ? (
+                    <div className="flex items-center gap-2">
+                      <NotificationBell />
+                      <UserNav user={user} />
+                    </div>
+                  ) : (
+                    <Button asChild>
+                      <Link href="/sign-in">Sign In</Link>
+                    </Button>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>

@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TeamManagementRole } from '@prisma/client';
 import { useState, useMemo, useEffect, Suspense } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Filters } from './components/filters';
 import { PlayerList } from './components/player-list';
 import { TeamSalaryCard } from './components/team-salary-card';
 import { BackToTop } from '@/components/back-to-top';
 import { cn } from '@/lib/utils';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface League {
   id: string;
@@ -114,7 +114,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
   // Filtered and sorted players
   const filteredPlayers = useMemo(() => {
     return availablePlayers
-      .filter(player => {
+      .filter((player) => {
         // Position filter
         if (positionFilter.length > 0 && !positionFilter.includes(player.position)) {
           return false;
@@ -162,7 +162,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
         </div>
       </div>
       <LeagueNav leagueId={league.id} />
-      
+
       <div className="container mx-auto px-6 sm:px-8 py-10">
         <Tabs defaultValue="bidding" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 bg-black/60 backdrop-blur-sm border-b border-white/10">
@@ -192,7 +192,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
             <div className="card-gradient rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Available Players</h2>
               <Suspense fallback={<PlayerListSkeleton />}>
-                <PlayerList 
+                <PlayerList
                   players={filteredPlayers}
                   isDetailedView={isDetailedView}
                   onPlaceBid={handlePlaceBid}
@@ -206,7 +206,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
             <div className="card-gradient rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Team Salary Cap Status</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {teams.map(team => (
+                {teams.map((team) => (
                   <TeamSalaryCard key={team.id} team={team} leagueId={league.id} />
                 ))}
               </div>
@@ -218,4 +218,4 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
       </div>
     </div>
   );
-} 
+}

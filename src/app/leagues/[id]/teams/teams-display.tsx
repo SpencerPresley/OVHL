@@ -218,11 +218,11 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
 
   // Add debug logging at the start of the component
   useEffect(() => {
-    teams.forEach(teamSeason => {
-      teamSeason.players.forEach(player => {
+    teams.forEach((teamSeason) => {
+      teamSeason.players.forEach((player) => {
         console.log('Player Contract Debug:', {
           name: player.playerSeason.player.name,
-          contractAmount: player.playerSeason.contract.amount
+          contractAmount: player.playerSeason.contract.amount,
         });
       });
     });
@@ -324,7 +324,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
               teamName: teamSeason.team.officialName,
               totalSalary,
               salaryCap,
-              tier: teamSeason.tier
+              tier: teamSeason.tier,
             });
 
             return (
@@ -369,11 +369,11 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       <div className="grid grid-cols-2 gap-4">
                         {['OWNER', 'GM', 'AGM', 'PAGM'].map((roleStr) => {
                           const role = roleStr as TeamManagementRole;
-                          const manager = teamSeason.team.managers.find(m => m.role === role);
+                          const manager = teamSeason.team.managers.find((m) => m.role === role);
                           const isHigherRole = ['OWNER', 'GM', 'AGM'].includes(roleStr);
-                          
+
                           return (
-                            <div 
+                            <div
                               key={role}
                               className={`p-3 rounded-lg ${isHigherRole ? 'bg-gray-800/50' : 'bg-gray-700/30'} border border-white/10`}
                             >
@@ -381,14 +381,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                                 <span className="text-sm font-medium text-gray-400">{role}</span>
                               </div>
                               {manager ? (
-                                <Link 
+                                <Link
                                   href={`/users/${manager.user.id}`}
                                   className="text-sm hover:text-blue-400"
                                 >
-                                  {manager.user.name || 
-                                   manager.user.username || 
-                                   manager.user.player?.gamertags[0]?.gamertag || 
-                                   manager.user.email}
+                                  {manager.user.name ||
+                                    manager.user.username ||
+                                    manager.user.player?.gamertags[0]?.gamertag ||
+                                    manager.user.email}
                                 </Link>
                               ) : (
                                 <span className="text-sm text-gray-500">Vacant</span>
@@ -696,7 +696,9 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                           if (goalieCount >= 2) countColor = 'text-green-500';
                           else if (goalieCount === 1) countColor = 'text-yellow-500';
                           return (
-                            <span className={`${countColor} font-medium`}>{goalieCount} players</span>
+                            <span className={`${countColor} font-medium`}>
+                              {goalieCount} players
+                            </span>
                           );
                         })()}
                       </div>

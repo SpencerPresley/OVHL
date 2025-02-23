@@ -75,9 +75,7 @@ interface TeamDisplayProps {
 export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayProps) {
   // Process players into position groups
   const players = teamSeason.players.map((ps: any) => {
-    const manager = managers.find(
-      (m: Manager) => m.user.id === ps.playerSeason.player.user?.id
-    );
+    const manager = managers.find((m: Manager) => m.user.id === ps.playerSeason.player.user?.id);
 
     return {
       id: ps.playerSeason.player.id,
@@ -91,7 +89,7 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
       points: ps.goals + ps.assists,
       plusMinus: ps.plusMinus,
       contract: ps.playerSeason.contract,
-      isManager: !!manager
+      isManager: !!manager,
     };
   });
 
@@ -154,10 +152,10 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
     totalSalary,
     salaryCap,
     tier: teamSeason.tier,
-    players: players.map(p => ({
+    players: players.map((p) => ({
       name: p.name,
-      contractAmount: p.contract.amount
-    }))
+      contractAmount: p.contract.amount,
+    })),
   });
 
   return (
@@ -179,7 +177,7 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
               <h1 className="text-4xl font-bold text-white">{team.officialName}</h1>
               <div className="flex items-center gap-4 mt-2">
                 <p className="text-xl text-white/80">
-                  Record: {teamRecord} ({(teamSeason.wins * 2) + teamSeason.otLosses} pts)
+                  Record: {teamRecord} ({teamSeason.wins * 2 + teamSeason.otLosses} pts)
                 </p>
                 <p className={`text-xl ${salaryColor}`}>
                   Salary: ${totalSalary.toLocaleString()} / ${salaryCap.toLocaleString()}
@@ -202,24 +200,24 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {['OWNER', 'GM', 'AGM', 'PAGM'].map((role) => {
-                const manager = managers.find(m => m.role === role);
+                const manager = managers.find((m) => m.role === role);
                 const isHigherRole = ['OWNER', 'GM', 'AGM'].includes(role);
-                
+
                 return (
-                  <div 
+                  <div
                     key={role}
                     className={`p-4 rounded-lg ${isHigherRole ? 'bg-gray-800/50' : 'bg-gray-700/30'} border border-white/10`}
                   >
                     <h3 className="font-semibold mb-2">{role}</h3>
                     {manager ? (
-                      <Link 
+                      <Link
                         href={`/users/${manager.user.id}`}
                         className="text-sm hover:text-blue-400"
                       >
-                        {manager.user.name || 
-                         manager.user.username || 
-                         manager.user.player?.gamertags[0]?.gamertag || 
-                         manager.user.email}
+                        {manager.user.name ||
+                          manager.user.username ||
+                          manager.user.player?.gamertags[0]?.gamertag ||
+                          manager.user.email}
                       </Link>
                     ) : (
                       <span className="text-sm text-gray-400">Vacant</span>
@@ -254,7 +252,7 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
                       Contract: ${player.contract.amount.toLocaleString()}
-                      {player.isManager && " (Management)"}
+                      {player.isManager && ' (Management)'}
                     </div>
                   </CardDescription>
                 </CardHeader>
@@ -310,7 +308,7 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
                       Contract: ${player.contract.amount.toLocaleString()}
-                      {player.isManager && " (Management)"}
+                      {player.isManager && ' (Management)'}
                     </div>
                   </CardDescription>
                 </CardHeader>
@@ -366,7 +364,7 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
                     </Link>
                     <div className="text-sm text-gray-400 mt-1">
                       Contract: ${player.contract.amount.toLocaleString()}
-                      {player.isManager && " (Management)"}
+                      {player.isManager && ' (Management)'}
                     </div>
                   </CardDescription>
                 </CardHeader>

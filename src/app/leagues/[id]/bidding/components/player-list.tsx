@@ -32,27 +32,21 @@ interface PlayerListProps {
 
 export function PlayerList({ players, isDetailedView, onPlaceBid }: PlayerListProps) {
   return (
-    <div className={cn(
-      "grid gap-4",
-      isDetailedView 
-        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-    )}>
-      {players.map(player => (
+    <div
+      className={cn(
+        'grid gap-4',
+        isDetailedView
+          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+      )}
+    >
+      {players.map((player) =>
         isDetailedView ? (
-          <PlayerCard
-            key={player.id}
-            player={player}
-            onPlaceBid={onPlaceBid}
-          />
+          <PlayerCard key={player.id} player={player} onPlaceBid={onPlaceBid} />
         ) : (
-          <CompactPlayerCard
-            key={player.id}
-            player={player}
-            onPlaceBid={onPlaceBid}
-          />
+          <CompactPlayerCard key={player.id} player={player} onPlaceBid={onPlaceBid} />
         )
-      ))}
+      )}
     </div>
   );
-} 
+}

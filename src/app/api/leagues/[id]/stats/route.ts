@@ -1,13 +1,13 @@
 /**
  * @file stats/route.ts
  * @description API route for retrieving league statistics (players, goalies, teams)
- * 
+ *
  * Features:
  * - Retrieves stats for players, goalies, and teams within a specific league
  * - Handles league-specific team data and division mapping
  * - Supports filtering by category (players, goalies, teams)
  * - Calculates derived statistics (points, percentages, etc.)
- * 
+ *
  * @version 1.0.0
  */
 
@@ -19,10 +19,10 @@ import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
 
 // Type definitions for league-specific team data
-type NHLTeam = typeof NHL_TEAMS[number];
-type AHLTeam = typeof AHL_TEAMS[number];
-type ECHLTeam = typeof ECHL_TEAMS[number];
-type CHLTeam = typeof CHL_TEAMS[number];
+type NHLTeam = (typeof NHL_TEAMS)[number];
+type AHLTeam = (typeof AHL_TEAMS)[number];
+type ECHLTeam = (typeof ECHL_TEAMS)[number];
+type CHLTeam = (typeof CHL_TEAMS)[number];
 
 interface TeamInfo {
   id: string;
@@ -37,15 +37,12 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET handler for league statistics
- * 
+ *
  * @param request - The incoming request object
  * @param params - Route parameters containing the league ID
  * @returns JSON response with league statistics
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = await params;
     const { searchParams } = new URL(request.url);
@@ -91,10 +88,7 @@ export async function GET(
     return NextResponse.json({ stats });
   } catch (error) {
     console.error('Failed to fetch stats:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
   }
 }
 
@@ -135,7 +129,7 @@ async function getPlayerStats(tierId: string) {
     },
   });
 
-  return players.map(stat => ({
+  return players.map((stat) => ({
     id: stat.playerSeason.player.id,
     name: stat.playerSeason.player.name,
     gamertag: stat.playerSeason.player.gamertags[0]?.gamertag || stat.playerSeason.player.name,
@@ -185,7 +179,7 @@ async function getGoalieStats(tierId: string) {
     },
   });
 
-  return goalies.map(stat => ({
+  return goalies.map((stat) => ({
     id: stat.playerSeason.player.id,
     name: stat.playerSeason.player.name,
     gamertag: stat.playerSeason.player.gamertags[0]?.gamertag || stat.playerSeason.player.name,
@@ -214,24 +208,36 @@ async function getTeamStats(tierId: string, leagueId: string) {
     },
   });
 
-  return teams.map(stat => {
+  return teams.map((stat) => {
     // Find the team in the appropriate league data
     const teamId = stat.team.teamIdentifier.toLowerCase();
-    const teamInfo = leagueId === 'nhl' ? NHL_TEAMS.find(t => t.id === teamId) :
-                    leagueId === 'ahl' ? AHL_TEAMS.find(t => t.id === teamId) :
-                    leagueId === 'echl' ? ECHL_TEAMS.find(t => t.id === teamId) :
-                    leagueId === 'chl' ? CHL_TEAMS.find(t => t.id === teamId) :
-                    undefined;
-    
+    const teamInfo =
+      leagueId === 'nhl'
+        ? NHL_TEAMS.find((t) => t.id === teamId)
+        : leagueId === 'ahl'
+          ? AHL_TEAMS.find((t) => t.id === teamId)
+          : leagueId === 'echl'
+            ? ECHL_TEAMS.find((t) => t.id === teamId)
+            : leagueId === 'chl'
+              ? CHL_TEAMS.find((t) => t.id === teamId)
+              : undefined;
+
     // Get league-specific metadata
-    const extraInfo = leagueId === 'nhl' ? {
-      division: (teamInfo as NHLTeam)?.division,
-      conference: (teamInfo as NHLTeam)?.conference,
-    } : leagueId === 'ahl' || leagueId === 'echl' ? {
-      division: teamInfo?.division,
-    } : leagueId === 'chl' ? {
-      league: (teamInfo as CHLTeam)?.league,
-    } : {};
+    const extraInfo =
+      leagueId === 'nhl'
+        ? {
+            division: (teamInfo as NHLTeam)?.division,
+            conference: (teamInfo as NHLTeam)?.conference,
+          }
+        : leagueId === 'ahl' || leagueId === 'echl'
+          ? {
+              division: teamInfo?.division,
+            }
+          : leagueId === 'chl'
+            ? {
+                league: (teamInfo as CHLTeam)?.league,
+              }
+            : {};
 
     return {
       id: stat.team.id,
@@ -242,15 +248,15 @@ async function getTeamStats(tierId: string, leagueId: string) {
       wins: stat.wins,
       losses: stat.losses,
       otl: stat.otLosses,
-      points: (stat.wins * 2) + stat.otLosses,
+      points: stat.wins * 2 + stat.otLosses,
       goalsFor: stat.goalsFor,
       goalsAgainst: stat.goalsAgainst,
-      powerplayPercentage: stat.powerplayOpportunities > 0 
-        ? stat.powerplayGoals / stat.powerplayOpportunities 
-        : 0,
-      penaltyKillPercentage: stat.penaltyKillOpportunities > 0
-        ? 1 - (stat.penaltyKillGoalsAgainst / stat.penaltyKillOpportunities)
-        : 0,
+      powerplayPercentage:
+        stat.powerplayOpportunities > 0 ? stat.powerplayGoals / stat.powerplayOpportunities : 0,
+      penaltyKillPercentage:
+        stat.penaltyKillOpportunities > 0
+          ? 1 - stat.penaltyKillGoalsAgainst / stat.penaltyKillOpportunities
+          : 0,
     };
   });
-} 
+}

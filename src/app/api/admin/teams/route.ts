@@ -1,39 +1,45 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { PrismaClient } from '@prisma/client';
 import { verify } from 'jsonwebtoken';
-import { prisma } from '@/lib/prisma';
-import { UserService } from '@/lib/services/user-service';
+import { cookies } from 'next/headers';
+
+const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
+    // Verify admin authentication
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
 
     if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
       id: string;
+      isAdmin?: boolean;
     };
 
-    // Check if user is an admin
-    const isAdmin = await UserService.isAdmin(decoded.id);
-    if (!isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user?.isAdmin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     // Get the latest season
-    const latestSeason = await prisma.season.findFirst({
+    const season = await prisma.season.findFirst({
       where: { isLatest: true },
     });
 
-    if (!latestSeason) {
-      return NextResponse.json({ message: 'No active season found' }, { status: 404 });
+    if (!season) {
+      return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
+    // Get all teams with their current season data
     const teams = await prisma.team.findMany({
       include: {
         nhlAffiliate: true,
@@ -41,26 +47,63 @@ export async function GET(request: Request) {
         seasons: {
           where: {
             tier: {
-              seasonId: latestSeason.id
-            }
+              seasonId: season.id,
+            },
           },
           include: {
-            tier: true
+            tier: true,
+            players: {
+              include: {
+                playerSeason: {
+                  select: {
+                    position: true,
+                  },
+                },
+              },
+            },
           },
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 1
-        }
+        },
       },
     });
 
-    return NextResponse.json({ teams });
-  } catch (error: any) {
+    // Transform the data to include roster counts
+    const transformedTeams = teams.map((team) => {
+      const currentSeason = team.seasons[0];
+      const players = currentSeason?.players || [];
+
+      // Calculate roster counts
+      const forwards = players.filter((p) =>
+        ['C', 'LW', 'RW'].includes(p.playerSeason.position)
+      ).length;
+      const defense = players.filter((p) => ['LD', 'RD'].includes(p.playerSeason.position)).length;
+      const goalies = players.filter((p) => p.playerSeason.position === 'G').length;
+
+      return {
+        id: team.id,
+        officialName: team.officialName,
+        teamIdentifier: team.teamIdentifier,
+        eaClubId: team.eaClubId,
+        eaClubName: team.eaClubName,
+        nhlAffiliate: team.nhlAffiliate,
+        ahlAffiliate: team.ahlAffiliate,
+        seasons: [
+          {
+            tier: {
+              name: currentSeason?.tier.name || '',
+            },
+          },
+        ],
+        roster: {
+          forwards,
+          defense,
+          goalies,
+        },
+      };
+    });
+
+    return NextResponse.json({ teams: transformedTeams });
+  } catch (error) {
     console.error('Failed to fetch teams:', error);
-    return NextResponse.json(
-      { message: error.message || 'Failed to fetch teams' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch teams' }, { status: 500 });
   }
 }

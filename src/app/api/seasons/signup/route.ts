@@ -76,8 +76,8 @@ export async function POST(request: Request) {
     // Create contract first
     const contract = await prisma.contract.create({
       data: {
-        amount: 500000 // Default contract amount
-      }
+        amount: 500000, // Default contract amount
+      },
     });
 
     // Create player season record with contract
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         takeaways: 0,
         giveaways: 0,
         penaltyMinutes: 0,
-        ...(position === 'G' ? { saves: 0, goalsAgainst: 0 } : {})
+        ...(position === 'G' ? { saves: 0, goalsAgainst: 0 } : {}),
       },
     });
 
