@@ -20,10 +20,16 @@ import { CHL_TEAMS } from '@/lib/teams/chl';
 
 // Type definitions for league-specific team data
 type NHLTeam = (typeof NHL_TEAMS)[number];
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type AHLTeam = (typeof AHL_TEAMS)[number];
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ECHLTeam = (typeof ECHL_TEAMS)[number];
+
 type CHLTeam = (typeof CHL_TEAMS)[number];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface TeamInfo {
   id: string;
   division?: string;

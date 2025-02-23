@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const SUPER_ADMIN_EMAIL = 'spencerpresley96@gmail.com';
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // Check if super admin already exists
     const existingAdmin = await prisma.user.findUnique({

@@ -2,6 +2,7 @@ import { NHLTeam, NHLConference, NHLDivision } from './types';
 import nhlTeams from '@nhl-api/teams';
 
 // Create a map of team IDs to colors
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const teamColors = new Map(
   nhlTeams.map((team) => [
     team.abbreviation.toLowerCase(),

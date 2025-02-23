@@ -42,7 +42,6 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { NotificationStatus } from '@/types/notifications';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 
@@ -66,10 +65,6 @@ const encoder = new TextEncoder();
  * @returns {Response} SSE stream response or 204 for unauthenticated users
  */
 export async function GET(request: Request) {
-  const encoder = new TextEncoder();
-  const controller = new TransformStream();
-  const writer = controller.writable.getWriter();
-
   try {
     // Validate authentication
     const cookieStore = await cookies();
@@ -95,6 +90,7 @@ export async function GET(request: Request) {
       };
       userId = decoded.id;
     } catch (error) {
+      console.error('Token verification failed:', error);
       // Invalid token, return 204 as well
       return new Response(null, {
         status: 204,

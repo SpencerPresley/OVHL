@@ -30,10 +30,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const managers = await TeamManagementService.getTeamManagers(teamId);
     return NextResponse.json({ managers });
-  } catch (error: any) {
-    console.error('Failed to get team managers:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to get team managers';
+    console.error('Failed to get team managers:', errorMessage);
     return NextResponse.json(
-      { message: error.message || 'Failed to get team managers' },
+      { message: errorMessage },
       { status: 500 }
     );
   }
@@ -73,10 +74,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
     });
 
     return NextResponse.json({ manager });
-  } catch (error: any) {
-    console.error('Failed to add team manager:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to add team manager';
+    console.error('Failed to add team manager:', errorMessage);
     return NextResponse.json(
-      { message: error.message || 'Failed to add team manager' },
+      { message: errorMessage },
       { status: 500 }
     );
   }
@@ -116,10 +118,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Failed to remove team manager:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to remove team manager';
+    console.error('Failed to remove team manager:', errorMessage);
     return NextResponse.json(
-      { message: error.message || 'Failed to remove team manager' },
+      { message: errorMessage },
       { status: 500 }
     );
   }

@@ -87,8 +87,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     return NextResponse.json({ team });
-  } catch (error: any) {
-    console.error('Failed to fetch team:', error);
-    return NextResponse.json({ message: error.message || 'Failed to fetch team' }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch team';
+    console.error('Failed to fetch team:', errorMessage);
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

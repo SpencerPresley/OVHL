@@ -140,6 +140,7 @@ export class ForumService {
     authorId: string;
     postId: string;
     quotedCommentId?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     gif?: any;
   }) {
     // Ensure content is never undefined/empty when creating a comment

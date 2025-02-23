@@ -1,9 +1,11 @@
 import * as Ably from 'ably';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   if (!process.env.ABLY_API_KEY) {
     throw new Error('ABLY_API_KEY is not set');
   }

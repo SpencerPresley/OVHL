@@ -2,6 +2,7 @@ import {
   Prisma,
   NotificationType,
   NotificationStatus,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ForumPostStatus,
   System,
 } from '@prisma/client';
@@ -92,7 +93,7 @@ export interface PlayerProfile {
 }
 
 export type FormattedUserProfile = NoPlayerProfile | PlayerProfile;
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface User {
   id: string;
   email: string;
@@ -296,6 +297,7 @@ export class UserService {
     title: string;
     message: string;
     link?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     return prisma.notification.create({
@@ -363,6 +365,7 @@ export class UserService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static calculateCareerStats(seasons: any[]): CareerStats {
     return seasons.reduce(
       (totals, season) => {
@@ -456,8 +459,9 @@ export class UserService {
       }
 
       return responseData.user;
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload avatar';
+      console.error('Error uploading avatar:', errorMessage);
       throw error;
     }
   }

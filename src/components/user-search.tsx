@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
 import {
   Command,
   CommandEmpty,
@@ -40,19 +39,13 @@ export function UserSearch({ onSelect, teamId, className }: UserSearchProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Load initial list of players when component mounts or teamId changes
-  useEffect(() => {
-    if (teamId) {
-      searchUsers('');
-    }
-  }, [teamId]);
-
+  
   const searchUsers = async (query: string) => {
     if (!teamId) {
       console.error('TeamId is required');
       return;
     }
-
+    
     setLoading(true);
     try {
       const response = await fetch(
@@ -71,7 +64,13 @@ export function UserSearch({ onSelect, teamId, className }: UserSearchProps) {
       setLoading(false);
     }
   };
-
+  
+  // Load initial list of players when component mounts or teamId changes
+  useEffect(() => {
+    if (teamId) {
+      searchUsers('');
+    }
+  }, [teamId]);
   const handleSelect = (user: User) => {
     setSelectedUser(user);
     onSelect(user.id);

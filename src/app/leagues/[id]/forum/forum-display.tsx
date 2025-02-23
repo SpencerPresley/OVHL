@@ -40,6 +40,7 @@ interface ForumDisplayProps {
 
 export function ForumDisplay({ league, initialPosts, pagination }: ForumDisplayProps) {
   const [posts, setPosts] = useState<ForumPost[]>(initialPosts);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();

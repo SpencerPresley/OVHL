@@ -3,16 +3,13 @@
 import { Nav } from '@/components/nav';
 import { LeagueNav } from '@/components/league-nav';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TeamManagementRole } from '@prisma/client';
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Filters } from './components/filters';
 import { PlayerList } from './components/player-list';
 import { TeamSalaryCard } from './components/team-salary-card';
 import { BackToTop } from '@/components/back-to-top';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface League {
@@ -94,6 +91,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
   const [priceSort, setPriceSort] = useState<'asc' | 'desc' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDetailedView, setIsDetailedView] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
@@ -107,6 +105,7 @@ export function BiddingBoard({ league, teams, availablePlayers }: BiddingBoardPr
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

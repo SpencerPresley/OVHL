@@ -47,12 +47,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }
       throw prismaError;
     }
-  } catch (error: any) {
-    console.error('Failed to update avatar:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update avatar';
+    console.error('Failed to update avatar:', errorMessage);
     return NextResponse.json(
       {
-        message: error.message || 'Failed to update avatar',
-        details: error.toString(),
+        message: errorMessage,
+        details: error instanceof Error ? error.toString() : 'Unknown error',
       },
       { status: 500 }
     );
@@ -98,12 +99,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       }
       throw prismaError;
     }
-  } catch (error: any) {
-    console.error('Failed to remove avatar:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to remove avatar';
+    console.error('Failed to remove avatar:', errorMessage);
     return NextResponse.json(
       {
-        message: error.message || 'Failed to remove avatar',
-        details: error.toString(),
+        message: errorMessage,
       },
       { status: 500 }
     );

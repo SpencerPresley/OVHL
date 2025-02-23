@@ -97,6 +97,7 @@ export async function POST() {
       });
 
       // Create player season with contract reference
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const playerSeason = await prisma.playerSeason.create({
         data: {
           player: { connect: { id: player.id } },

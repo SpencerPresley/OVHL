@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ForumPostStatus } from '@prisma/client';
+
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';

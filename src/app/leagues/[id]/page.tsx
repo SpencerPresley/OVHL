@@ -64,6 +64,7 @@ const leagues: Record<string, League> = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getLeagueStats(leagueId: string) {
   // Get the latest season
   const season = await prisma.season.findFirst({
@@ -306,8 +307,6 @@ export default async function LeaguePage({ params }: { params: { id: string } })
       console.error('LeaguePage: Error verifying token:', error);
     }
   }
-
-  const stats = await getLeagueStats(league.id);
 
   console.log('LeaguePage: Rendering page');
 

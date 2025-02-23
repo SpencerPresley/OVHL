@@ -117,10 +117,10 @@ export default function TeamManagementPage() {
         title: 'Success',
         description: 'Team manager added successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add team manager',
+        description: error instanceof Error ? error.message : 'Failed to add team manager',
         variant: 'destructive',
       });
     }
@@ -150,10 +150,10 @@ export default function TeamManagementPage() {
         title: 'Success',
         description: 'Team manager removed successfully',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to remove team manager',
+        description: error instanceof Error ? error.message : 'Failed to remove team manager',
         variant: 'destructive',
       });
     }

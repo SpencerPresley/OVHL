@@ -38,8 +38,32 @@ interface Team {
   managers: Manager[];
 }
 
+interface PlayerSeasonData {
+  playerSeason: {
+    player: {
+      id: string;
+      name: string;
+      activeSystem: System;
+      gamertags: {
+        gamertag: string;
+      }[];
+      user?: {
+        id: string;
+      };
+    };
+    position: string;
+    contract: {
+      amount: number;
+    };
+  };
+  gamesPlayed: number;
+  goals: number;
+  assists: number;
+  plusMinus: number;
+}
+
 interface TeamSeason {
-  players: any[];
+  players: PlayerSeasonData[];
   tier: {
     salaryCap: number;
   };
@@ -74,7 +98,7 @@ interface TeamDisplayProps {
 
 export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayProps) {
   // Process players into position groups
-  const players = teamSeason.players.map((ps: any) => {
+  const players = teamSeason.players.map((ps: PlayerSeasonData) => {
     const manager = managers.find((m: Manager) => m.user.id === ps.playerSeason.player.user?.id);
 
     return {
@@ -136,6 +160,8 @@ export function TeamDisplay({ league, team, teamSeason, managers }: TeamDisplayP
   };
 
   const teamRecord = `${teamSeason.wins}-${teamSeason.losses}-${teamSeason.otLosses}`;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const points = teamSeason.wins * 2 + teamSeason.otLosses;
 
   const totalSalary = players.reduce((total, player) => total + player.contract.amount, 0);

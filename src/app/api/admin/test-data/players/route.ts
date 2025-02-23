@@ -131,6 +131,7 @@ export async function POST() {
             });
 
             // Create player team season
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const playerTeamSeason = await prisma.playerTeamSeason.create({
               data: {
                 playerSeasonId: playerSeason.id,

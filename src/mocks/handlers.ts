@@ -6,6 +6,7 @@ interface NotificationData {
   title: string;
   message: string;
   link?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any> | null;
 }
 

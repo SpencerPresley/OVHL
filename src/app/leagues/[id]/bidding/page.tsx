@@ -6,7 +6,6 @@ import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
 import { NHLTeam, AHLTeam, ECHLTeam, CHLTeam } from '@/lib/teams/types';
-import { Suspense } from 'react';
 
 const prisma = new PrismaClient();
 

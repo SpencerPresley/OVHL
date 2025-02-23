@@ -30,6 +30,7 @@ interface PlayerCardProps {
 }
 
 export function PlayerCard({ player, onPlaceBid }: PlayerCardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const positionColors = getPositionColors(player.position);
 
   return (

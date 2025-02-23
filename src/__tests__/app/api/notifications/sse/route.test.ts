@@ -1,9 +1,15 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextResponse } from 'next/server';
+
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 import { mockPrismaClient } from '@/mocks/prisma';
 import { GET } from '@/app/api/notifications/sse/route';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NotificationStatus } from '@/types/notifications';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { TextEncoder } from 'util';
 
 // Mock dependencies
@@ -36,11 +42,14 @@ jest.mock('next/server', () => {
   };
 });
 
-// Mock web APIs
+// Define types for event handlers
+type EventCallback = (event: Event) => void;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class MockReadableStream {
   private chunks: Uint8Array[] = [];
   private controller: ReadableStreamDefaultController<Uint8Array> | null = null;
-  private listeners: { [key: string]: ((event: any) => void)[] } = {};
+  private listeners: { [key: string]: EventCallback[] } = {};
 
   constructor() {
     this.controller = null;
@@ -70,20 +79,20 @@ class MockReadableStream {
     }
   }
 
-  addEventListener(event: string, callback: (event: any) => void) {
+  addEventListener(event: string, callback: EventCallback) {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
   }
 
-  removeEventListener(event: string, callback: (event: any) => void) {
+  removeEventListener(event: string, callback: EventCallback) {
     if (this.listeners[event]) {
       this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
     }
   }
 
-  dispatchEvent(event: any) {
+  dispatchEvent(event: Event) {
     const listeners = this.listeners[event.type] || [];
     listeners.forEach((callback) => callback(event));
     return true;
@@ -93,12 +102,10 @@ class MockReadableStream {
 // Mock Response constructor
 const originalResponse = global.Response;
 global.Response = jest.fn().mockImplementation((body, init) => {
-  // If body is a string (JSON), use it directly
   const actualBody =
     typeof body === 'string' ? body : body instanceof ReadableStream ? body : JSON.stringify(body);
   const response = new originalResponse(actualBody, init);
 
-  // Add proper json method
   Object.defineProperty(response, 'json', {
     value: async () => JSON.parse(await response.text()),
     writable: true,
@@ -106,7 +113,7 @@ global.Response = jest.fn().mockImplementation((body, init) => {
   });
 
   return response;
-}) as any;
+}) as unknown as typeof Response;
 
 // Mock EventSource
 class MockEventSource extends EventTarget {
@@ -116,9 +123,9 @@ class MockEventSource extends EventTarget {
   readyState = this.OPEN;
   url = '';
   withCredentials = false;
-  onerror: ((this: EventSource, ev: Event) => any) | null = null;
-  onmessage: ((this: EventSource, ev: MessageEvent<any>) => any) | null = null;
-  onopen: ((this: EventSource, ev: Event) => any) | null = null;
+  onerror: ((this: EventSource, ev: Event) => void) | null = null;
+  onmessage: ((this: EventSource, ev: MessageEvent) => void) | null = null;
+  onopen: ((this: EventSource, ev: Event) => void) | null = null;
 
   constructor(url: string, eventSourceInitDict?: EventSourceInit) {
     super();
@@ -131,20 +138,17 @@ class MockEventSource extends EventTarget {
   }
 }
 
-global.EventSource = MockEventSource as any;
+global.EventSource = MockEventSource as unknown as typeof EventSource;
 
 // Mock Request constructor
 const mockAbortController = new AbortController();
 const originalRequest = global.Request;
 global.Request = jest.fn().mockImplementation((url, init) => {
-  const request = new originalRequest(url, init);
-  Object.defineProperty(request, 'signal', {
-    value: mockAbortController.signal,
-    writable: true,
-    configurable: true,
-  });
+  const request = new originalRequest(url, init) as Request;
   return request;
-}) as any;
+}) as unknown as typeof Request;
+
+let mockTimer: NodeJS.Timeout;
 
 describe('SSE API Route', () => {
   let mockTimer: NodeJS.Timeout;
@@ -154,6 +158,7 @@ describe('SSE API Route', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(console, 'error').mockImplementation(() => {}); // Silence console.error
+    mockTimer = setInterval(() => {}, 1000); // Initialize mockTimer
 
     // Mock cookies
     const mockCookieStore = {

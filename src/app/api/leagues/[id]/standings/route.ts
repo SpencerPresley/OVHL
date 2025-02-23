@@ -10,6 +10,26 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
+interface TeamStats {
+  teamId: string;
+  teamName: string;
+  teamIdentifier: string;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  otLosses: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifferential: number;
+  powerplayGoals: number;
+  powerplayOpportunities: number;
+  powerplayPercentage: number;
+  penaltyKillGoalsAgainst: number;
+  penaltyKillOpportunities: number;
+  penaltyKillPercentage: number;
+}
+
 const LEAGUE_LEVELS: Record<string, number> = {
   nhl: 1,
   ahl: 2,
@@ -115,7 +135,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     );
 
     // Calculate stats and group teams by division
-    const teamsByDivision = new Map<string, any[]>();
+    const teamsByDivision = new Map<string, TeamStats[]>();
 
     teamSeasons.forEach((ts) => {
       const division = getTeamDivision(ts.team.teamIdentifier, leagueId);
@@ -173,7 +193,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     });
 
     // Sort teams within each division by points
-    for (const [division, teams] of teamsByDivision) {
+    teamsByDivision.forEach((teams) => {
       teams.sort((a, b) => {
         // Sort by points first
         if (b.points !== a.points) {
@@ -182,7 +202,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         // If points are tied, sort by team name
         return a.teamName.localeCompare(b.teamName);
       });
-    }
+    });
 
     // Convert Map to array of divisions
     const standings = Array.from(teamsByDivision.entries()).map(([division, teams]) => ({

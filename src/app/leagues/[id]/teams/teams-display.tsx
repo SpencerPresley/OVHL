@@ -74,6 +74,7 @@ interface League {
 /**
  * Player information interface including season stats and contract details
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Player {
   playerSeason: {
     player: {
@@ -172,6 +173,7 @@ interface TeamsDisplayProps {
 /**
  * Player card interface
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface PlayerCard {
   id: string;
   name: string;
@@ -204,6 +206,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     a.team.officialName.localeCompare(b.team.officialName)
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {

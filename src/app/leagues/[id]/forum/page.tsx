@@ -10,6 +10,21 @@ interface League {
   bannerColor: string;
 }
 
+interface RawForumPost {
+  id: string;
+  title: string;
+  content: string;
+  created_at: Date;
+  updated_at: Date;
+  status: ForumPostStatus;
+  author_id: string;
+  league_id: string;
+  author_name: string | null;
+  author_username: string;
+  comment_count: bigint;
+  reaction_count: bigint;
+}
+
 const POSTS_PER_PAGE = 10;
 
 const leagues: Record<string, League> = {
@@ -88,7 +103,7 @@ export default async function ForumPage({
     `;
 
     // Transform Prisma data to match our frontend types
-    const posts = (prismaData as any[]).map((post) => ({
+    const posts = (prismaData as RawForumPost[]).map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,

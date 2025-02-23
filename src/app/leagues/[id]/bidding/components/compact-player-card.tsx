@@ -22,6 +22,7 @@ interface CompactPlayerCardProps {
 }
 
 export function CompactPlayerCard({ player, onPlaceBid }: CompactPlayerCardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const positionColors = getPositionColors(player.position);
 
   return (

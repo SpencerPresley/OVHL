@@ -164,10 +164,11 @@ export default function LeagueRosterManagementPage() {
         });
         setTeams(filteredTeams);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add player to team';
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add player to team',
+        description: errorMessage,
         variant: 'destructive',
       });
     }

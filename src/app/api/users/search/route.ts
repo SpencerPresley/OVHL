@@ -107,10 +107,11 @@ export async function GET(request: Request) {
       });
 
     return NextResponse.json({ users });
-  } catch (error: any) {
-    console.error('Failed to search users:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to search users';
+    console.error('Failed to search users:', errorMessage);
     return NextResponse.json(
-      { message: error.message || 'Failed to search users' },
+      { message: errorMessage },
       { status: 500 }
     );
   }

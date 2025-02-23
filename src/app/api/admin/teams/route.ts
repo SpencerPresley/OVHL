@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Verify admin authentication
     const cookieStore = await cookies();

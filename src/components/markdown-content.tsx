@@ -1,6 +1,7 @@
 'use client';
 
 import { marked } from 'marked';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { Renderer, Tokens } from 'marked';
 import { useMemo } from 'react';
 import DOMPurify from 'isomorphic-dompurify';

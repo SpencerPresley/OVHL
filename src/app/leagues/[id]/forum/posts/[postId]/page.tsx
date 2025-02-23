@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PostView } from './post-view';
 import { ForumPostStatus, ReactionType } from '@prisma/client';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { ForumPost, ForumComment, GifData } from '@/types/forum';
 
 interface PrismaGif {

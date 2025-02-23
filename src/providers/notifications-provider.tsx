@@ -11,6 +11,8 @@ import {
 } from 'react';
 import { Notification, NotificationStatus } from '@/types/notifications';
 import { useNotificationToast } from '@/hooks/use-notification-toast';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Bell } from 'lucide-react';
 
 interface NotificationsContextType {

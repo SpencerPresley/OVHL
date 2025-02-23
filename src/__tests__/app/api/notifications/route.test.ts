@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextResponse } from 'next/server';
+
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 import { GET, POST } from '@/app/api/notifications/route';
@@ -20,18 +22,19 @@ jest.mock('jsonwebtoken', () => ({
 
 // Mock NextResponse
 jest.mock('next/server', () => {
+  const NextResponseClass = {
+    json: jest.fn().mockImplementation((data, init) => {
+      const response = new Response(JSON.stringify(data), init);
+      Object.defineProperty(response, 'json', {
+        value: async () => data,
+        writable: true,
+        configurable: true,
+      });
+      return response;
+    }),
+  };
   return {
-    NextResponse: {
-      json: jest.fn().mockImplementation((data, init) => {
-        const response = new Response(JSON.stringify(data), init);
-        Object.defineProperty(response, 'json', {
-          value: async () => data,
-          writable: true,
-          configurable: true,
-        });
-        return response;
-      }),
-    },
+    NextResponse: NextResponseClass,
   };
 });
 
@@ -45,14 +48,14 @@ global.Response = jest.fn().mockImplementation((body, init) => {
     configurable: true,
   });
   return response;
-}) as any;
+}) as unknown as typeof Response;
 
 // Mock Request constructor
 const originalRequest = global.Request;
 global.Request = jest.fn().mockImplementation((url, init) => {
   const request = new originalRequest(url, init);
   return request;
-}) as any;
+}) as unknown as typeof Request;
 
 describe('Notifications API Routes', () => {
   const mockUserId = 'user123';

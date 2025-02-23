@@ -225,10 +225,10 @@ export default function TeamRosterPage() {
         const data = await teamResponse.json();
         setTeam(data.team);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to remove player',
+        description: error instanceof Error ? error.message : 'Failed to remove player',
         variant: 'destructive',
       });
     }
