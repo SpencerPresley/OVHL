@@ -10,6 +10,12 @@
 body {
   min-height: 100vh;
   color: #fff;
+  /* background: radial-gradient(at 50% 0%, rgba(50, 50, 180, 0.15) 0%, rgba(0, 0, 0, 0) 75%),
+              radial-gradient(at 100% 0%, rgba(255, 0, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%),
+              radial-gradient(at 100% 100%, rgba(0, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 50%),
+              radial-gradient(at 0% 100%, rgba(50, 50, 180, 0.15) 0%, rgba(0, 0, 0, 0) 75%),
+              var(--primary-dark);
+  background-attachment: fixed; */
   background: var(--primary-dark);
 }
 

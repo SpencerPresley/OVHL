@@ -60,6 +60,11 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { System, TeamManagementRole } from '@prisma/client';
 import { BackToTop } from '@/components/back-to-top';
+import { NHL_TEAMS } from '@/lib/teams/nhl';
+import { AHL_TEAMS } from '@/lib/teams/ahl';
+import { ECHL_TEAMS } from '@/lib/teams/echl';
+import { CHL_TEAMS } from '@/lib/teams/chl';
+import type { NHLTeam, AHLTeam, ECHLTeam, CHLTeam } from '@/lib/teams/types';
 
 /**
  * League information interface
@@ -153,13 +158,14 @@ interface TeamSeason {
     teamIdentifier: string;
     managers: Manager[];
   };
+  tier: {
+    name: string;
+    salaryCap: number;
+  };
   wins: number;
   losses: number;
   otLosses: number;
   players: TeamSeasonPlayer[];
-  tier: {
-    salaryCap: number;
-  };
 }
 
 /**
@@ -190,6 +196,8 @@ interface PlayerCard {
   };
 }
 
+type LeagueTeam = NHLTeam | AHLTeam | ECHLTeam | CHLTeam;
+
 /**
  * TeamsDisplay Component
  *
@@ -201,10 +209,22 @@ interface PlayerCard {
  * @returns {JSX.Element} Rendered component
  */
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
-  // Sort teams alphabetically by name
-  const sortedTeams = [...teams].sort((a, b) =>
-    a.team.officialName.localeCompare(b.team.officialName)
+  // Create a map of team identifiers to colors based on league
+  const teamColorsMap = new Map<string, LeagueTeam>(
+    league.id === 'nhl'
+      ? NHL_TEAMS.map((team) => [team.id, team])
+      : league.id === 'ahl'
+        ? AHL_TEAMS.map((team) => [team.id, team])
+        : league.id === 'echl'
+          ? ECHL_TEAMS.map((team) => [team.id, team])
+          : league.id === 'chl'
+            ? CHL_TEAMS.map((team) => [team.id, team])
+            : []
   );
+
+  // Sort teams alphabetically by name and filter by league-specific teams
+  const sortedTeams = [...teams]
+    .sort((a, b) => a.team.officialName.localeCompare(b.team.officialName));
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobile, setIsMobile] = useState(false);
@@ -250,7 +270,13 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   const scrollToTeam = (teamId: string) => {
     const element = document.getElementById(teamId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const isMobile = window.innerWidth < 768;
+      const headerOffset = isMobile ? 220 : 120; // Much more padding on mobile for wrapped buttons
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ 
+        top: elementPosition - headerOffset, 
+        behavior: 'smooth' 
+      });
     }
   };
 
