@@ -61,15 +61,15 @@ export const dynamic = 'force-dynamic';
  * Used for type-safe validation of category parameter
  */
 export const StatCategory = z.enum([
-  'Points',
-  'Goals',
-  'Assists',
-  '+/-',
-  'SV%',
+  'POINTS',
+  'GOALS',
+  'ASSISTS',
+  'PLUSMINUS',
+  'SAVEPCT',
   'GAA',
-  'Wins',
-  'PP%',
-  'PK%',
+  'WINS',
+  'POWERPLAY',
+  'PENALTYKILL',
 ]);
 
 export type StatCategory = z.infer<typeof StatCategory>;
@@ -101,13 +101,13 @@ interface FormattedStat {
  * @returns Formatted string representation of the value
  */
 function formatStatValue(value: number, category: StatCategory): string {
-  if (category === 'SV%' || category === 'PP%' || category === 'PK%') {
+  if (category === 'SAVEPCT' || category === 'POWERPLAY' || category === 'PENALTYKILL') {
     return `${(value * 100).toFixed(1)}%`;
   }
   if (category === 'GAA') {
     return value.toFixed(2);
   }
-  if (category === '+/-' && value > 0) {
+  if (category === 'PLUSMINUS' && value > 0) {
     return `+${value}`;
   }
   return value.toString();
@@ -121,7 +121,7 @@ function formatStatValue(value: number, category: StatCategory): string {
  * @returns boolean indicating if the stat is team-based
  */
 function isTeamStat(category: StatCategory): boolean {
-  return ['Wins', 'PP%', 'PK%'].includes(category);
+  return ['WINS', 'POWERPLAY', 'PENALTYKILL'].includes(category);
 }
 
 /**
@@ -195,13 +195,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
       stats = teamSeasons.map((teamSeason) => {
         let value = 0;
         switch (statCategory) {
-          case 'Wins':
+          case 'WINS':
             value = teamSeason.wins;
             break;
-          case 'PP%':
+          case 'POWERPLAY':
             value = teamSeason.powerplayGoals / teamSeason.powerplayOpportunities;
             break;
-          case 'PK%':
+          case 'PENALTYKILL':
             value = 1 - teamSeason.penaltyKillGoalsAgainst / teamSeason.penaltyKillOpportunities;
             break;
         }
@@ -252,19 +252,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
       stats = playerSeasons.map((playerSeason) => {
         let value = 0;
         switch (statCategory) {
-          case 'Points':
+          case 'POINTS':
             value = (playerSeason.goals || 0) + (playerSeason.assists || 0);
             break;
-          case 'Goals':
+          case 'GOALS':
             value = playerSeason.goals || 0;
             break;
-          case 'Assists':
+          case 'ASSISTS':
             value = playerSeason.assists || 0;
             break;
-          case '+/-':
+          case 'PLUSMINUS':
             value = playerSeason.plusMinus || 0;
             break;
-          case 'SV%':
+          case 'SAVEPCT':
             value = playerSeason.saves
               ? playerSeason.saves / (playerSeason.saves + (playerSeason.goalsAgainst || 0))
               : 0;

@@ -4,7 +4,28 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 
-type StatCategory = 'Points' | 'Goals' | 'Assists' | '+/-' | 'SV%' | 'GAA' | 'Wins' | 'PP%' | 'PK%';
+type StatCategory = 
+  | 'POINTS' 
+  | 'GOALS' 
+  | 'ASSISTS' 
+  | 'PLUSMINUS' 
+  | 'SAVEPCT' 
+  | 'GAA' 
+  | 'WINS' 
+  | 'POWERPLAY' 
+  | 'PENALTYKILL';
+
+const STAT_DISPLAY_NAMES: Record<StatCategory, string> = {
+  POINTS: 'Points',
+  GOALS: 'Goals',
+  ASSISTS: 'Assists',
+  PLUSMINUS: '+/-',
+  SAVEPCT: 'SV%',
+  GAA: 'GAA',
+  WINS: 'Wins',
+  POWERPLAY: 'PP%',
+  PENALTYKILL: 'PK%'
+};
 
 interface Stat {
   id: string;
@@ -21,7 +42,7 @@ interface LeagueQuickStatsProps {
 }
 
 export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
-  const [selectedStat, setSelectedStat] = useState<StatCategory>('Points');
+  const [selectedStat, setSelectedStat] = useState<StatCategory>('POINTS');
   const [stats, setStats] = useState<Stat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,9 +50,8 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
     const fetchStats = async () => {
       setIsLoading(true);
       try {
-        const encodedCategory = encodeURIComponent(selectedStat);
         const response = await fetch(
-          `/api/leagues/${leagueId}/quick-stats?category=${encodedCategory}`
+          `/api/leagues/${leagueId}/quick-stats?category=${selectedStat}`
         );
         if (!response.ok) throw new Error('Failed to fetch stats');
         const data = await response.json();
@@ -49,17 +69,13 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
 
   return (
     <div className="space-y-4">
-      <Tabs defaultValue="Points" onValueChange={(value) => setSelectedStat(value as StatCategory)}>
+      <Tabs defaultValue="POINTS" onValueChange={(value) => setSelectedStat(value as StatCategory)}>
         <TabsList className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <TabsTrigger value="Points">Points</TabsTrigger>
-          <TabsTrigger value="Goals">Goals</TabsTrigger>
-          <TabsTrigger value="Assists">Assists</TabsTrigger>
-          <TabsTrigger value="+/-">+/-</TabsTrigger>
-          <TabsTrigger value="SV%">SV%</TabsTrigger>
-          <TabsTrigger value="GAA">GAA</TabsTrigger>
-          <TabsTrigger value="Wins">Wins</TabsTrigger>
-          <TabsTrigger value="PP%">PP%</TabsTrigger>
-          <TabsTrigger value="PK%">PK%</TabsTrigger>
+          {Object.entries(STAT_DISPLAY_NAMES).map(([value, display]) => (
+            <TabsTrigger key={value} value={value}>
+              {display}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
 
