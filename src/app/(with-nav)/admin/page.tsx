@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Team {
   id: string;
@@ -178,6 +179,23 @@ export default function AdminPage() {
       <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
 
       <div className="grid gap-6 md:grid-cols-2">
+        {/* Bidding Management Card - NEW */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Bidding Management</CardTitle>
+            <CardDescription>
+              Manage league bidding periods, create test players, and control the bidding process across all tiers.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/bidding" passHref>
+              <Button className="w-full">
+                Manage Bidding
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* Team Setup Card */}
         <Card>
           <CardHeader>

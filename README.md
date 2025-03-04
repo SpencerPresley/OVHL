@@ -1,3 +1,58 @@
+# OVHL - Online Virtual Hockey League
+
+## Redis Setup for Bidding System
+
+The bidding system uses Redis for real-time bidding data. You have two options for setting up Redis:
+
+### Option 1: Local Redis Installation
+
+1. **Install Redis** on your local machine:
+   - Mac: `brew install redis` and start with `brew services start redis`
+   - Windows: Use [Windows Subsystem for Linux](https://redis.io/docs/getting-started/installation/install-redis-on-windows/) or [Memurai](https://www.memurai.com/)
+   - Linux: `sudo apt-get install redis-server` and start with `sudo service redis-server start`
+
+2. **Verify Installation**: Run `redis-cli ping` and you should receive `PONG`
+
+3. **Update Environment**: Make sure `.env.local` contains:
+   ```
+   REDIS_URL="redis://localhost:6379"
+   ```
+
+### Option 2: Cloud Redis (Upstash)
+
+1. Create a free Redis database at [Upstash](https://upstash.com/)
+2. After creating the database, copy the REDIS_URL from your dashboard
+3. Update `.env.local` with your Upstash URL:
+   ```
+   REDIS_URL="your-upstash-redis-url"
+   ```
+
+## Bidding System Features
+
+- Sequential league bidding (NHL → AHL → ECHL → CHL)
+- Each bidding period lasts 2 days
+- Bid timers reset to 6 hours when below 6 hours remaining
+- Team manager restrictions for placing bids
+- Automatic progression between leagues
+
+## Running the Scheduler
+
+For automatic bid expiration and league transitions, set up a cron job to call:
+
+```bash
+curl -X GET "https://your-domain.com/api/bidding/scheduler?key=your-scheduler-api-key"
+```
+
+Use a service like [Upstash QStash](https://upstash.com/docs/qstash) or [GitHub Actions](https://docs.github.com/en/actions) to run this every few minutes.
+
+## Development
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
 # Default Next.js README
 
 Full README coming later.

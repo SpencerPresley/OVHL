@@ -24,9 +24,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-// import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
+import { signIn } from 'next-auth/react';
 
 /**
  * Zod schema for sign-in form validation
@@ -59,7 +60,7 @@ type SignInValues = z.infer<typeof signInSchema>;
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  // const router = useRouter()
+  const router = useRouter();
 
   // Initialize form with zod validation
   const form = useForm<SignInValues>({
@@ -76,7 +77,7 @@ export function SignInForm() {
    * @param values - Form values containing email, password, and rememberMe
    *
    * On successful sign-in:
-   * - Sets JWT in HTTP-only cookie
+   * - Signs in with NextAuth
    * - Cookie expiration varies based on rememberMe
    * - Redirects to dashboard
    */
@@ -85,26 +86,24 @@ export function SignInForm() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-        credentials: 'include',
+      // Use NextAuth's signIn function instead of custom API
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+        callbackUrl: '/',
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign in');
+      if (!result?.ok) {
+        throw new Error(result?.error || 'Failed to sign in');
       }
 
-      // Wait for cookie to be set
+      // Wait for session to be set up
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Redirect to home and force a full page reload
-      window.location.href = '/';
+      // Redirect to home
+      router.push('/');
+      router.refresh();
     } catch (error) {
       console.error(error);
       setError(error instanceof Error ? error.message : 'An error occurred');

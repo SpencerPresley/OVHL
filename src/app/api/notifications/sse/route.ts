@@ -17,7 +17,7 @@
  *
  * Features:
  * - Persistent real-time notification connection
- * - JWT-based authentication
+ * - JWT-based authentication and NextAuth authentication
  * - Efficient connection management
  * - Automatic reconnection handling
  *
@@ -44,6 +44,8 @@
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
+import { getServerSession } from 'next-auth';
+import { AuthOptions } from '@/lib/auth-options';
 
 /**
  * TextEncoder instance for converting strings to Uint8Array
@@ -56,7 +58,7 @@ const encoder = new TextEncoder();
  *
  * Establishes a persistent SSE connection and streams notifications to authenticated users.
  * The connection:
- * - Validates user authentication via JWT
+ * - Validates user authentication via JWT or NextAuth
  * - Sends periodic pings (every 5s) to keep connection alive
  * - Checks for new notifications on each ping
  * - Handles connection cleanup on client disconnect
@@ -66,32 +68,51 @@ const encoder = new TextEncoder();
  */
 export async function GET(request: Request) {
   try {
-    // Validate authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
+    // Validate authentication - Check for NextAuth session first
+    const session = await getServerSession(AuthOptions);
+    let userId: string | undefined;
+    
+    if (session?.user?.id) {
+      // User is authenticated with NextAuth
+      userId = session.user.id;
+    } else {
+      // Fall back to token-based auth
+      const cookieStore = await cookies();
+      const token = cookieStore.get('token');
 
-    if (!token) {
-      // Return a 204 No Content instead of 401 for unauthenticated users
-      // This prevents aggressive reconnection attempts
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Cache-Control': 'no-cache, no-transform',
-          'Content-Type': 'text/event-stream',
-        },
-      });
+      if (!token) {
+        // Return a 204 No Content instead of 401 for unauthenticated users
+        // This prevents aggressive reconnection attempts
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Cache-Control': 'no-cache, no-transform',
+            'Content-Type': 'text/event-stream',
+          },
+        });
+      }
+
+      // Decode and verify JWT token
+      try {
+        const decoded = verify(token.value, process.env.JWT_SECRET!) as {
+          id: string;
+        };
+        userId = decoded.id;
+      } catch (error) {
+        console.error('Token verification failed:', error);
+        // Invalid token, return 204 as well
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Cache-Control': 'no-cache, no-transform',
+            'Content-Type': 'text/event-stream',
+          },
+        });
+      }
     }
-
-    // Decode and verify JWT token
-    let userId: string;
-    try {
-      const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-        id: string;
-      };
-      userId = decoded.id;
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      // Invalid token, return 204 as well
+    
+    // If we still don't have a userId, return 204
+    if (!userId) {
       return new Response(null, {
         status: 204,
         headers: {

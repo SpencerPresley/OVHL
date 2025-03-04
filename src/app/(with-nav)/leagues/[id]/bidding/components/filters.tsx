@@ -25,12 +25,12 @@ interface FiltersProps {
   setPriceSort: (value: 'asc' | 'desc' | null) => void;
   searchQuery: string;
   setSearchQuery: (value: string) => void;
-  totalPlayers: number;
-  filteredCount: number;
   isDetailedView: boolean;
   setIsDetailedView: (value: boolean) => void;
-  isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  isFiltersOpen: boolean;
+  setIsFiltersOpen: (value: boolean) => void;
+  totalPlayers?: number;
+  filteredCount?: number;
 }
 
 const POSITIONS = [
@@ -65,12 +65,12 @@ export function Filters({
   setPriceSort,
   searchQuery,
   setSearchQuery,
-  totalPlayers,
-  filteredCount,
   isDetailedView,
   setIsDetailedView,
-  isOpen,
-  setIsOpen,
+  isFiltersOpen,
+  setIsFiltersOpen,
+  totalPlayers = 0,
+  filteredCount = 0,
 }: FiltersProps) {
   const hasActiveFilters =
     positionFilter.length > 0 ||
@@ -125,7 +125,7 @@ export function Filters({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="card-gradient rounded-lg">
+    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen} className="card-gradient rounded-lg">
       <CollapsibleTrigger className="w-full flex items-center justify-between p-6 cursor-pointer">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold">Filters</h2>
@@ -136,7 +136,7 @@ export function Filters({
           )}
         </div>
         <ChevronDown
-          className={`h-5 w-5 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
+          className={`h-5 w-5 transition-transform ${isFiltersOpen ? 'transform rotate-180' : ''}`}
         />
       </CollapsibleTrigger>
 

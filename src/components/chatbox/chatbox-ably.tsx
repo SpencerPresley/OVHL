@@ -485,20 +485,49 @@ function ChatComponent({ leagueId, currentUser }: ChatProps) {
  */
 const Chat = function Chat({ leagueId, currentUser }: ChatProps) {
   console.log('Chat: Initializing for league', leagueId);
+  const [authError, setAuthError] = useState(false);
 
   // Create a memoized client instance that persists across renders
   const client = useMemo(() => {
     console.log('Chat: Creating new Ably client');
-    return new Ably.Realtime({
+    
+    // Create a new Ably client that handles auth errors
+    const ablyClient = new Ably.Realtime({
       authUrl: '/api/ably',
       authMethod: 'GET',
       echoMessages: true,
       closeOnUnload: true,
     });
+    
+    // Listen for auth errors
+    ablyClient.connection.on('failed', (err) => {
+      console.error('Ably connection failed:', err);
+      if (err.statusCode === 401) {
+        setAuthError(true);
+      }
+    });
+    
+    return ablyClient;
   }, []);
 
   const channelName = `league-chat:${leagueId}`;
   console.log('Chat: Using channel', channelName);
+
+  // If auth error, show a message instead of the chat
+  if (authError) {
+    return (
+      <Card className="flex flex-col h-[800px] lg:h-[600px] card-gradient shadow-xl">
+        <CardContent className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-red-400 mb-2">Authentication Error</h3>
+            <p className="text-gray-300 mb-4">
+              Unable to connect to chat. Please try refreshing the page or sign in again.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <AblyProvider client={client}>

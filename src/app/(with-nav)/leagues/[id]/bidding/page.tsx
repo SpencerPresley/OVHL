@@ -224,6 +224,9 @@ export default async function BiddingPage({ params }: { params: { id: string } }
     position: playerSeason.position,
     gamertag: playerSeason.player.gamertags[0]?.gamertag || playerSeason.player.name,
     currentBid: null, // We'll implement this when we add the bidding system
+    currentTeamId: null, // Added for compatibility with the Player interface
+    currentTeamName: null, // Added for compatibility with the Player interface
+    bids: [], // Added for compatibility with the Player interface
     contract: {
       amount: playerSeason.contract.amount,
     },

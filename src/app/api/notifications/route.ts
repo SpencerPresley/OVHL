@@ -2,11 +2,23 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
+import { getServerSession } from 'next-auth';
+import { AuthOptions } from '@/lib/auth-options';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    // Try to get NextAuth session first
+    const session = await getServerSession(AuthOptions);
+    
+    if (session?.user?.id) {
+      // User is authenticated with NextAuth
+      const notifications = await UserService.getUserNotifications(session.user.id);
+      return NextResponse.json({ notifications });
+    }
+    
+    // Fall back to token-based auth if no NextAuth session
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
 
@@ -28,27 +40,42 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
+    // Try to get NextAuth session first
+    const session = await getServerSession(AuthOptions);
+    let userId: string;
+    let isAdmin: boolean = false;
+    
+    if (session?.user?.id) {
+      // User is authenticated with NextAuth
+      userId = session.user.id;
+      isAdmin = session.user.isAdmin || false;
+    } else {
+      // Fall back to token-based auth
+      const cookieStore = await cookies();
+      const token = cookieStore.get('token');
 
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      if (!token) {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+
+      const decoded = verify(token.value, process.env.JWT_SECRET!) as {
+        id: string;
+        isAdmin?: boolean;
+      };
+      
+      userId = decoded.id;
+      isAdmin = decoded.isAdmin || false;
     }
 
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
     // Only admins can create notifications
-    if (!decoded.isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { userId, type, title, message, link, metadata } = await request.json();
+    const { userId: targetUserId, type, title, message, link, metadata } = await request.json();
 
     const notification = await UserService.createNotification({
-      userId,
+      userId: targetUserId,
       type,
       title,
       message,

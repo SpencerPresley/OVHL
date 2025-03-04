@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:test": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -61,6 +62,7 @@
     "embla-carousel-react": "^8.5.2",
     "highlight.js": "^11.11.1",
     "input-otp": "^1.4.2",
+    "ioredis": "^5.5.0",
     "isomorphic-dompurify": "^2.21.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.469.0",

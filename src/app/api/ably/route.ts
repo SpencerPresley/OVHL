@@ -1,40 +1,43 @@
 import * as Ably from 'ably';
+import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-import { verify } from 'jsonwebtoken';
-
+/**
+ * Ably authentication endpoint
+ * 
+ * This endpoint provides Ably token requests for authenticated users only.
+ * It strictly requires authentication via either NextAuth or JWT token.
+ * Anonymous users are rejected with a 401 Unauthorized response.
+ */
 export async function GET() {
-  if (!process.env.ABLY_API_KEY) {
-    throw new Error('ABLY_API_KEY is not set');
-  }
-
-  // Get the user's ID from their auth token to use as client ID
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token');
-  let clientId = 'anonymous-' + Math.random().toString(36).substring(7);
-
-  if (token?.value) {
-    try {
-      const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
-      clientId = decoded.id;
-    } catch (error) {
-      console.error('Error verifying token for Ably clientId:', error);
+  try {
+    if (!process.env.ABLY_API_KEY) {
+      return NextResponse.json(
+        { error: 'Ably API key not configured' },
+        { status: 500 }
+      );
     }
+
+    // This will throw an error if not authenticated
+    const user = await requireAuth();
+
+    // Create an Ably client with the API key
+    const client = new Ably.Rest(process.env.ABLY_API_KEY);
+
+    // Create a token request with appropriate capabilities
+    const tokenRequestData = await client.auth.createTokenRequest({
+      clientId: user.id,
+      capability: {
+        'league-chat:*': ['publish', 'subscribe', 'presence', 'history'],
+      },
+    });
+
+    return NextResponse.json(tokenRequestData);
+  } catch (error) {
+    console.error('Ably auth error:', error);
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    );
   }
-
-  // Create an Ably client with the API key
-  const client = new Ably.Rest(process.env.ABLY_API_KEY);
-
-  // Create a token request with appropriate capabilities
-  const tokenRequestData = await client.auth.createTokenRequest({
-    clientId,
-    capability: {
-      // Grant full access to league chat channels
-      'league-chat:*': ['publish', 'subscribe', 'presence', 'history'],
-    },
-  });
-
-  return Response.json(tokenRequestData);
 }

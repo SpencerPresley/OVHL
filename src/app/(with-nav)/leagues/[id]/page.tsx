@@ -3,9 +3,8 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { default as dynamicImport } from 'next/dynamic';
 import { PrismaClient } from '@prisma/client';
-import { cookies } from 'next/headers';
-import { verify } from 'jsonwebtoken';
 import { LeagueQuickStats } from '@/components/league-quick-stats';
+import { serverAuth } from '@/lib/auth';
 
 // Use nodejs runtime to avoid edge runtime issues with crypto
 export const runtime = 'nodejs';
@@ -280,31 +279,26 @@ export default async function LeaguePage({ params }: { params: { id: string } })
     notFound();
   }
 
-  // Attempt to get authenticated user for chat functionality
-  console.log('LeaguePage: Getting auth token');
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token');
-
-  console.log('LeaguePage: Token found:', !!token);
-
   let currentUser = null;
-  if (token?.value) {
-    try {
-      console.log('LeaguePage: Verifying token');
-      const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
-      console.log('LeaguePage: Token verified, getting user');
 
+  // Get authenticated user with unified auth utility
+  try {
+    console.log('LeaguePage: Checking authentication');
+    const user = await serverAuth();
+    
+    if (user) {
+      console.log('LeaguePage: User authenticated, getting full user data');
       currentUser = await prisma.user.findUnique({
-        where: { id: decoded.id },
+        where: { id: user.id },
         select: {
           id: true,
           name: true,
         },
       });
       console.log('LeaguePage: User found:', !!currentUser);
-    } catch (error) {
-      console.error('LeaguePage: Error verifying token:', error);
     }
+  } catch (error) {
+    console.error('LeaguePage: Auth error:', error);
   }
 
   console.log('LeaguePage: Rendering page');

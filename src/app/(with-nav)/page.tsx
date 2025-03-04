@@ -2,11 +2,10 @@ import { Hero } from '@/components/hero';
 import { FeaturesGrid } from '@/components/features_grid';
 import { HomeCTA } from '@/components/home_cta';
 import { Footer } from '@/components/footer';
-import { cookies } from 'next/headers';
-import { verify } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { News } from '@/components/news';
 import { SeasonSignupCard } from '@/components/season-signup-card';
+import { serverAuth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -32,18 +31,9 @@ export default async function Home() {
   let latestSeason = null;
 
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (token) {
-      try {
-        verify(token.value, process.env.JWT_SECRET || '');
-        isAuthenticated = true;
-      } catch (error) {
-        console.error('Invalid token:', error);
-      }
-    }
+    // Check authentication with unified auth utility
+    const user = await serverAuth();
+    isAuthenticated = !!user;
 
     // Get latest season - wrapped in try/catch to handle database errors gracefully
     try {

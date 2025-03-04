@@ -5,6 +5,7 @@ import './globals.css';
 import '@/styles/notifications.css';
 import { NotificationsProvider } from '@/providers/notifications-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthSessionProvider } from '../providers/auth-session-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,7 +38,9 @@ export default function RootLayout({
         `}</Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NotificationsProvider>{children}</NotificationsProvider>
+        <AuthSessionProvider>
+          <NotificationsProvider>{children}</NotificationsProvider>
+        </AuthSessionProvider>
         <Toaster />
       </body>
     </html>
