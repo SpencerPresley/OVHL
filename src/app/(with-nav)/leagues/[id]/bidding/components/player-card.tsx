@@ -36,15 +36,22 @@ interface PlayerCardProps {
   managedTeamId?: string | null;
 }
 
-export function PlayerCard({ player, onPlaceBid, canBid, isSubmitting, managedTeamId }: PlayerCardProps) {
+export function PlayerCard({
+  player,
+  onPlaceBid,
+  canBid,
+  isSubmitting,
+  managedTeamId,
+}: PlayerCardProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const positionColors = getPositionColors(player.position);
-  
+
   // Helper to prevent displaying player timer for players without active bids
   const hasActiveBid = Boolean(player.currentBid && player.endTime);
-  
+
   // Only show team name if it's the user's team
-  const showTeamName = player.currentTeamId && managedTeamId && player.currentTeamId === managedTeamId;
+  const showTeamName =
+    player.currentTeamId && managedTeamId && player.currentTeamId === managedTeamId;
 
   return (
     <div className="group">
@@ -85,14 +92,10 @@ export function PlayerCard({ player, onPlaceBid, canBid, isSubmitting, managedTe
           </div>
           <div className="text-center p-2 rounded-lg bg-black/30 border border-white/5">
             <p className="text-sm text-muted-foreground">Min Contract</p>
-            <p className="font-mono font-bold">
-              ${player.contract.amount.toLocaleString()}
-            </p>
+            <p className="font-mono font-bold">${player.contract.amount.toLocaleString()}</p>
             {/* Only show team name if it matches the user's team */}
             {showTeamName && player.currentTeamName && (
-              <p className="text-xs text-gray-400 mt-1">
-                {player.currentTeamName}
-              </p>
+              <p className="text-xs text-gray-400 mt-1">{player.currentTeamName}</p>
             )}
           </div>
         </div>
@@ -119,18 +122,20 @@ export function PlayerCard({ player, onPlaceBid, canBid, isSubmitting, managedTe
                 'text-red-400': (player.stats?.plusMinus || 0) < 0,
               })}
             >
-              {(player.stats?.plusMinus || 0) > 0 ? `+${player.stats?.plusMinus}` : player.stats?.plusMinus || 0}
+              {(player.stats?.plusMinus || 0) > 0
+                ? `+${player.stats?.plusMinus}`
+                : player.stats?.plusMinus || 0}
             </p>
           </div>
         </div>
 
         {/* Bid Button */}
-        <BidSection 
-          playerId={player.id} 
-          onPlaceBid={onPlaceBid} 
-          canBid={canBid} 
-          isSubmitting={isSubmitting} 
-          currentBid={player.currentBid === null ? null : player.currentBid} 
+        <BidSection
+          playerId={player.id}
+          onPlaceBid={onPlaceBid}
+          canBid={canBid}
+          isSubmitting={isSubmitting}
+          currentBid={player.currentBid === null ? null : player.currentBid}
           startingAmount={player.contract.amount}
         />
       </div>

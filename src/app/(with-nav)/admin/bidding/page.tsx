@@ -7,7 +7,16 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, Clock, PlayCircle, TimerOff, XCircle, Database, RefreshCw } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  PlayCircle,
+  TimerOff,
+  XCircle,
+  Database,
+  RefreshCw,
+} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
@@ -45,8 +54,8 @@ export default function AdminBiddingPage() {
 
   // Debug session - only used for troubleshooting, not functionality
   useEffect(() => {
-    console.log("Session status:", status);
-    console.log("Session data:", session);
+    console.log('Session status:', status);
+    console.log('Session data:', session);
   }, [session, status]);
 
   // Fetch bidding status
@@ -54,13 +63,13 @@ export default function AdminBiddingPage() {
     try {
       setIsLoading(true);
       const response = await fetch('/api/admin/bidding', {
-        credentials: 'include' // Ensure cookies are sent with the request
+        credentials: 'include', // Ensure cookies are sent with the request
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch bidding status');
       }
-      
+
       const data = await response.json();
       setBiddingStatuses(data.biddingStatus || {});
       setActiveBidding(data.activeBidding);
@@ -82,21 +91,21 @@ export default function AdminBiddingPage() {
   // Timer for periodic refresh
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     const interval = setInterval(() => {
       fetchBiddingStatus();
     }, 30000); // Refresh every 30 seconds
-    
+
     return () => clearInterval(interval);
   }, [status]);
 
   // Handle bidding actions
   const handleBiddingAction = async (action: 'start' | 'stop' | 'finalize', leagueId: string) => {
     if (isActionPending) return;
-    
+
     try {
       setIsActionPending(true);
-      
+
       const response = await fetch('/api/admin/bidding', {
         method: 'POST',
         headers: {
@@ -108,9 +117,9 @@ export default function AdminBiddingPage() {
           leagueId,
         }),
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           toast.error('You are not authorized to perform this action. Please log in as an admin.');
@@ -118,9 +127,9 @@ export default function AdminBiddingPage() {
         }
         throw new Error(result.error || 'Failed to perform action');
       }
-      
+
       toast.success(result.message || 'Action completed successfully');
-      
+
       // Refresh bidding status
       fetchBiddingStatus();
     } catch (error: any) {
@@ -134,16 +143,19 @@ export default function AdminBiddingPage() {
   // Create test player data
   const handleCreateTestData = async (leagueId: string) => {
     if (isCreatingTestData) return;
-    
+
     try {
       setIsCreatingTestData(true);
-      
-      const response = await fetch(`/api/bidding/initialize?leagueId=${leagueId}&count=${testPlayerCount}`, {
-        credentials: 'include' // Ensure cookies are sent with the request
-      });
-      
+
+      const response = await fetch(
+        `/api/bidding/initialize?leagueId=${leagueId}&count=${testPlayerCount}`,
+        {
+          credentials: 'include', // Ensure cookies are sent with the request
+        }
+      );
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           toast.error('You are not authorized to create test data. Please log in as an admin.');
@@ -151,7 +163,7 @@ export default function AdminBiddingPage() {
         }
         throw new Error(result.error || 'Failed to create test data');
       }
-      
+
       toast.success(result.message || 'Test players created successfully');
       fetchDebugData(leagueId);
     } catch (error: any) {
@@ -165,10 +177,10 @@ export default function AdminBiddingPage() {
   // Initialize players in Redis
   const handleInitializeBidding = async (leagueId: string) => {
     if (isInitializingBidding) return;
-    
+
     try {
       setIsInitializingBidding(true);
-      
+
       const response = await fetch('/api/bidding/initialize', {
         method: 'POST',
         headers: {
@@ -179,9 +191,9 @@ export default function AdminBiddingPage() {
           leagueId,
         }),
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           toast.error('You are not authorized to initialize bidding. Please log in as an admin.');
@@ -189,13 +201,13 @@ export default function AdminBiddingPage() {
         }
         throw new Error(result.error || 'Failed to initialize bidding');
       }
-      
+
       if (result.initializedCount === 0) {
         toast.info(result.message || 'No players to initialize');
       } else {
         toast.success(result.message || 'Players initialized successfully');
       }
-      
+
       // Refresh data
       fetchBiddingStatus();
     } catch (error: any) {
@@ -210,15 +222,15 @@ export default function AdminBiddingPage() {
   const fetchDebugData = async (leagueId: string) => {
     try {
       setIsLoadingDebug(true);
-      
+
       const response = await fetch(`/api/bidding/debug?leagueId=${leagueId}`, {
-        credentials: 'include' // Ensure cookies are sent with the request
+        credentials: 'include', // Ensure cookies are sent with the request
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch debug data');
       }
-      
+
       const data = await response.json();
       setDebugData(data);
     } catch (error) {
@@ -238,14 +250,14 @@ export default function AdminBiddingPage() {
   const calculateTimeRemaining = (endTime: number) => {
     const now = Date.now();
     const diff = endTime - now;
-    
+
     if (diff <= 0) {
       return 'Ending...';
     }
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     return `${hours}h ${minutes}m remaining`;
   };
 
@@ -253,7 +265,7 @@ export default function AdminBiddingPage() {
   const fixBiddingData = async () => {
     try {
       setIsLoading(true);
-      
+
       const response = await fetch('/api/bidding/fix-data', {
         method: 'POST',
         headers: {
@@ -263,14 +275,14 @@ export default function AdminBiddingPage() {
           leagueId: selectedLeagueId,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fix bidding data');
       }
-      
+
       const data = await response.json();
       toast.success(`Fixed bidding data: ${data.message}`);
-      
+
       // Fetch the status to display updated stats
       await checkBiddingDataStatus();
       // Also refresh regular bidding status
@@ -287,7 +299,7 @@ export default function AdminBiddingPage() {
   const checkBiddingDataStatus = async () => {
     try {
       const dataResponse = await fetch(`/api/bidding/fix-data?leagueId=${selectedLeagueId}`);
-      
+
       if (dataResponse.ok) {
         const dataStatus = await dataResponse.json();
         setDataStatus({
@@ -319,19 +331,19 @@ export default function AdminBiddingPage() {
       </div>
     );
   }
-  
+
   if (status === 'unauthenticated') {
     return (
       <div className="container mx-auto py-10">
         <Card>
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>
-            <CardDescription>You must be logged in as an admin to access this page.</CardDescription>
+            <CardDescription>
+              You must be logged in as an admin to access this page.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push('/sign-in')}>
-              Log In
-            </Button>
+            <Button onClick={() => router.push('/sign-in')}>Log In</Button>
           </CardContent>
         </Card>
       </div>
@@ -353,9 +365,8 @@ export default function AdminBiddingPage() {
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <AlertTitle className="text-green-400">Bidding Active</AlertTitle>
               <AlertDescription>
-                {activeBidding.leagueId.toUpperCase()} bidding is currently active.
-                Ends at {formatDate(activeBidding.endTime)}.
-                {" "}
+                {activeBidding.leagueId.toUpperCase()} bidding is currently active. Ends at{' '}
+                {formatDate(activeBidding.endTime)}.{' '}
                 <span className="font-semibold">
                   {calculateTimeRemaining(activeBidding.endTime)}
                 </span>
@@ -385,17 +396,17 @@ export default function AdminBiddingPage() {
                   <div>
                     <h3 className="text-xl font-semibold">{leagueId.toUpperCase()} Bidding</h3>
                     <div className="flex items-center mt-2">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={
-                          biddingStatuses[leagueId]?.active 
-                            ? "bg-green-900/20 text-green-400 border-green-700"
-                            : "bg-gray-800 text-gray-400 border-gray-700"
+                          biddingStatuses[leagueId]?.active
+                            ? 'bg-green-900/20 text-green-400 border-green-700'
+                            : 'bg-gray-800 text-gray-400 border-gray-700'
                         }
                       >
                         {biddingStatuses[leagueId]?.active ? 'Active' : 'Inactive'}
                       </Badge>
-                      
+
                       {biddingStatuses[leagueId]?.active && (
                         <div className="ml-4 flex items-center text-sm text-gray-400">
                           <Clock className="h-3 w-3 mr-1" />
@@ -403,7 +414,7 @@ export default function AdminBiddingPage() {
                         </div>
                       )}
                     </div>
-                    
+
                     {biddingStatuses[leagueId]?.active && (
                       <div className="mt-2 text-sm text-gray-400">
                         <div>Started: {formatDate(biddingStatuses[leagueId]?.startTime || 0)}</div>
@@ -411,7 +422,7 @@ export default function AdminBiddingPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex gap-2">
                     {!biddingStatuses[leagueId]?.active && !activeBidding && (
                       <Button
@@ -422,7 +433,7 @@ export default function AdminBiddingPage() {
                         Start Bidding
                       </Button>
                     )}
-                    
+
                     {biddingStatuses[leagueId]?.active && (
                       <>
                         <Button
@@ -433,7 +444,7 @@ export default function AdminBiddingPage() {
                           <TimerOff className="h-4 w-4 mr-2" />
                           Stop
                         </Button>
-                        
+
                         <Button
                           variant="outline"
                           onClick={() => handleBiddingAction('finalize', leagueId)}
@@ -446,10 +457,10 @@ export default function AdminBiddingPage() {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="p-4 bg-gray-800/50 rounded-lg space-y-4">
                   <h4 className="text-lg font-semibold">Development Tools</h4>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <Button
@@ -459,10 +470,12 @@ export default function AdminBiddingPage() {
                         disabled={isLoadingDebug}
                         className="mr-2"
                       >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingDebug ? 'animate-spin' : ''}`} />
+                        <RefreshCw
+                          className={`h-4 w-4 mr-2 ${isLoadingDebug ? 'animate-spin' : ''}`}
+                        />
                         Debug Data
                       </Button>
-                      
+
                       <Button
                         variant="default"
                         size="sm"
@@ -473,9 +486,9 @@ export default function AdminBiddingPage() {
                         {isInitializingBidding ? 'Initializing...' : 'Initialize Players in Redis'}
                       </Button>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex items-center">
                       <div className="flex items-center space-x-2 mr-4">
                         <span className="text-sm">Test Players:</span>
@@ -488,7 +501,7 @@ export default function AdminBiddingPage() {
                           className="w-16 h-8 text-center"
                         />
                       </div>
-                      
+
                       <Button
                         variant="secondary"
                         size="sm"
@@ -501,11 +514,11 @@ export default function AdminBiddingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {debugData && debugData.tier?.name === leagueId.toUpperCase() && (
                   <div className="p-4 bg-gray-800/50 rounded-lg space-y-4">
                     <h4 className="text-lg font-semibold">Debug Information</h4>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium">Season</h5>
@@ -515,7 +528,7 @@ export default function AdminBiddingPage() {
                           <div>Is Latest: {debugData.season.isLatest ? 'Yes' : 'No'}</div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium">Tier</h5>
                         <div className="text-xs text-gray-400">
@@ -525,13 +538,15 @@ export default function AdminBiddingPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h5 className="text-sm font-medium">Player Counts</h5>
                       <div className="grid grid-cols-2 gap-2">
                         <div className="bg-gray-900/50 p-2 rounded">
                           <div className="text-xs font-medium">All Players</div>
-                          <div className="text-xl font-mono">{debugData.counts.allPlayerSeasons}</div>
+                          <div className="text-xl font-mono">
+                            {debugData.counts.allPlayerSeasons}
+                          </div>
                         </div>
                         <div className="bg-gray-900/50 p-2 rounded">
                           <div className="text-xs font-medium">In Bidding</div>
@@ -543,26 +558,35 @@ export default function AdminBiddingPage() {
                         </div>
                         <div className="bg-gray-900/50 p-2 rounded">
                           <div className="text-xs font-medium">Available for Bidding</div>
-                          <div className="text-xl font-mono text-green-400">{debugData.counts.availablePlayers}</div>
+                          <div className="text-xl font-mono text-green-400">
+                            {debugData.counts.availablePlayers}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     {debugData.samplePlayers && debugData.samplePlayers.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium">Sample Players</h5>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {debugData.samplePlayers.map((player: any, index: number) => (
-                            <div key={index} className="bg-gray-900/50 p-2 rounded flex justify-between">
+                            <div
+                              key={index}
+                              className="bg-gray-900/50 p-2 rounded flex justify-between"
+                            >
                               <div>
                                 <div className="text-xs font-medium">{player.playerName}</div>
-                                <div className="text-xs text-gray-400">Position: {player.position}</div>
+                                <div className="text-xs text-gray-400">
+                                  Position: {player.position}
+                                </div>
                               </div>
-                              <Badge 
-                                variant="outline" 
-                                className={player.isInBidding 
-                                  ? "bg-green-900/20 text-green-400 border-green-700" 
-                                  : "bg-gray-800 text-gray-400 border-gray-700"}
+                              <Badge
+                                variant="outline"
+                                className={
+                                  player.isInBidding
+                                    ? 'bg-green-900/20 text-green-400 border-green-700'
+                                    : 'bg-gray-800 text-gray-400 border-gray-700'
+                                }
                               >
                                 {player.isInBidding ? 'In Bidding' : 'Not in Bidding'}
                               </Badge>
@@ -573,15 +597,15 @@ export default function AdminBiddingPage() {
                     )}
                   </div>
                 )}
-                
+
                 <div className="p-4 bg-gray-800/50 rounded-lg">
                   <h4 className="text-lg font-semibold mb-2">Bidding Schedule</h4>
-                  <p className="text-gray-400">
-                    Bidding order: NHL → AHL → ECHL → CHL
-                  </p>
+                  <p className="text-gray-400">Bidding order: NHL → AHL → ECHL → CHL</p>
                   <ul className="list-disc list-inside mt-2 text-sm text-gray-400">
                     <li>Each bidding period lasts 2 days</li>
-                    <li>The next league's bidding starts at 8 PM EST after the previous one ends</li>
+                    <li>
+                      The next league's bidding starts at 8 PM EST after the previous one ends
+                    </li>
                     <li>Bid timers start at 8 hours</li>
                     <li>Once below 6 hours, new bids reset the timer to 6 hours</li>
                   </ul>
@@ -596,24 +620,28 @@ export default function AdminBiddingPage() {
             <p className="mb-4">
               This will update player data in Redis to fix gamertags and endTime issues:
             </p>
-            
+
             {dataStatus && (
               <div className="bg-black/30 rounded-lg p-3 mb-4">
                 <h3 className="font-semibold mb-1">Current Data Status:</h3>
                 <ul>
                   <li>Total Players: {dataStatus.playerCount}</li>
-                  <li>Players with Gamertag: {dataStatus.playersWithGamertag} / {dataStatus.playerCount}</li>
-                  <li>Players with EndTime: {dataStatus.playersWithEndTime} / {dataStatus.playerCount}</li>
-                  <li>Players with Active Bids: {dataStatus.playersWithActiveBids} / {dataStatus.playerCount}</li>
+                  <li>
+                    Players with Gamertag: {dataStatus.playersWithGamertag} /{' '}
+                    {dataStatus.playerCount}
+                  </li>
+                  <li>
+                    Players with EndTime: {dataStatus.playersWithEndTime} / {dataStatus.playerCount}
+                  </li>
+                  <li>
+                    Players with Active Bids: {dataStatus.playersWithActiveBids} /{' '}
+                    {dataStatus.playerCount}
+                  </li>
                 </ul>
               </div>
             )}
-            
-            <button
-              onClick={fixBiddingData}
-              disabled={isLoading}
-              className="btn btn-primary"
-            >
+
+            <button onClick={fixBiddingData} disabled={isLoading} className="btn btn-primary">
               {isLoading ? 'Processing...' : 'Fix Bidding Data'}
             </button>
           </div>
@@ -621,4 +649,4 @@ export default function AdminBiddingPage() {
       </Card>
     </div>
   );
-} 
+}

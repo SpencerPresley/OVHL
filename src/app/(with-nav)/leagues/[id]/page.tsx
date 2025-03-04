@@ -285,7 +285,7 @@ export default async function LeaguePage({ params }: { params: { id: string } })
   try {
     console.log('LeaguePage: Checking authentication');
     const user = await serverAuth();
-    
+
     if (user) {
       console.log('LeaguePage: User authenticated, getting full user data');
       currentUser = await prisma.user.findUnique({
@@ -306,7 +306,7 @@ export default async function LeaguePage({ params }: { params: { id: string } })
   return (
     <div className="min-h-screen">
       {/* Nav removed - handled by parent layout */}
-      
+
       {/* League Banner */}
       <div className={`w-full ${league.bannerColor} py-8`}>
         <div className="container mx-auto px-4 flex items-center justify-between">

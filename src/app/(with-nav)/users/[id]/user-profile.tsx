@@ -44,7 +44,6 @@ export function UserProfile({ user }: UserProfileProps) {
 
   return (
     <div className="min-h-screen">
-
       <div className="container mx-auto px-4 py-8">
         <Card className="w-full max-w-3xl mx-auto">
           <CardHeader className="text-center">

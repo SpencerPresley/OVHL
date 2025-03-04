@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 
-type StatCategory = 
-  | 'POINTS' 
-  | 'GOALS' 
-  | 'ASSISTS' 
-  | 'PLUSMINUS' 
-  | 'SAVEPCT' 
-  | 'GAA' 
-  | 'WINS' 
-  | 'POWERPLAY' 
+type StatCategory =
+  | 'POINTS'
+  | 'GOALS'
+  | 'ASSISTS'
+  | 'PLUSMINUS'
+  | 'SAVEPCT'
+  | 'GAA'
+  | 'WINS'
+  | 'POWERPLAY'
   | 'PENALTYKILL';
 
 const STAT_DISPLAY_NAMES: Record<StatCategory, string> = {
@@ -24,7 +24,7 @@ const STAT_DISPLAY_NAMES: Record<StatCategory, string> = {
   GAA: 'GAA',
   WINS: 'Wins',
   POWERPLAY: 'PP%',
-  PENALTYKILL: 'PK%'
+  PENALTYKILL: 'PK%',
 };
 
 interface Stat {
@@ -72,7 +72,11 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
       <Tabs defaultValue="POINTS" onValueChange={(value) => setSelectedStat(value as StatCategory)}>
         <TabsList className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full overflow-x-auto flex-wrap sm:flex-nowrap">
           {Object.entries(STAT_DISPLAY_NAMES).map(([value, display]) => (
-            <TabsTrigger key={value} value={value} className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">
+            <TabsTrigger
+              key={value}
+              value={value}
+              className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4"
+            >
               {display}
             </TabsTrigger>
           ))}
@@ -88,7 +92,9 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
                 className="flex items-center justify-between p-2 rounded-lg bg-gray-800/50 animate-pulse"
               >
                 <div className="flex items-center gap-2 sm:gap-4">
-                  <span className="text-xs sm:text-sm font-mono text-gray-400 w-5 sm:w-6">{index + 1}</span>
+                  <span className="text-xs sm:text-sm font-mono text-gray-400 w-5 sm:w-6">
+                    {index + 1}
+                  </span>
                   <div className="h-5 w-24 sm:w-32 bg-gray-700 rounded"></div>
                 </div>
                 <div className="h-5 w-12 sm:w-16 bg-gray-700 rounded"></div>
@@ -100,7 +106,9 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
                 className="flex items-center justify-between p-2 rounded-lg bg-gray-800/50 hover:bg-gray-800/70 transition-colors"
               >
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                  <span className="text-xs sm:text-sm font-mono text-gray-400 w-5 sm:w-6 flex-shrink-0">{index + 1}</span>
+                  <span className="text-xs sm:text-sm font-mono text-gray-400 w-5 sm:w-6 flex-shrink-0">
+                    {index + 1}
+                  </span>
                   <div className="min-w-0 overflow-hidden">
                     {stat.isTeamStat ? (
                       <Link
@@ -110,7 +118,10 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
                         {stat.name}
                       </Link>
                     ) : (
-                      <Link href={`/users/${stat.id}`} className="hover:text-blue-400 text-sm sm:text-base truncate block">
+                      <Link
+                        href={`/users/${stat.id}`}
+                        className="hover:text-blue-400 text-sm sm:text-base truncate block"
+                      >
                         {stat.gamertag || stat.name}
                       </Link>
                     )}
@@ -119,7 +130,9 @@ export function LeagueQuickStats({ leagueId }: LeagueQuickStatsProps) {
                     )}
                   </div>
                 </div>
-                <span className="font-mono text-sm sm:text-base ml-2 flex-shrink-0">{stat.formattedValue}</span>
+                <span className="font-mono text-sm sm:text-base ml-2 flex-shrink-0">
+                  {stat.formattedValue}
+                </span>
               </div>
             ))}
       </div>

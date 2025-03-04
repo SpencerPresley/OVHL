@@ -6,17 +6,17 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const leagueId = searchParams.get('leagueId') || 'nhl';
-  
+
   try {
     // Get latest season
     const season = await prisma.season.findFirst({
       where: { isLatest: true },
     });
-    
+
     if (!season) {
       return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
-    
+
     // Get tier for the league
     const tier = await prisma.tier.findFirst({
       where: {
@@ -24,18 +24,18 @@ export async function GET(request: NextRequest) {
         seasonId: season.id,
       },
     });
-    
+
     if (!tier) {
       return NextResponse.json({ error: 'Tier not found' }, { status: 404 });
     }
-    
+
     // Count all player seasons
     const allPlayerSeasonsCount = await prisma.playerSeason.count({
       where: {
         seasonId: season.id,
       },
     });
-    
+
     // Count player seasons in bidding
     const inBiddingCount = await prisma.playerSeason.count({
       where: {
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         isInBidding: true,
       },
     });
-    
+
     // Count player seasons not on a team for this tier
     const notOnTeamCount = await prisma.playerSeason.count({
       where: {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-    
+
     // Count player seasons that meet both criteria
     const availablePlayersCount = await prisma.playerSeason.count({
       where: {
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-    
+
     // Get some sample player seasons
     const samplePlayers = await prisma.playerSeason.findMany({
       where: {
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       },
       take: 5,
     });
-    
+
     // Get the query criteria we use for bidding
     const queryCriteria = {
       seasonId: season.id,
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
         },
       },
     };
-    
+
     return NextResponse.json({
       season: {
         id: season.id,
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         notOnTeam: notOnTeamCount,
         availablePlayers: availablePlayersCount,
       },
-      samplePlayers: samplePlayers.map(p => ({
+      samplePlayers: samplePlayers.map((p) => ({
         id: p.id,
         playerName: p.player.name,
         isInBidding: p.isInBidding,
@@ -126,4 +126,4 @@ export async function GET(request: NextRequest) {
     console.error('Debug error:', error);
     return NextResponse.json({ error: 'Debug endpoint failed' }, { status: 500 });
   }
-} 
+}

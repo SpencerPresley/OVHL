@@ -11,13 +11,13 @@ export async function GET() {
   try {
     // Try to get NextAuth session first
     const session = await getServerSession(AuthOptions);
-    
+
     if (session?.user?.id) {
       // User is authenticated with NextAuth
       const notifications = await UserService.getUserNotifications(session.user.id);
       return NextResponse.json({ notifications });
     }
-    
+
     // Fall back to token-based auth if no NextAuth session
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const session = await getServerSession(AuthOptions);
     let userId: string;
     let isAdmin: boolean = false;
-    
+
     if (session?.user?.id) {
       // User is authenticated with NextAuth
       userId = session.user.id;
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         id: string;
         isAdmin?: boolean;
       };
-      
+
       userId = decoded.id;
       isAdmin = decoded.isAdmin || false;
     }

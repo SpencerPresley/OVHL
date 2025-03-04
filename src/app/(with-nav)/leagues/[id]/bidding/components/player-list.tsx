@@ -44,13 +44,13 @@ interface PlayerListProps {
   managedTeamId?: string | null;
 }
 
-export function PlayerList({ 
-  players, 
-  isDetailedView, 
-  onPlaceBid, 
-  canBid, 
+export function PlayerList({
+  players,
+  isDetailedView,
+  onPlaceBid,
+  canBid,
   isSubmitting,
-  managedTeamId
+  managedTeamId,
 }: PlayerListProps) {
   return (
     <div
@@ -63,19 +63,19 @@ export function PlayerList({
     >
       {players.map((player) =>
         isDetailedView ? (
-          <PlayerCard 
-            key={player.id} 
-            player={player} 
-            onPlaceBid={onPlaceBid} 
+          <PlayerCard
+            key={player.id}
+            player={player}
+            onPlaceBid={onPlaceBid}
             canBid={canBid}
             isSubmitting={isSubmitting}
             managedTeamId={managedTeamId}
           />
         ) : (
-          <CompactPlayerCard 
-            key={player.id} 
-            player={player} 
-            onPlaceBid={onPlaceBid} 
+          <CompactPlayerCard
+            key={player.id}
+            player={player}
+            onPlaceBid={onPlaceBid}
             canBid={canBid}
             isSubmitting={isSubmitting}
             managedTeamId={managedTeamId}

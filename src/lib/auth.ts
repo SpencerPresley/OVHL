@@ -68,20 +68,20 @@ export async function serverAuth(): Promise<AuthUser | null> {
           isAdmin: true,
         },
       });
-      
+
       if (user) {
         return user;
       }
     }
-    
+
     // Fall back to JWT token auth
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
-    
+
     if (token?.value) {
       return await verifyAuth(token.value);
     }
-    
+
     return null;
   } catch (error) {
     console.error('Server auth error:', error);
@@ -98,11 +98,11 @@ export async function serverAuth(): Promise<AuthUser | null> {
  */
 export async function requireAuth(): Promise<AuthUser> {
   const user = await serverAuth();
-  
+
   if (!user) {
     throw new Error('Authentication required');
   }
-  
+
   return user;
 }
 
@@ -113,14 +113,14 @@ export async function requireAuth(): Promise<AuthUser> {
  */
 export async function requireAdmin(): Promise<AuthUser> {
   const user = await serverAuth();
-  
+
   if (!user) {
     throw new Error('Authentication required');
   }
-  
+
   if (!user.isAdmin) {
     throw new Error('Admin privileges required');
   }
-  
+
   return user;
 }

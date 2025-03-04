@@ -13,7 +13,8 @@ const keyPrefix = {
 /**
  * Create a Redis key with the appropriate namespace
  */
-const createKey = (namespace: string, id: string) => `${keyPrefix[namespace as keyof typeof keyPrefix]}${id}`;
+const createKey = (namespace: string, id: string) =>
+  `${keyPrefix[namespace as keyof typeof keyPrefix]}${id}`;
 
 /**
  * Bidding system utilities
@@ -23,39 +24,39 @@ export const biddingUtils = {
    * Initialize a player for bidding
    */
   async setPlayerBidding(
-    playerSeasonId: string, 
-    initialData: { 
-      startingAmount: number, 
-      tierId: string,
-      tierName: string, 
-      endTime?: number,
-      playerName: string,
-      position: string,
-      contractId: string,
-      gamertag?: string,
+    playerSeasonId: string,
+    initialData: {
+      startingAmount: number;
+      tierId: string;
+      tierName: string;
+      endTime?: number;
+      playerName: string;
+      position: string;
+      contractId: string;
+      gamertag?: string;
       stats?: {
         gamesPlayed: number;
         goals: number;
         assists: number;
         plusMinus: number;
-      }
+      };
     }
   ) {
     const key = createKey('bidding', playerSeasonId);
-    
+
     // Only set endTime if this player already has bids
     // Otherwise, endTime will be set when the first bid is placed
     const hasInitialBid = initialData.startingAmount > 0 && initialData.endTime;
-    
+
     const data = {
       ...initialData,
       id: playerSeasonId, // Include the ID for easier reference
       currentBid: null, // Start with no bids
       currentTeamId: null,
       currentTeamName: null,
-      contract: { 
+      contract: {
         id: initialData.contractId,
-        amount: initialData.startingAmount // Ensure contract has an amount property
+        amount: initialData.startingAmount, // Ensure contract has an amount property
       },
       // Only include endTime if there's an initial bid
       ...(hasInitialBid ? { endTime: initialData.endTime } : {}),
@@ -66,13 +67,13 @@ export const biddingUtils = {
         gamesPlayed: 0,
         goals: 0,
         assists: 0,
-        plusMinus: 0
+        plusMinus: 0,
       },
       bids: [],
       status: 'active',
       lastUpdate: Date.now(),
     };
-    
+
     await redis.set(key, JSON.stringify(data));
     return data;
   },
@@ -90,73 +91,77 @@ export const biddingUtils = {
    * Place a bid on a player
    */
   async placeBid(
-    playerSeasonId: string, 
-    bidData: { 
-      teamId: string, 
-      teamName: string, 
-      amount: number,
-      teamSeasonId: string,
+    playerSeasonId: string,
+    bidData: {
+      teamId: string;
+      teamName: string;
+      amount: number;
+      teamSeasonId: string;
     }
   ) {
     const key = createKey('bidding', playerSeasonId);
     const data = await redis.get(key);
-    
+
     if (!data) {
       throw new Error('Player not found in bidding');
     }
-    
+
     const playerData = JSON.parse(data);
-    
+
     // Validate bid amount
     const INCREMENT = 250000; // 250k increment
-    
+
     if (playerData.currentBid === null) {
       // First bid must be exactly the starting amount (contract amount)
       if (bidData.amount !== playerData.startingAmount) {
-        throw new Error(`First bid must be exactly $${playerData.startingAmount.toLocaleString()} (the contract amount)`);
+        throw new Error(
+          `First bid must be exactly $${playerData.startingAmount.toLocaleString()} (the contract amount)`
+        );
       }
     } else {
       // Subsequent bids must be at least 250k more than current
       const minBid = playerData.currentBid + INCREMENT;
-      
+
       if (bidData.amount < minBid) {
-        throw new Error(`Bid must be at least $${minBid.toLocaleString()} (current bid + $${INCREMENT.toLocaleString()})`);
+        throw new Error(
+          `Bid must be at least $${minBid.toLocaleString()} (current bid + $${INCREMENT.toLocaleString()})`
+        );
       }
-      
+
       // Check if bid is in valid increments of 250k
       if (bidData.amount % INCREMENT !== 0) {
         throw new Error(`Bids must be in increments of $${INCREMENT.toLocaleString()}`);
       }
     }
-    
+
     // Calculate new end time based on time remaining
     const now = Date.now();
     let newEndTime;
-    
+
     // If this is the first bid, set endTime to 8 hours from now
     if (!playerData.currentTeamId) {
-      newEndTime = now + (8 * 60 * 60 * 1000); // 8 hours
+      newEndTime = now + 8 * 60 * 60 * 1000; // 8 hours
     } else {
       // Check remaining time
       const remainingTime = playerData.endTime - now;
-      
+
       // If < 6 hours remain, extend by 6 hours
       if (remainingTime < 6 * 60 * 60 * 1000) {
-        newEndTime = now + (6 * 60 * 60 * 1000); // 6 hours
+        newEndTime = now + 6 * 60 * 60 * 1000; // 6 hours
       } else {
         // Keep existing end time
         newEndTime = playerData.endTime;
       }
     }
-    
+
     // Add the new bid to the history
     const newBid = {
       teamId: bidData.teamId,
       teamName: bidData.teamName,
       amount: bidData.amount,
-      timestamp: now
+      timestamp: now,
     };
-    
+
     // Update player data
     const updatedPlayerData = {
       ...playerData,
@@ -165,12 +170,12 @@ export const biddingUtils = {
       currentTeamName: bidData.teamName,
       endTime: newEndTime,
       bids: [...playerData.bids, newBid],
-      lastUpdate: now
+      lastUpdate: now,
     };
-    
+
     // Save updated player data
     await redis.set(key, JSON.stringify(updatedPlayerData));
-    
+
     return updatedPlayerData;
   },
 
@@ -180,7 +185,7 @@ export const biddingUtils = {
   async getActivePlayerBids() {
     // Get all keys in the bidding namespace
     const keys = await redis.keys(`${keyPrefix.bidding}*`);
-    
+
     // Filter to only include active bids
     const activeBids = [];
     for (const key of keys) {
@@ -192,7 +197,7 @@ export const biddingUtils = {
         }
       }
     }
-    
+
     return activeBids;
   },
 
@@ -203,7 +208,7 @@ export const biddingUtils = {
     // Get all keys in the bidding namespace
     const keys = await redis.keys(`${keyPrefix.bidding}*`);
     const playerData = [];
-    
+
     // Fetch all player data and filter by tier
     for (const key of keys) {
       const data = await redis.get(key);
@@ -216,14 +221,14 @@ export const biddingUtils = {
               gamesPlayed: 0,
               goals: 0,
               assists: 0,
-              plusMinus: 0
+              plusMinus: 0,
             };
           }
           playerData.push(player);
         }
       }
     }
-    
+
     return playerData;
   },
 
@@ -233,13 +238,13 @@ export const biddingUtils = {
   async finalizeBidding(playerSeasonId: string) {
     const key = createKey('bidding', playerSeasonId);
     const data = await redis.get(key);
-    
+
     if (!data) {
       throw new Error('Player not found in bidding');
     }
-    
+
     const playerData = JSON.parse(data);
-    
+
     // Update status to completed
     const finalizedData = {
       ...playerData,
@@ -248,20 +253,20 @@ export const biddingUtils = {
       // Set contract amount directly
       contract: {
         ...playerData.contract,
-        amount: playerData.currentBid
+        amount: playerData.currentBid,
       },
       // Ensure stats object is preserved
       stats: playerData.stats || {
         gamesPlayed: 0,
         goals: 0,
         assists: 0,
-        plusMinus: 0
-      }
+        plusMinus: 0,
+      },
     };
-    
+
     // Save updated data
     await redis.set(key, JSON.stringify(finalizedData));
-    
+
     return finalizedData;
   },
 
@@ -278,20 +283,23 @@ export const biddingUtils = {
    * Set the status and timing for a league's bidding period
    */
   async setLeagueBiddingStatus(
-    leagueId: string, 
-    status: { 
-      active: boolean, 
-      startTime: number, 
-      endTime: number,
-      tierLevel: number,
+    leagueId: string,
+    status: {
+      active: boolean;
+      startTime: number;
+      endTime: number;
+      tierLevel: number;
     }
   ) {
     const key = createKey('leagueStatus', leagueId);
-    await redis.set(key, JSON.stringify({
-      ...status,
-      leagueId,
-      lastUpdate: Date.now(),
-    }));
+    await redis.set(
+      key,
+      JSON.stringify({
+        ...status,
+        leagueId,
+        lastUpdate: Date.now(),
+      })
+    );
   },
 
   /**
@@ -299,14 +307,14 @@ export const biddingUtils = {
    */
   async getCurrentActiveBidding() {
     const leagueIds = ['nhl', 'ahl', 'echl', 'chl'];
-    
+
     for (const leagueId of leagueIds) {
       const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
       if (status && status.active) {
         return status;
       }
     }
-    
+
     return null;
   },
 
@@ -318,7 +326,7 @@ export const biddingUtils = {
     const keys = await redis.keys(`${keyPrefix.bidding}*`);
     let totalCommitted = 0;
     const activeBids = [];
-    
+
     // Calculate total committed amount from current bids
     for (const key of keys) {
       const data = await redis.get(key);
@@ -331,7 +339,7 @@ export const biddingUtils = {
             const bidAmount = Number(player.currentBid);
             if (!isNaN(bidAmount)) {
               totalCommitted += bidAmount;
-              
+
               activeBids.push({
                 playerSeasonId: key.replace(keyPrefix.bidding, ''),
                 playerName: player.playerName,
@@ -340,7 +348,9 @@ export const biddingUtils = {
                 endTime: player.endTime,
               });
             } else {
-              console.error(`Invalid bid amount for player ${player.playerName}: ${player.currentBid}`);
+              console.error(
+                `Invalid bid amount for player ${player.playerName}: ${player.currentBid}`
+              );
             }
           }
         } catch (err) {
@@ -348,7 +358,7 @@ export const biddingUtils = {
         }
       }
     }
-    
+
     console.log(`Team ${teamId} total committed: ${totalCommitted}`);
     return { totalCommitted, activeBids };
   },
@@ -360,7 +370,7 @@ export const biddingUtils = {
     const key = createKey('leagueStatus', leagueId);
     const now = Date.now();
     const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-    
+
     // Map league ID to tier level
     const tierLevels = {
       nhl: 1,
@@ -368,16 +378,19 @@ export const biddingUtils = {
       echl: 3,
       chl: 4,
     };
-    
-    await redis.set(key, JSON.stringify({
-      active,
-      leagueId,
-      startTime: now,
-      endTime: now + twoDaysMs,
-      tierLevel: tierLevels[leagueId as keyof typeof tierLevels] || 0,
-      lastUpdate: now,
-    }));
+
+    await redis.set(
+      key,
+      JSON.stringify({
+        active,
+        leagueId,
+        startTime: now,
+        endTime: now + twoDaysMs,
+        tierLevel: tierLevels[leagueId as keyof typeof tierLevels] || 0,
+        lastUpdate: now,
+      })
+    );
   },
 };
 
-export default redis; 
+export default redis;

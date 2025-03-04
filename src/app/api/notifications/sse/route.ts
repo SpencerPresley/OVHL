@@ -71,7 +71,7 @@ export async function GET(request: Request) {
     // Validate authentication - Check for NextAuth session first
     const session = await getServerSession(AuthOptions);
     let userId: string | undefined;
-    
+
     if (session?.user?.id) {
       // User is authenticated with NextAuth
       userId = session.user.id;
@@ -110,7 +110,7 @@ export async function GET(request: Request) {
         });
       }
     }
-    
+
     // If we still don't have a userId, return 204
     if (!userId) {
       return new Response(null, {

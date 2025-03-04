@@ -125,7 +125,11 @@ export function Filters({
   };
 
   return (
-    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen} className="card-gradient rounded-lg">
+    <Collapsible
+      open={isFiltersOpen}
+      onOpenChange={setIsFiltersOpen}
+      className="card-gradient rounded-lg"
+    >
       <CollapsibleTrigger className="w-full flex items-center justify-between p-6 cursor-pointer">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold">Filters</h2>

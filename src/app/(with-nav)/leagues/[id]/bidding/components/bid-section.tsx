@@ -1,7 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
@@ -16,14 +23,14 @@ interface BidSectionProps {
   isSubmitting: boolean;
 }
 
-export function BidSection({ 
-  playerId, 
-  onPlaceBid, 
-  canBid, 
-  currentBid, 
+export function BidSection({
+  playerId,
+  onPlaceBid,
+  canBid,
+  currentBid,
   startingAmount,
   isCompact = false,
-  isSubmitting
+  isSubmitting,
 }: BidSectionProps) {
   // Define constants before any state initialization
   const BID_INCREMENT = 250000; // 250k increment
@@ -34,7 +41,7 @@ export function BidSection({
     if (currentAmount === null) {
       return startingAmount;
     }
-    
+
     // For subsequent bids, add 250k to the current amount
     const minBid = currentAmount + BID_INCREMENT;
     // Round to nearest 250k increment if needed
@@ -73,19 +80,25 @@ export function BidSection({
     if (currentBid === null) {
       // First bid - must be exactly the starting amount
       if (bidAmount !== startingAmount) {
-        setError(`First bid must be exactly $${startingAmount.toLocaleString()} (the contract amount)`);
+        setError(
+          `First bid must be exactly $${startingAmount.toLocaleString()} (the contract amount)`
+        );
         return;
       }
     } else {
       // Subsequent bid - must be at least current + 250k
       if (bidAmount < currentBid + BID_INCREMENT) {
-        setError(`Bid must be at least $${(currentBid + BID_INCREMENT).toLocaleString()} (current + $250,000)`);
+        setError(
+          `Bid must be at least $${(currentBid + BID_INCREMENT).toLocaleString()} (current + $250,000)`
+        );
         return;
       }
 
       // Validate that bid is in 250k increments
       if (bidAmount % BID_INCREMENT !== 0) {
-        setError(`Bids must be in increments of $${BID_INCREMENT.toLocaleString()} (e.g. $750k, $1M, $1.25M)`);
+        setError(
+          `Bids must be in increments of $${BID_INCREMENT.toLocaleString()} (e.g. $750k, $1M, $1.25M)`
+        );
         return;
       }
     }
@@ -106,11 +119,9 @@ export function BidSection({
   return (
     <>
       <Button
-        className={`transition-all duration-300 ${
-          isCompact ? 'px-4' : 'w-full'
-        } ${
-          isButtonHovered && !isSubmitting && canBid 
-            ? 'bg-white/15 border-white/20' 
+        className={`transition-all duration-300 ${isCompact ? 'px-4' : 'w-full'} ${
+          isButtonHovered && !isSubmitting && canBid
+            ? 'bg-white/15 border-white/20'
             : 'bg-white/5 border-white/10'
         }`}
         variant="ghost"
@@ -130,21 +141,22 @@ export function BidSection({
         )}
       </Button>
 
-      <Dialog open={isDialogOpen} onOpenChange={(open) => {
-        // Prevent closing dialog during submission
-        if (localIsSubmitting && !open) return;
-        setIsDialogOpen(open);
-      }}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          // Prevent closing dialog during submission
+          if (localIsSubmitting && !open) return;
+          setIsDialogOpen(open);
+        }}
+      >
         <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-800">
           <DialogHeader>
             <DialogTitle>Place a Bid</DialogTitle>
             <DialogDescription>
-              {currentBid === null ? (
-                `Enter your bid amount below. First bid must be exactly $${startingAmount.toLocaleString()} (the contract amount).`
-              ) : (
-                `Enter your bid amount below. The minimum bid is $${(currentBid + BID_INCREMENT).toLocaleString()}.
-                Bids must be in $250,000 increments (e.g. $750k, $1M, $1.25M).`
-              )}
+              {currentBid === null
+                ? `Enter your bid amount below. First bid must be exactly $${startingAmount.toLocaleString()} (the contract amount).`
+                : `Enter your bid amount below. The minimum bid is $${(currentBid + BID_INCREMENT).toLocaleString()}.
+                Bids must be in $250,000 increments (e.g. $750k, $1M, $1.25M).`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -179,13 +191,14 @@ export function BidSection({
             {currentBid !== null && (
               <div className="flex justify-between text-sm">
                 <span>Increase:</span>
-                <span 
-                  className={bidAmount >= currentBid + BID_INCREMENT ? 'text-green-500' : 'text-red-500'}
+                <span
+                  className={
+                    bidAmount >= currentBid + BID_INCREMENT ? 'text-green-500' : 'text-red-500'
+                  }
                 >
                   {bidAmount >= currentBid + BID_INCREMENT
-                    ? `$${(bidAmount - currentBid).toLocaleString()} (+${Math.round((bidAmount - currentBid) / currentBid * 100)}%)`
-                    : 'Invalid bid amount'
-                  }
+                    ? `$${(bidAmount - currentBid).toLocaleString()} (+${Math.round(((bidAmount - currentBid) / currentBid) * 100)}%)`
+                    : 'Invalid bid amount'}
                 </span>
               </div>
             )}
@@ -200,17 +213,21 @@ export function BidSection({
             </div>
           </div>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsDialogOpen(false)}
               className="border-gray-700"
               disabled={localIsSubmitting}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleSubmitBid}
-              disabled={(currentBid === null ? bidAmount !== startingAmount : bidAmount < currentBid + BID_INCREMENT) || localIsSubmitting}
+              disabled={
+                (currentBid === null
+                  ? bidAmount !== startingAmount
+                  : bidAmount < currentBid + BID_INCREMENT) || localIsSubmitting
+              }
               className={localIsSubmitting ? 'opacity-80' : ''}
             >
               {localIsSubmitting ? (

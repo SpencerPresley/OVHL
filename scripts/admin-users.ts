@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // Create readline interface for CLI interaction
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 /**
@@ -37,8 +37,10 @@ async function listUsers() {
   console.log('ID | Email | Name | Username | Admin Status');
   console.log('-'.repeat(80));
 
-  users.forEach(user => {
-    console.log(`${user.id} | ${user.email} | ${user.name || 'N/A'} | ${user.username || 'N/A'} | ${user.isAdmin ? 'YES' : 'NO'}`);
+  users.forEach((user) => {
+    console.log(
+      `${user.id} | ${user.email} | ${user.name || 'N/A'} | ${user.username || 'N/A'} | ${user.isAdmin ? 'YES' : 'NO'}`
+    );
   });
   console.log('='.repeat(80));
   console.log(`Total users: ${users.length}\n`);
@@ -183,4 +185,4 @@ main().catch(async (error) => {
   console.error('Error in admin tool:', error);
   await prisma.$disconnect();
   process.exit(1);
-}); 
+});

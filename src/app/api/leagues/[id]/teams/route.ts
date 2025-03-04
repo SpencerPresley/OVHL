@@ -27,7 +27,11 @@ function getTeamDivision(teamIdentifier: string, teamName: string, leagueId: str
       const team = NHL_TEAMS.find((t) => t.id === teamId);
       console.log('Found NHL team:', { team, validDivisions: Object.values(NHLDivision) });
       // Verify it's an NHL division AND the name matches
-      if (team?.division && Object.values(NHLDivision).includes(team.division) && team.name === teamName) {
+      if (
+        team?.division &&
+        Object.values(NHLDivision).includes(team.division) &&
+        team.name === teamName
+      ) {
         return team.division;
       }
       return null;
@@ -36,7 +40,11 @@ function getTeamDivision(teamIdentifier: string, teamName: string, leagueId: str
       const team = AHL_TEAMS.find((t) => t.id === teamId);
       console.log('Found AHL team:', { team, validDivisions: Object.values(AHLDivision) });
       // Verify it's an AHL division AND the name matches
-      if (team?.division && Object.values(AHLDivision).includes(team.division) && team.name === teamName) {
+      if (
+        team?.division &&
+        Object.values(AHLDivision).includes(team.division) &&
+        team.name === teamName
+      ) {
         return team.division;
       }
       return null;
@@ -45,7 +53,11 @@ function getTeamDivision(teamIdentifier: string, teamName: string, leagueId: str
       const team = ECHL_TEAMS.find((t) => t.id === teamId);
       console.log('Found ECHL team:', { team, validDivisions: Object.values(ECHLDivision) });
       // Verify it's an ECHL division AND the name matches
-      if (team?.division && Object.values(ECHLDivision).includes(team.division) && team.name === teamName) {
+      if (
+        team?.division &&
+        Object.values(ECHLDivision).includes(team.division) &&
+        team.name === teamName
+      ) {
         return team.division;
       }
       return null;
@@ -148,11 +160,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       id: tierData?.id,
       name: tierData?.name,
       teamCount: tierData?.teams.length,
-      teams: tierData?.teams.map(t => ({
+      teams: tierData?.teams.map((t) => ({
         id: t.team.id,
         name: t.team.officialName,
-        identifier: t.team.teamIdentifier
-      }))
+        identifier: t.team.teamIdentifier,
+      })),
     });
 
     if (!tierData) {
@@ -161,52 +173,57 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     // Filter teams based on league-specific data BEFORE transforming
     console.log('About to filter teams. Total teams before filter:', tierData.teams.length);
-    
-    const validTeams = tierData.teams.map(teamSeason => {
-      const teamId = teamSeason.team.teamIdentifier.toLowerCase();
-      let leagueTeam;
-      
-      switch (leagueId) {
-        case 'nhl':
-          leagueTeam = NHL_TEAMS.find(t => t.id === teamId);
-          break;
-        case 'ahl':
-          leagueTeam = AHL_TEAMS.find(t => t.id === teamId);
-          break;
-        case 'echl':
-          leagueTeam = ECHL_TEAMS.find(t => t.id === teamId);
-          break;
-        case 'chl':
-          leagueTeam = CHL_TEAMS.find(t => t.id === teamId);
-          break;
-        default:
-          leagueTeam = null;
-      }
 
-      console.log('Team check:', {
-        teamId: teamSeason.team.teamIdentifier,
-        dbName: teamSeason.team.officialName,
-        leagueTeamName: leagueTeam?.name,
-        valid: !!leagueTeam
-      });
+    const validTeams = tierData.teams
+      .map((teamSeason) => {
+        const teamId = teamSeason.team.teamIdentifier.toLowerCase();
+        let leagueTeam;
 
-      if (!leagueTeam) return null;
-
-      // Return a new object with the CORRECT name from our league data
-      return {
-        ...teamSeason,
-        team: {
-          ...teamSeason.team,
-          officialName: leagueTeam.name // Use the name from our league data
+        switch (leagueId) {
+          case 'nhl':
+            leagueTeam = NHL_TEAMS.find((t) => t.id === teamId);
+            break;
+          case 'ahl':
+            leagueTeam = AHL_TEAMS.find((t) => t.id === teamId);
+            break;
+          case 'echl':
+            leagueTeam = ECHL_TEAMS.find((t) => t.id === teamId);
+            break;
+          case 'chl':
+            leagueTeam = CHL_TEAMS.find((t) => t.id === teamId);
+            break;
+          default:
+            leagueTeam = null;
         }
-      };
-    }).filter(Boolean) as typeof tierData.teams; // Filter out nulls and cast back to correct type
+
+        console.log('Team check:', {
+          teamId: teamSeason.team.teamIdentifier,
+          dbName: teamSeason.team.officialName,
+          leagueTeamName: leagueTeam?.name,
+          valid: !!leagueTeam,
+        });
+
+        if (!leagueTeam) return null;
+
+        // Return a new object with the CORRECT name from our league data
+        return {
+          ...teamSeason,
+          team: {
+            ...teamSeason.team,
+            officialName: leagueTeam.name, // Use the name from our league data
+          },
+        };
+      })
+      .filter(Boolean) as typeof tierData.teams; // Filter out nulls and cast back to correct type
 
     console.log('Teams after filter:', validTeams.length);
-    console.log('Valid teams:', validTeams.map(t => ({
-      id: t.team.teamIdentifier,
-      name: t.team.officialName
-    })));
+    console.log(
+      'Valid teams:',
+      validTeams.map((t) => ({
+        id: t.team.teamIdentifier,
+        name: t.team.officialName,
+      }))
+    );
 
     // Transform ONLY the valid teams
     const teams = validTeams.map((teamSeason) => ({

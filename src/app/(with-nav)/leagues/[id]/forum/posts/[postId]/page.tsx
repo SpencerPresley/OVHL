@@ -133,19 +133,20 @@ function transformComment(comment: PrismaComment, includeQuoted = true): ForumCo
       name: comment.author.name || comment.author.username,
       username: comment.author.username,
     },
-    reactions: comment.reactions?.map((reaction) => ({
-      id: reaction.id,
-      type: reaction.type as unknown as ReactionType,
-      createdAt: reaction.createdAt,
-      userId: reaction.user.id,
-      postId: reaction.postId || undefined,
-      commentId: reaction.commentId || undefined,
-      user: {
-        id: reaction.user.id,
-        name: reaction.user.name || reaction.user.username,
-        username: reaction.user.username,
-      },
-    })) || [],
+    reactions:
+      comment.reactions?.map((reaction) => ({
+        id: reaction.id,
+        type: reaction.type as unknown as ReactionType,
+        createdAt: reaction.createdAt,
+        userId: reaction.user.id,
+        postId: reaction.postId || undefined,
+        commentId: reaction.commentId || undefined,
+        user: {
+          id: reaction.user.id,
+          name: reaction.user.name || reaction.user.username,
+          username: reaction.user.username,
+        },
+      })) || [],
   };
 
   return {
@@ -228,19 +229,20 @@ export default async function PostPage({ params }: { params: { id: string; postI
         name: post.author.name || post.author.username,
         username: post.author.username,
       },
-      reactions: post.reactions?.map((reaction) => ({
-        id: reaction.id,
-        type: reaction.type,
-        createdAt: reaction.createdAt,
-        userId: reaction.user.id,
-        postId: reaction.postId || undefined,
-        commentId: reaction.commentId || undefined,
-        user: {
-          id: reaction.user.id,
-          name: reaction.user.name || reaction.user.username,
-          username: reaction.user.username,
-        },
-      })) || [],
+      reactions:
+        post.reactions?.map((reaction) => ({
+          id: reaction.id,
+          type: reaction.type,
+          createdAt: reaction.createdAt,
+          userId: reaction.user.id,
+          postId: reaction.postId || undefined,
+          commentId: reaction.commentId || undefined,
+          user: {
+            id: reaction.user.id,
+            name: reaction.user.name || reaction.user.username,
+            username: reaction.user.username,
+          },
+        })) || [],
       comments: post.comments?.map((comment) => transformComment(comment)) || [],
     };
 

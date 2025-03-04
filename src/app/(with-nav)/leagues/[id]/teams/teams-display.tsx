@@ -222,8 +222,9 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   );
 
   // Sort teams alphabetically by name and filter by league-specific teams
-  const sortedTeams = [...teams]
-    .sort((a, b) => a.team.officialName.localeCompare(b.team.officialName));
+  const sortedTeams = [...teams].sort((a, b) =>
+    a.team.officialName.localeCompare(b.team.officialName)
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobile, setIsMobile] = useState(false);
@@ -272,16 +273,15 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
       const isMobile = window.innerWidth < 768;
       const headerOffset = isMobile ? 220 : 120; // Much more padding on mobile for wrapped buttons
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ 
-        top: elementPosition - headerOffset, 
-        behavior: 'smooth' 
+      window.scrollTo({
+        top: elementPosition - headerOffset,
+        behavior: 'smooth',
       });
     }
   };
 
   return (
     <div className="min-h-screen">
-
       {/* League Banner Section
        * Displays league logo, name, and title
        * Uses league-specific banner color for branding

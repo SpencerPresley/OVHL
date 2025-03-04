@@ -184,14 +184,13 @@ export default function AdminPage() {
           <CardHeader>
             <CardTitle>Bidding Management</CardTitle>
             <CardDescription>
-              Manage league bidding periods, create test players, and control the bidding process across all tiers.
+              Manage league bidding periods, create test players, and control the bidding process
+              across all tiers.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/admin/bidding" passHref>
-              <Button className="w-full">
-                Manage Bidding
-              </Button>
+              <Button className="w-full">Manage Bidding</Button>
             </Link>
           </CardContent>
         </Card>

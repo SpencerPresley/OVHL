@@ -22,4 +22,4 @@ export default function TeamCard({ team }: { team: Team }) {
       </div>
     </Link>
   );
-} 
+}

@@ -7,7 +7,7 @@ export function getApiUrl(): string {
   if (typeof window === 'undefined') {
     // Server-side: use environment variables or default to localhost
     const isDev = process.env.NODE_ENV === 'development';
-    return isDev 
+    return isDev
       ? 'http://localhost:3000'
       : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   }

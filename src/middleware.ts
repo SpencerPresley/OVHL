@@ -11,18 +11,21 @@ import { getToken } from 'next-auth/jwt';
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Check for either token or next-auth session
   const hasToken = request.cookies.has('token');
-  const hasNextAuthSession = request.cookies.has('next-auth.session-token') || 
-                            request.cookies.has('__Secure-next-auth.session-token');
+  const hasNextAuthSession =
+    request.cookies.has('next-auth.session-token') ||
+    request.cookies.has('__Secure-next-auth.session-token');
   const isAuthenticated = hasToken || hasNextAuthSession;
 
   // Protected API routes
-  if (pathname.startsWith('/api/upload') || 
-      pathname.startsWith('/api/users') || 
-      pathname.startsWith('/api/auth/user') || 
-      pathname.startsWith('/api/notifications')) {
+  if (
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/users') ||
+    pathname.startsWith('/api/auth/user') ||
+    pathname.startsWith('/api/notifications')
+  ) {
     // For protected API routes, require token in cookies
     if (!isAuthenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,10 +41,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // NextAuth admin routes
-  if (pathname.startsWith('/api/admin') || pathname.startsWith('/api/bidding/initialize') || pathname.startsWith('/api/bidding/debug')) {
+  if (
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/bidding/initialize') ||
+    pathname.startsWith('/api/bidding/debug')
+  ) {
     // Get NextAuth session token
-    const token = await getToken({ 
-      req: request, 
+    const token = await getToken({
+      req: request,
       secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
     });
 
@@ -52,7 +59,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // If it's an admin route, check for admin privileges
-    if ((pathname.startsWith('/api/admin') || pathname.startsWith('/api/bidding/initialize')) && (!token || token.isAdmin !== true)) {
+    if (
+      (pathname.startsWith('/api/admin') || pathname.startsWith('/api/bidding/initialize')) &&
+      (!token || token.isAdmin !== true)
+    ) {
       console.log('Access denied - not an admin');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -61,7 +71,7 @@ export async function middleware(request: NextRequest) {
   // NextAuth admin page routes
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
     // For admin pages, redirect to login if not authenticated
-    const token = await getToken({ 
+    const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
     });
@@ -80,15 +90,15 @@ export async function middleware(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    '/profile/:path*', 
-    '/api/upload/:path*', 
+    '/profile/:path*',
+    '/api/upload/:path*',
     '/api/users/:path*',
     '/api/auth/user/:path*',
     '/api/notifications/:path*',
-    '/admin/:path*', 
-    '/api/admin/:path*', 
-    '/api/bidding/initialize/:path*', 
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/api/bidding/initialize/:path*',
     '/api/bidding/debug/:path*',
-    '/api/bidding/fix-data/:path*'
+    '/api/bidding/fix-data/:path*',
   ],
 };

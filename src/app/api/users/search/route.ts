@@ -110,9 +110,6 @@ export async function GET(request: Request) {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to search users';
     console.error('Failed to search users:', errorMessage);
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

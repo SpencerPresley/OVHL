@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/auth';
 
 /**
  * Ably authentication endpoint
- * 
+ *
  * This endpoint provides Ably token requests for authenticated users only.
  * It strictly requires authentication via either NextAuth or JWT token.
  * Anonymous users are rejected with a 401 Unauthorized response.
@@ -12,10 +12,7 @@ import { requireAuth } from '@/lib/auth';
 export async function GET() {
   try {
     if (!process.env.ABLY_API_KEY) {
-      return NextResponse.json(
-        { error: 'Ably API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Ably API key not configured' }, { status: 500 });
     }
 
     // This will throw an error if not authenticated
@@ -35,9 +32,6 @@ export async function GET() {
     return NextResponse.json(tokenRequestData);
   } catch (error) {
     console.error('Ably auth error:', error);
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 }

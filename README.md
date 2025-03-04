@@ -7,6 +7,7 @@ The bidding system uses Redis for real-time bidding data. You have two options f
 ### Option 1: Local Redis Installation
 
 1. **Install Redis** on your local machine:
+
    - Mac: `brew install redis` and start with `brew services start redis`
    - Windows: Use [Windows Subsystem for Linux](https://redis.io/docs/getting-started/installation/install-redis-on-windows/) or [Memurai](https://www.memurai.com/)
    - Linux: `sudo apt-get install redis-server` and start with `sudo service redis-server start`

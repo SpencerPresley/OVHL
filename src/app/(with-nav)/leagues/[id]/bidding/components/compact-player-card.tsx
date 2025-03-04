@@ -46,20 +46,21 @@ interface CompactPlayerCardProps {
   managedTeamId?: string | null;
 }
 
-export function CompactPlayerCard({ 
-  player, 
-  onPlaceBid, 
-  canBid, 
-  isSubmitting, 
-  managedTeamId 
+export function CompactPlayerCard({
+  player,
+  onPlaceBid,
+  canBid,
+  isSubmitting,
+  managedTeamId,
 }: CompactPlayerCardProps) {
   const positionColors = getPositionColors(player.position);
-  
+
   // Helper to prevent displaying player timer for players without active bids
   const hasActiveBid = Boolean(player.currentBid && player.endTime);
 
   // Add the logic to only show team name if it's the user's team
-  const showTeamName = player.currentTeamId && managedTeamId && player.currentTeamId === managedTeamId;
+  const showTeamName =
+    player.currentTeamId && managedTeamId && player.currentTeamId === managedTeamId;
 
   return (
     <div className="group flex items-center justify-between p-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/5 transition-all duration-200 hover:bg-black/30">
@@ -99,9 +100,9 @@ export function CompactPlayerCard({
         </div>
       </div>
 
-      <BidSection 
-        playerId={player.id} 
-        onPlaceBid={onPlaceBid} 
+      <BidSection
+        playerId={player.id}
+        onPlaceBid={onPlaceBid}
         isCompact={true}
         canBid={canBid}
         currentBid={player.currentBid === null ? null : player.currentBid}

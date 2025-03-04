@@ -18,8 +18,8 @@ export const AuthOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -27,7 +27,7 @@ export const AuthOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
         });
 
         if (!user) {
@@ -47,8 +47,8 @@ export const AuthOptions: NextAuthOptions = {
           username: user.username,
           isAdmin: user.isAdmin,
         };
-      }
-    })
+      },
+    }),
   ],
   cookies: {
     sessionToken: {
@@ -87,7 +87,7 @@ export const AuthOptions: NextAuthOptions = {
 };
 
 // Extend next-auth types
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
@@ -97,7 +97,7 @@ declare module "next-auth" {
       isAdmin: boolean;
     };
   }
-  
+
   interface User {
     id: string;
     email: string;
@@ -107,7 +107,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     email: string;
@@ -115,4 +115,4 @@ declare module "next-auth/jwt" {
     username: string;
     isAdmin: boolean;
   }
-} 
+}

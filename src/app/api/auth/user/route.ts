@@ -12,7 +12,7 @@ export async function GET() {
   try {
     // Try to get NextAuth session first
     const session = await getServerSession(AuthOptions);
-    
+
     if (session?.user?.id) {
       // User is authenticated with NextAuth
       const user = await UserService.getUserById(session.user.id);
@@ -21,7 +21,7 @@ export async function GET() {
       }
       return NextResponse.json({ user });
     }
-    
+
     // Fall back to token-based auth if no NextAuth session
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
@@ -51,7 +51,7 @@ export async function PUT(request: Request) {
     // Try to get NextAuth session first
     const session = await getServerSession(AuthOptions);
     let userId: string;
-    
+
     if (session?.user?.id) {
       // User is authenticated with NextAuth
       userId = session.user.id;
@@ -67,7 +67,7 @@ export async function PUT(request: Request) {
       const decoded = verify(token.value, process.env.JWT_SECRET!) as {
         id: string;
       };
-      
+
       userId = decoded.id;
     }
 

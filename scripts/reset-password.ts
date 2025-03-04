@@ -59,4 +59,4 @@ resetPassword().catch(async (error) => {
   console.error('Error in script:', error);
   await prisma.$disconnect();
   process.exit(1);
-}); 
+});

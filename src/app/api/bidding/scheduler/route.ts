@@ -17,19 +17,19 @@ export async function GET(request: NextRequest) {
   // Validate the request contains a secret key to prevent unauthorized access
   const { searchParams } = new URL(request.url);
   const apiKey = searchParams.get('key');
-  
+
   // This should match an environment variable set in your deployment
   if (apiKey !== process.env.SCHEDULER_API_KEY) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   try {
     // Step 1: Check for expired player bids
     await handleExpiredBids();
-    
+
     // Step 2: Check for league transitions
     await handleLeagueTransitions();
-    
+
     return NextResponse.json({
       success: true,
       message: 'Scheduler check completed',
@@ -48,21 +48,21 @@ async function handleExpiredBids() {
   // Get all active bidding data from Redis
   const allKeys = await biddingUtils.getActivePlayerBids();
   const now = Date.now();
-  
+
   // Process each active bid
   for (const key of allKeys) {
     try {
       const playerSeasonId = key.replace('ovhl:bidding:', '');
       const bidData = await biddingUtils.getPlayerBidding(playerSeasonId);
-      
+
       // Skip if already completed or if timer hasn't expired
       if (!bidData || bidData.status !== 'active' || bidData.endTime > now) {
         continue;
       }
-      
+
       // Finalize the bid in Redis
       await biddingUtils.finalizeBidding(playerSeasonId);
-      
+
       // Process the winning bid in the database
       if (bidData.currentTeamId) {
         // Get the team season record
@@ -72,7 +72,7 @@ async function handleExpiredBids() {
             tierId: bidData.tierId,
           },
         });
-        
+
         if (teamSeason) {
           // Create player-team association
           await prisma.playerTeamSeason.create({
@@ -81,7 +81,7 @@ async function handleExpiredBids() {
               teamSeasonId: teamSeason.id,
             },
           });
-          
+
           // Update contract amount
           await prisma.contract.update({
             where: { id: bidData.contractId },
@@ -89,14 +89,16 @@ async function handleExpiredBids() {
           });
         }
       }
-      
+
       // Mark player as no longer in bidding
       await prisma.playerSeason.update({
         where: { id: playerSeasonId },
         data: { isInBidding: false },
       });
-      
-      console.log(`Finalized bid for player: ${bidData.playerName}, winning team: ${bidData.currentTeamName || 'None'}`);
+
+      console.log(
+        `Finalized bid for player: ${bidData.playerName}, winning team: ${bidData.currentTeamName || 'None'}`
+      );
     } catch (error) {
       console.error(`Error processing expired bid: ${key}`, error);
     }
@@ -108,18 +110,18 @@ async function handleExpiredBids() {
  */
 async function handleLeagueTransitions() {
   const now = Date.now();
-  
+
   // Check if any league's bidding period has ended
   for (const leagueId of LEAGUE_ORDER) {
     const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
-    
+
     // If this league is active but the end time has passed
     if (status && status.active && status.endTime < now) {
       console.log(`Bidding period for ${leagueId.toUpperCase()} has ended`);
-      
+
       // Finalize all remaining bids for this league
       await finalizeLeagueBidding(leagueId);
-      
+
       // Mark this league's bidding as inactive
       await biddingUtils.setLeagueBiddingStatus(leagueId, {
         active: false,
@@ -127,26 +129,26 @@ async function handleLeagueTransitions() {
         endTime: 0,
         tierLevel: status.tierLevel,
       });
-      
+
       // Check if we need to start the next league in the sequence
       const currentIndex = LEAGUE_ORDER.indexOf(leagueId);
       if (currentIndex < LEAGUE_ORDER.length - 1) {
         const nextLeagueId = LEAGUE_ORDER[currentIndex + 1];
-        
+
         // Calculate start time for next league (8pm EST on the day after this one ends)
         const nextDay = new Date();
         nextDay.setDate(nextDay.getDate() + 1);
         nextDay.setHours(20, 0, 0, 0); // 8:00 PM
-        
+
         // Convert to Eastern Time (EST/EDT)
         // Note: This is a simplified approach, a proper timezone library would be better
         const estOffset = -5 * 60 * 60 * 1000; // EST offset in milliseconds
         const localOffset = nextDay.getTimezoneOffset() * 60 * 1000;
         const estTime = new Date(nextDay.getTime() + localOffset + estOffset);
-        
+
         const startTime = estTime.getTime();
-        const endTime = startTime + (2 * 24 * 60 * 60 * 1000); // 2 days
-        
+        const endTime = startTime + 2 * 24 * 60 * 60 * 1000; // 2 days
+
         // Start the next league's bidding period
         await biddingUtils.setLeagueBiddingStatus(nextLeagueId, {
           active: true,
@@ -154,10 +156,10 @@ async function handleLeagueTransitions() {
           endTime,
           tierLevel: status.tierLevel + 1,
         });
-        
+
         // Initialize players for bidding
         await initializeLeaguePlayers(nextLeagueId);
-        
+
         console.log(`Started bidding period for ${nextLeagueId.toUpperCase()}`);
       } else {
         console.log('All league bidding periods have completed');
@@ -179,21 +181,21 @@ async function finalizeLeagueBidding(leagueId: string) {
       },
     },
   });
-  
+
   if (!tier) {
     console.error(`Tier not found for league: ${leagueId}`);
     return;
   }
-  
+
   // Get all players in bidding for this tier
   const biddingPlayers = await biddingUtils.getPlayersByTier(tier.id);
-  
+
   // Process each player
   for (const player of biddingPlayers) {
     if (player.status === 'active') {
       // Same finalization logic as in handleExpiredBids
       await biddingUtils.finalizeBidding(player.id);
-      
+
       if (player.currentTeamId) {
         const teamSeason = await prisma.teamSeason.findFirst({
           where: {
@@ -201,7 +203,7 @@ async function finalizeLeagueBidding(leagueId: string) {
             tierId: tier.id,
           },
         });
-        
+
         if (teamSeason) {
           await prisma.playerTeamSeason.create({
             data: {
@@ -209,22 +211,24 @@ async function finalizeLeagueBidding(leagueId: string) {
               teamSeasonId: teamSeason.id,
             },
           });
-          
+
           await prisma.contract.update({
             where: { id: player.contractId },
             data: { amount: player.currentAmount },
           });
         }
       }
-      
+
       await prisma.playerSeason.update({
         where: { id: player.id },
         data: { isInBidding: false },
       });
     }
   }
-  
-  console.log(`Finalized all bids for ${leagueId.toUpperCase()}, total players: ${biddingPlayers.length}`);
+
+  console.log(
+    `Finalized all bids for ${leagueId.toUpperCase()}, total players: ${biddingPlayers.length}`
+  );
 }
 
 /**
@@ -243,12 +247,12 @@ async function initializeLeaguePlayers(leagueId: string) {
       season: true,
     },
   });
-  
+
   if (!tier) {
     console.error(`Tier not found for league: ${leagueId}`);
     return;
   }
-  
+
   // Get all available players for this tier
   const availablePlayers = await prisma.playerSeason.findMany({
     where: {
@@ -267,15 +271,15 @@ async function initializeLeaguePlayers(leagueId: string) {
       contract: true,
     },
   });
-  
+
   // Get the league status to determine end time
   const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
-  
+
   if (!status || !status.active) {
     console.error(`League ${leagueId} is not active for bidding`);
     return;
   }
-  
+
   // Initialize each player in Redis
   for (const player of availablePlayers) {
     await biddingUtils.setPlayerBidding(player.id, {
@@ -288,6 +292,8 @@ async function initializeLeaguePlayers(leagueId: string) {
       contractId: player.contract.id,
     });
   }
-  
-  console.log(`Initialized ${availablePlayers.length} players for bidding in ${leagueId.toUpperCase()}`);
-} 
+
+  console.log(
+    `Initialized ${availablePlayers.length} players for bidding in ${leagueId.toUpperCase()}`
+  );
+}

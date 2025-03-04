@@ -33,10 +33,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to get team managers';
     console.error('Failed to get team managers:', errorMessage);
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }
 
@@ -77,10 +74,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to add team manager';
     console.error('Failed to add team manager:', errorMessage);
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }
 
@@ -121,9 +115,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to remove team manager';
     console.error('Failed to remove team manager:', errorMessage);
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

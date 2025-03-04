@@ -14,4 +14,4 @@ export default function LeagueBanner({ league }: { league: League }) {
       />
     </div>
   );
-} 
+}

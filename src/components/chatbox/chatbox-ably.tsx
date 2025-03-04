@@ -41,7 +41,7 @@
  * <Chat
  *   leagueId="nhl"
  *   currentUser={{ id: "123", name: "John Doe" }}
- * />
+ />
  */
 
 'use client';
@@ -490,7 +490,7 @@ const Chat = function Chat({ leagueId, currentUser }: ChatProps) {
   // Create a memoized client instance that persists across renders
   const client = useMemo(() => {
     console.log('Chat: Creating new Ably client');
-    
+
     // Create a new Ably client that handles auth errors
     const ablyClient = new Ably.Realtime({
       authUrl: '/api/ably',
@@ -498,15 +498,15 @@ const Chat = function Chat({ leagueId, currentUser }: ChatProps) {
       echoMessages: true,
       closeOnUnload: true,
     });
-    
+
     // Listen for auth errors
     ablyClient.connection.on('failed', (err) => {
       console.error('Ably connection failed:', err);
-      if (err.statusCode === 401) {
+      if (err.reason && err.reason.statusCode === 401) {
         setAuthError(true);
       }
     });
-    
+
     return ablyClient;
   }, []);
 

@@ -48,12 +48,12 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ url: result.secure_url });
     } catch (cloudinaryError: unknown) {
-      const errorMessage = cloudinaryError instanceof Error ? cloudinaryError.message : 'Failed to upload to Cloudinary';
+      const errorMessage =
+        cloudinaryError instanceof Error
+          ? cloudinaryError.message
+          : 'Failed to upload to Cloudinary';
       console.error('Cloudinary upload error:', errorMessage);
-      return NextResponse.json(
-        { message: errorMessage },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: errorMessage }, { status: 500 });
     }
   } catch (error) {
     console.error('Upload error:', error);

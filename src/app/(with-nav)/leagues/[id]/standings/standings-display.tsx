@@ -266,7 +266,6 @@ export function StandingsDisplay({ league }: StandingsDisplayProps) {
 
   return (
     <div className="min-h-screen">
-
       {/* League Banner */}
       <div className={`w-full ${league.bannerColor} py-8`}>
         <div className="container mx-auto px-4 flex items-center justify-between">

@@ -3,4 +3,4 @@ export interface League {
   name: string;
   logo: string;
   bannerColor: string;
-} 
+}

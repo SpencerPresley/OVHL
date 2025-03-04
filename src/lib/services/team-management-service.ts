@@ -187,8 +187,8 @@ export class TeamManagementService {
               data: {
                 playerSeason: {
                   connect: {
-                    id: currentSeason.id
-                  }
+                    id: currentSeason.id,
+                  },
                 },
                 amount: 0,
               },

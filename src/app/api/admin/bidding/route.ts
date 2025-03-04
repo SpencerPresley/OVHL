@@ -20,20 +20,20 @@ interface BiddingStatus {
 export async function GET(request: NextRequest) {
   // Debug authentication
   console.log('GET /api/admin/bidding - Checking admin access');
-  
+
   try {
     const leagueIds = ['nhl', 'ahl', 'echl', 'chl'];
     const biddingStatus: Record<string, BiddingStatus> = {};
-    
+
     // Get the status of all bidding periods
     for (const leagueId of leagueIds) {
       const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
       biddingStatus[leagueId] = status || { active: false, leagueId };
     }
-    
+
     // Get the current active league
     const activeBidding = await biddingUtils.getCurrentActiveBidding();
-    
+
     return NextResponse.json({
       biddingStatus,
       activeBidding,
@@ -49,29 +49,29 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // Debug authentication
   console.log('POST /api/admin/bidding - Checking admin access');
-  
+
   // Get token directly instead of using getServerSession
-  const token = await getToken({ 
+  const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
   });
-  
+
   console.log('Token exists:', !!token);
   console.log('Is admin:', token?.isAdmin ? 'Yes' : 'No');
-  
+
   if (!token?.isAdmin) {
     console.log('Unauthorized access attempt to bidding admin');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   try {
     const body = await request.json();
     const { action, leagueId } = body;
-    
+
     if (!action || !leagueId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    
+
     // Check if the league exists
     const tier = await prisma.tier.findFirst({
       where: {
@@ -81,27 +81,30 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    
+
     if (!tier) {
       return NextResponse.json({ error: 'Tier not found' }, { status: 404 });
     }
-    
+
     // Get the current active bidding
     const activeBidding = await biddingUtils.getCurrentActiveBidding();
-    
+
     // Only allow one active bidding period at a time
     if (action === 'start' && activeBidding && activeBidding.leagueId !== leagueId) {
-      return NextResponse.json({ 
-        error: `Cannot start bidding for ${leagueId} while ${activeBidding.leagueId} is active` 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Cannot start bidding for ${leagueId} while ${activeBidding.leagueId} is active`,
+        },
+        { status: 400 }
+      );
     }
-    
+
     // Handle the action
     switch (action) {
       case 'start': {
         const now = Date.now();
         const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-        
+
         // Map league ID to tier level
         const tierLevels = {
           nhl: 1,
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
           echl: 3,
           chl: 4,
         };
-        
+
         // Start bidding period
         await biddingUtils.setLeagueBiddingStatus(leagueId, {
           active: true,
@@ -117,16 +120,16 @@ export async function POST(request: NextRequest) {
           endTime: now + twoDaysMs,
           tierLevel: tierLevels[leagueId as keyof typeof tierLevels] || 0,
         });
-        
+
         // Initialize players
         await initializeLeaguePlayers(leagueId, tier.id);
-        
+
         return NextResponse.json({
           success: true,
           message: `Bidding started for ${leagueId.toUpperCase()}`,
         });
       }
-      
+
       case 'stop': {
         // Stop bidding period
         await biddingUtils.setLeagueBiddingStatus(leagueId, {
@@ -135,25 +138,25 @@ export async function POST(request: NextRequest) {
           endTime: 0,
           tierLevel: 0,
         });
-        
+
         return NextResponse.json({
           success: true,
           message: `Bidding stopped for ${leagueId.toUpperCase()}`,
         });
       }
-      
+
       case 'finalize': {
         // Get all players in bidding for this league
         const biddingPlayers = await biddingUtils.getPlayersByTier(tier.id);
-        
+
         // Process all remaining bids
         let processedCount = 0;
-        
+
         for (const player of biddingPlayers) {
           if (player.status === 'active') {
             // Mark as finalized in Redis
             await biddingUtils.finalizeBidding(player.id);
-            
+
             // If there's a winning team, assign the player
             if (player.currentTeamId) {
               const teamSeason = await prisma.teamSeason.findFirst({
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
                   tierId: tier.id,
                 },
               });
-              
+
               if (teamSeason) {
                 // Create player-team association
                 await prisma.playerTeamSeason.create({
@@ -171,20 +174,20 @@ export async function POST(request: NextRequest) {
                     teamSeasonId: teamSeason.id,
                   },
                 });
-                
+
                 // Update contract if needed
                 await prisma.contract.update({
                   where: { id: player.contractId },
-                  data: { 
+                  data: {
                     amount: player.currentBid,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                   },
                 });
-                
+
                 processedCount++;
               }
             }
-            
+
             // Mark player as no longer in bidding
             await prisma.playerSeason.update({
               where: { id: player.id },
@@ -192,7 +195,7 @@ export async function POST(request: NextRequest) {
             });
           }
         }
-        
+
         // Stop bidding period
         await biddingUtils.setLeagueBiddingStatus(leagueId, {
           active: false,
@@ -200,7 +203,7 @@ export async function POST(request: NextRequest) {
           endTime: 0,
           tierLevel: 0,
         });
-        
+
         return NextResponse.json({
           success: true,
           message: `Bidding finalized for ${leagueId.toUpperCase()}`,
@@ -208,7 +211,7 @@ export async function POST(request: NextRequest) {
           totalPlayers: biddingPlayers.length,
         });
       }
-      
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
@@ -224,11 +227,11 @@ export async function POST(request: NextRequest) {
 async function initializeLeaguePlayers(leagueId: string, tierId: string) {
   // Get league status to determine end time
   const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
-  
+
   if (!status || !status.active) {
     throw new Error(`League ${leagueId} is not active for bidding`);
   }
-  
+
   // Get all available players for this tier
   const availablePlayers = await prisma.playerSeason.findMany({
     where: {
@@ -246,7 +249,7 @@ async function initializeLeaguePlayers(leagueId: string, tierId: string) {
       contract: true,
     },
   });
-  
+
   // Initialize each player in Redis
   let initCount = 0;
   for (const player of availablePlayers) {
@@ -263,12 +266,12 @@ async function initializeLeaguePlayers(leagueId: string, tierId: string) {
         gamesPlayed: player.gamesPlayed || 0,
         goals: player.goals || 0,
         assists: player.assists || 0,
-        plusMinus: player.plusMinus || 0
-      }
+        plusMinus: player.plusMinus || 0,
+      },
     });
     initCount++;
   }
-  
+
   console.log(`Initialized ${initCount} players for bidding in ${leagueId.toUpperCase()}`);
   return initCount;
 }
