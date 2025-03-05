@@ -18,6 +18,7 @@ const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 
 // Helper function to get division for a team
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getTeamDivision(teamIdentifier: string, teamName: string, leagueId: string) {
   const teamId = teamIdentifier.toLowerCase();
   console.log('Looking up division for:', { teamId, teamName, leagueId });

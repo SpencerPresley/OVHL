@@ -209,6 +209,7 @@ type LeagueTeam = NHLTeam | AHLTeam | ECHLTeam | CHLTeam;
  */
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   // Create a map of team identifiers to colors based on league
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const teamColorsMap = new Map<string, LeagueTeam>(
     league.id === 'nhl'
       ? NHL_TEAMS.map((team) => [team.id, team])

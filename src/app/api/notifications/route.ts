@@ -63,6 +63,7 @@ export async function POST(request: Request) {
         isAdmin?: boolean;
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       userId = decoded.id;
       isAdmin = decoded.isAdmin || false;
     }

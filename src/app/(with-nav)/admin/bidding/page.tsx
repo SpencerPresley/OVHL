@@ -13,7 +13,6 @@ import {
   Clock,
   PlayCircle,
   TimerOff,
-  XCircle,
   Database,
   RefreshCw,
 } from 'lucide-react';

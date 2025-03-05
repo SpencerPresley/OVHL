@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { biddingUtils } from '@/lib/redis';
 import { getServerSession } from 'next-auth';
 import { AuthOptions } from '@/lib/auth-options';
 import redis from '@/lib/redis';
@@ -11,6 +10,7 @@ const keyPrefix = {
   leagueStatus: 'leagueStatus:',
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createKey(prefix: keyof typeof keyPrefix, id: string) {
   return `${keyPrefix[prefix]}${id}`;
 }

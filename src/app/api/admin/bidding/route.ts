@@ -17,6 +17,7 @@ interface BiddingStatus {
 
 // GET /api/admin/bidding
 // Returns the status of all bidding periods
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
   // Debug authentication
   console.log('GET /api/admin/bidding - Checking admin access');
