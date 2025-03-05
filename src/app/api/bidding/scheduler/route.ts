@@ -12,6 +12,14 @@ const LEAGUE_ORDER = ['nhl', 'ahl', 'echl', 'chl'];
  * It handles:
  * 1. Checking for expired player bids and finalizing them
  * 2. Checking if a league bidding period has ended and starting the next one
+ * 3. Cleaning up database inconsistencies (e.g., players on teams but still marked as in bidding)
+ * 
+ * Normal flow for a player bid:
+ * 1. Player is added to bidding via Redis + DB flag isInBidding=true
+ * 2. Bids are placed, timer counts down
+ * 3. When timer reaches zero, handleExpiredBids marks status=completed in Redis 
+ *    and isInBidding=false in the DB
+ * 4. If a player already has a team, they should NOT be in bidding
  */
 export async function GET(request: NextRequest) {
   // Validate the request contains a secret key to prevent unauthorized access
@@ -29,6 +37,9 @@ export async function GET(request: NextRequest) {
 
     // Step 2: Check for league transitions
     await handleLeagueTransitions();
+
+    // Step 3: Check for inconsistencies in the database
+    await cleanupDatabaseInconsistencies();
 
     return NextResponse.json({
       success: true,
@@ -48,17 +59,29 @@ async function handleExpiredBids() {
   // Get all active bidding data from Redis
   const allKeys = await biddingUtils.getActivePlayerBids();
   const now = Date.now();
+  
+  console.log(`Checking ${allKeys.length} active bids for expiration...`);
 
   // Process each active bid
   for (const key of allKeys) {
     try {
-      const playerSeasonId = key.replace('ovhl:bidding:', '');
+      const playerSeasonId = key.replace('bidding:', '');
       const bidData = await biddingUtils.getPlayerBidding(playerSeasonId);
 
       // Skip if already completed or if timer hasn't expired
-      if (!bidData || bidData.status !== 'active' || bidData.endTime > now) {
+      if (!bidData || bidData.status !== 'active') {
         continue;
       }
+
+      // Check if the bid has expired
+      const hasExpired = bidData.endTime && bidData.endTime <= now;
+      
+      if (!hasExpired) {
+        // This bid hasn't expired yet
+        continue;
+      }
+
+      console.log(`Processing expired bid for player: ${bidData.playerName}, ID: ${playerSeasonId}, endTime: ${new Date(bidData.endTime).toISOString()}`);
 
       // Finalize the bid in Redis
       await biddingUtils.finalizeBidding(playerSeasonId);
@@ -82,10 +105,10 @@ async function handleExpiredBids() {
             },
           });
 
-          // Update contract amount
+          // Fix: Update contract amount using currentBid 
           await prisma.contract.update({
             where: { id: bidData.contractId },
-            data: { amount: bidData.currentAmount },
+            data: { amount: bidData.currentBid || bidData.contract.amount },
           });
         }
       }
@@ -189,10 +212,15 @@ async function finalizeLeagueBidding(leagueId: string) {
 
   // Get all players in bidding for this tier
   const biddingPlayers = await biddingUtils.getPlayersByTier(tier.id);
+  console.log(`Finalizing bidding for ${leagueId.toUpperCase()}, found ${biddingPlayers.length} players`);
 
+  let processedCount = 0;
+  
   // Process each player
   for (const player of biddingPlayers) {
     if (player.status === 'active') {
+      console.log(`Finalizing bid for player: ${player.playerName} (ID: ${player.id})`);
+      
       // Same finalization logic as in handleExpiredBids
       await biddingUtils.finalizeBidding(player.id);
 
@@ -212,9 +240,10 @@ async function finalizeLeagueBidding(leagueId: string) {
             },
           });
 
+          // Fix: Use currentBid instead of currentAmount, fall back to contract amount if null
           await prisma.contract.update({
             where: { id: player.contractId },
-            data: { amount: player.currentAmount },
+            data: { amount: player.currentBid || player.contract.amount },
           });
         }
       }
@@ -223,11 +252,13 @@ async function finalizeLeagueBidding(leagueId: string) {
         where: { id: player.id },
         data: { isInBidding: false },
       });
+      
+      processedCount++;
     }
   }
 
   console.log(
-    `Finalized all bids for ${leagueId.toUpperCase()}, total players: ${biddingPlayers.length}`
+    `Finalized all bids for ${leagueId.toUpperCase()}, total players: ${biddingPlayers.length}, processed: ${processedCount}`
   );
 }
 
@@ -296,4 +327,56 @@ async function initializeLeaguePlayers(leagueId: string) {
   console.log(
     `Initialized ${availablePlayers.length} players for bidding in ${leagueId.toUpperCase()}`
   );
+}
+
+/**
+ * Clean up inconsistencies in the database
+ * - Players on teams shouldn't be in bidding
+ */
+async function cleanupDatabaseInconsistencies() {
+  try {
+    console.log('Checking for database inconsistencies...');
+    
+    // Find players marked as in bidding who already have team assignments
+    const playersWithTeams = await prisma.playerSeason.findMany({
+      where: {
+        isInBidding: true,
+        teamSeasons: {
+          some: {} // Has at least one team association
+        }
+      },
+      include: {
+        player: true,
+      }
+    });
+    
+    console.log(`Found ${playersWithTeams.length} players on teams but still marked as in bidding`);
+    
+    // Fix these players
+    for (const player of playersWithTeams) {
+      console.log(`Fixing player ${player.player.name} (ID: ${player.id}) - already on team but marked as in bidding`);
+      
+      // Update database
+      await prisma.playerSeason.update({
+        where: { id: player.id },
+        data: { isInBidding: false }
+      });
+      
+      // Also remove from Redis if present
+      try {
+        const redisData = await biddingUtils.getPlayerBidding(player.id);
+        if (redisData) {
+          // Finalize in Redis to clean up
+          await biddingUtils.finalizeBidding(player.id);
+        }
+      } catch (error) {
+        console.error(`Error cleaning up Redis for player ${player.id}:`, error);
+      }
+    }
+    
+    return playersWithTeams.length;
+  } catch (error) {
+    console.error('Error cleaning up database inconsistencies:', error);
+    return 0;
+  }
 }

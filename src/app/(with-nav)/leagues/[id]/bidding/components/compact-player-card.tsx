@@ -44,6 +44,25 @@ interface CompactPlayerCardProps {
   canBid: boolean;
   isSubmitting: boolean;
   managedTeamId?: string | null;
+  teamData?: {
+    salaryCap: number;
+    currentSalary: number;
+    totalCommitted: number;
+    activeBids: {
+      playerSeasonId: string;
+      playerName?: string;
+      position?: string;
+      amount: number;
+      endTime?: number;
+    }[];
+    roster?: {
+      id: string;
+      name: string;
+      position: string;
+      gamertag: string;
+      contractAmount: number;
+    }[];
+  } | null;
 }
 
 export function CompactPlayerCard({
@@ -52,6 +71,7 @@ export function CompactPlayerCard({
   canBid,
   isSubmitting,
   managedTeamId,
+  teamData,
 }: CompactPlayerCardProps) {
   const positionColors = getPositionColors(player.position);
 
@@ -108,6 +128,8 @@ export function CompactPlayerCard({
         currentBid={player.currentBid === null ? null : player.currentBid}
         startingAmount={player.contract.amount}
         isSubmitting={isSubmitting}
+        teamData={teamData}
+        playerPosition={player.position}
       />
     </div>
   );

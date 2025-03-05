@@ -72,7 +72,16 @@ export async function GET(request: NextRequest) {
       // Get the team's current committed bids
       const committedBids = await biddingUtils.getTeamCommittedBids(teamId);
 
-      console.log('Team committed bids:', committedBids);
+      console.log('Team committed bids:', {
+        teamId,
+        totalCommitted: committedBids.totalCommitted,
+        activeBidsCount: committedBids.activeBids.length,
+        activeBids: committedBids.activeBids.map(bid => ({
+          playerName: bid.playerName,
+          amount: bid.amount,
+          position: bid.position
+        }))
+      });
 
       // TODO: Future improvement - Store committed bids in the database
       // This would involve:
@@ -221,10 +230,111 @@ export async function POST(request: NextRequest) {
         teamId,
         tierId: tier.id,
       },
+      include: {
+        players: {
+          include: {
+            playerSeason: {
+              include: {
+                contract: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!teamSeason) {
       return NextResponse.json({ error: 'Team not registered for this season' }, { status: 400 });
+    }
+
+    // Get team's current committed bids
+    const committedBids = await biddingUtils.getTeamCommittedBids(teamId);
+    
+    // Calculate current salary from player contracts
+    const currentSalary = teamSeason.players.reduce(
+      (sum, p) => sum + p.playerSeason.contract.amount,
+      0
+    );
+    
+    // Get roster counts
+    const forwards = teamSeason.players.filter((p) => 
+      ['LW', 'C', 'RW'].includes(p.playerSeason.position)
+    ).length;
+    
+    const defense = teamSeason.players.filter((p) => 
+      ['LD', 'RD'].includes(p.playerSeason.position)
+    ).length;
+    
+    const goalies = teamSeason.players.filter((p) => 
+      p.playerSeason.position === 'G'
+    ).length;
+
+    // Get the player's position from Redis
+    const playerBidding = await biddingUtils.getPlayerBidding(playerSeasonId);
+    if (!playerBidding) {
+      return NextResponse.json({ error: 'Player not found in bidding' }, { status: 404 });
+    }
+    
+    const playerPosition = playerBidding.position;
+    const isForward = ['LW', 'C', 'RW'].includes(playerPosition);
+    const isDefense = ['LD', 'RD'].includes(playerPosition);
+    const isGoalie = playerPosition === 'G';
+    
+    // Salary cap validation
+    const totalCurrentCommitments = currentSalary + committedBids.totalCommitted;
+    const proposedTotal = totalCurrentCommitments + amount;
+    
+    // If they have an active bid on this player, subtract that amount
+    const existingBidOnThisPlayer = committedBids.activeBids.find(
+      bid => bid.playerSeasonId === playerSeasonId
+    );
+    
+    const adjustedProposedTotal = existingBidOnThisPlayer 
+      ? proposedTotal - existingBidOnThisPlayer.amount 
+      : proposedTotal;
+    
+    if (adjustedProposedTotal > tier.salaryCap) {
+      return NextResponse.json(
+        { error: `This bid would put your team over the salary cap of $${tier.salaryCap.toLocaleString()}` },
+        { status: 400 }
+      );
+    }
+    
+    // Minimum roster requirements calculation
+    const MIN_SALARY = 500000; // Minimum contract of $500k
+    const MIN_FORWARDS = 9;
+    const MIN_DEFENSE = 6;
+    const MIN_GOALIES = 2;
+    
+    // Calculate minimum required for the remaining roster spots
+    const remainingForwardsNeeded = Math.max(0, MIN_FORWARDS - forwards);
+    const remainingDefenseNeeded = Math.max(0, MIN_DEFENSE - defense);
+    const remainingGoaliesNeeded = Math.max(0, MIN_GOALIES - goalies);
+    
+    // Calculate minimum budget needed for the remaining roster
+    const minBudgetForRemainingRoster = (
+      remainingForwardsNeeded * MIN_SALARY +
+      remainingDefenseNeeded * MIN_SALARY +
+      remainingGoaliesNeeded * MIN_SALARY
+    );
+    
+    // Calculate remaining cap after proposed bid
+    const remainingAfterBid = tier.salaryCap - adjustedProposedTotal;
+    
+    // Check if making this bid would leave enough cap space for minimum roster
+    if (remainingAfterBid < minBudgetForRemainingRoster) {
+      let positionNeeded = "";
+      if (remainingForwardsNeeded > 0) positionNeeded += `${remainingForwardsNeeded} forwards, `;
+      if (remainingDefenseNeeded > 0) positionNeeded += `${remainingDefenseNeeded} defense, `;
+      if (remainingGoaliesNeeded > 0) positionNeeded += `${remainingGoaliesNeeded} goalies, `;
+      positionNeeded = positionNeeded.replace(/, $/, "");
+      
+      return NextResponse.json(
+        { 
+          error: `This bid would not leave enough cap space to complete your roster. You still need ${positionNeeded} at minimum salary (${minBudgetForRemainingRoster.toLocaleString()}).` 
+        },
+        { status: 400 }
+      );
     }
 
     // Place the bid
@@ -233,6 +343,18 @@ export async function POST(request: NextRequest) {
       teamName: team.officialName,
       amount,
       teamSeasonId: teamSeason.id,
+    });
+
+    console.log('Bid placed successfully:', {
+      playerSeasonId,
+      playerName: updatedBidding.playerName,
+      teamId,
+      teamName: team.officialName,
+      amount,
+      currentBid: updatedBidding.currentBid,
+      status: updatedBidding.status,
+      endTime: updatedBidding.endTime,
+      bidCount: updatedBidding.bids.length,
     });
 
     // Record the bid in Postgres for backup

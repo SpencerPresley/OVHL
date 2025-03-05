@@ -112,11 +112,16 @@ export const biddingUtils = {
     const INCREMENT = 250000; // 250k increment
 
     if (playerData.currentBid === null) {
-      // First bid must be exactly the starting amount (contract amount)
-      if (bidData.amount !== playerData.startingAmount) {
+      // First bid must be at least the starting amount (contract amount)
+      if (bidData.amount < playerData.startingAmount) {
         throw new Error(
-          `First bid must be exactly $${playerData.startingAmount.toLocaleString()} (the contract amount)`
+          `First bid must be at least $${playerData.startingAmount.toLocaleString()} (the contract amount)`
         );
+      }
+      
+      // Check if bid is in valid increments of 250k
+      if (bidData.amount % INCREMENT !== 0) {
+        throw new Error(`Bids must be in increments of $${INCREMENT.toLocaleString()}`);
       }
     } else {
       // Subsequent bids must be at least 250k more than current
@@ -171,6 +176,7 @@ export const biddingUtils = {
       endTime: newEndTime,
       bids: [...playerData.bids, newBid],
       lastUpdate: now,
+      status: 'active',
     };
 
     // Save updated player data
@@ -326,6 +332,8 @@ export const biddingUtils = {
     const keys = await redis.keys(`${keyPrefix.bidding}*`);
     let totalCommitted = 0;
     const activeBids = [];
+    
+    console.log(`Checking ${keys.length} keys for team ${teamId} active bids`);
 
     // Calculate total committed amount from current bids
     for (const key of keys) {
@@ -333,20 +341,28 @@ export const biddingUtils = {
       if (data) {
         try {
           const player = JSON.parse(data);
+          const playerIdFromKey = key.replace(keyPrefix.bidding, '');
+          
+          // Debug player data to see what we're working with
+          console.log(`Player ${player.playerName} (${playerIdFromKey}): currentTeamId=${player.currentTeamId}, status=${player.status}, currentBid=${player.currentBid}`);
+          
           // Only count active bids where this team is the current highest bidder
-          if (player.currentTeamId === teamId && player.status === 'active') {
+          // Make sure we have a currentTeamId that matches AND a status of 'active'
+          // Also ensure currentBid exists (not null)
+          if (player.currentTeamId === teamId && player.status === 'active' && player.currentBid !== null) {
             // Ensure currentBid is a number
             const bidAmount = Number(player.currentBid);
             if (!isNaN(bidAmount)) {
               totalCommitted += bidAmount;
 
               activeBids.push({
-                playerSeasonId: key.replace(keyPrefix.bidding, ''),
+                playerSeasonId: playerIdFromKey,
                 playerName: player.playerName,
                 position: player.position,
                 amount: bidAmount,
                 endTime: player.endTime,
               });
+              console.log(`Added active bid for ${player.playerName}: $${bidAmount}`);
             } else {
               console.error(
                 `Invalid bid amount for player ${player.playerName}: ${player.currentBid}`
@@ -359,7 +375,7 @@ export const biddingUtils = {
       }
     }
 
-    console.log(`Team ${teamId} total committed: ${totalCommitted}`);
+    console.log(`Team ${teamId} total committed: ${totalCommitted}, active bids: ${activeBids.length}`);
     return { totalCommitted, activeBids };
   },
 

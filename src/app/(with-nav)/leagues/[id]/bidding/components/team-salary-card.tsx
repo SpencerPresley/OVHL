@@ -171,6 +171,24 @@ export function TeamSalaryCard(props: TeamSalaryCardProps) {
               ></div>
             </div>
           </div>
+          
+          {/* Salary Cap Warning Section */}
+          {availableCap < 8500000 && (
+            <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40 rounded-md">
+              <h3 className="text-sm font-medium text-red-400 mb-1">Salary Cap Warning</h3>
+              <p className="text-xs text-gray-300">
+                Your available cap space is getting low. Remember that a complete roster requires:
+              </p>
+              <ul className="text-xs text-gray-300 list-disc list-inside mt-1">
+                <li>Minimum 9 forwards ($4.5M at min contracts)</li>
+                <li>Minimum 6 defense ($3M at min contracts)</li>
+                <li>Minimum 2 goalies ($1M at min contracts)</li>
+              </ul>
+              <p className="text-xs text-gray-300 mt-1">
+                Total minimum roster cost: $8.5M 
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

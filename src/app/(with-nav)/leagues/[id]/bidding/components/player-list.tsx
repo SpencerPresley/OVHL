@@ -42,6 +42,25 @@ interface PlayerListProps {
   canBid: boolean;
   isSubmitting: boolean;
   managedTeamId?: string | null;
+  teamData?: {
+    salaryCap: number;
+    currentSalary: number;
+    totalCommitted: number;
+    activeBids: {
+      playerSeasonId: string;
+      playerName?: string;
+      position?: string;
+      amount: number;
+      endTime?: number;
+    }[];
+    roster?: {
+      id: string;
+      name: string;
+      position: string;
+      gamertag: string;
+      contractAmount: number;
+    }[];
+  } | null;
 }
 
 export function PlayerList({
@@ -51,6 +70,7 @@ export function PlayerList({
   canBid,
   isSubmitting,
   managedTeamId,
+  teamData,
 }: PlayerListProps) {
   return (
     <div
@@ -70,6 +90,7 @@ export function PlayerList({
             canBid={canBid}
             isSubmitting={isSubmitting}
             managedTeamId={managedTeamId}
+            teamData={teamData}
           />
         ) : (
           <CompactPlayerCard
@@ -79,6 +100,7 @@ export function PlayerList({
             canBid={canBid}
             isSubmitting={isSubmitting}
             managedTeamId={managedTeamId}
+            teamData={teamData}
           />
         )
       )}

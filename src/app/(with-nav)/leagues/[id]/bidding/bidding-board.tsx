@@ -14,6 +14,9 @@ import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { CountdownTimer } from './components/countdown-timer';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { PlayerCard } from './components/player-card';
+import { CompactPlayerCard } from './components/compact-player-card';
 
 interface League {
   id: string;
@@ -312,7 +315,27 @@ export function BiddingBoard({
       // Fetch updated team data after bid placement
       fetchBiddingData(true);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to place bid');
+      // Enhanced error messaging with appropriate styling
+      const errorMessage = error.message || 'Failed to place bid';
+      
+      // Check if the error is related to salary cap or roster requirements
+      const isSalaryError = errorMessage.includes('salary cap') || 
+                            errorMessage.includes('cap space') || 
+                            errorMessage.includes('roster');
+      
+      // Use a different toast style for salary/roster errors to make them more noticeable
+      if (isSalaryError) {
+        toast.error(errorMessage, {
+          duration: 6000, // Show longer for complex messages
+          style: {
+            borderLeft: '4px solid #f43f5e',
+            background: '#1e1e1e',
+            color: '#ffffff',
+          },
+        });
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -482,6 +505,7 @@ export function BiddingBoard({
                     canBid={!!managedTeam && biddingStatus?.active === true}
                     isSubmitting={isSubmitting}
                     managedTeamId={managedTeam?.id || null}
+                    teamData={teamData}
                   />
                 )}
               </Suspense>

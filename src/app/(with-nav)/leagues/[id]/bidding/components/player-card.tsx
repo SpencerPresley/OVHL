@@ -34,6 +34,25 @@ interface PlayerCardProps {
   canBid: boolean;
   isSubmitting: boolean;
   managedTeamId?: string | null;
+  teamData?: {
+    salaryCap: number;
+    currentSalary: number;
+    totalCommitted: number;
+    activeBids: {
+      playerSeasonId: string;
+      playerName?: string;
+      position?: string;
+      amount: number;
+      endTime?: number;
+    }[];
+    roster?: {
+      id: string;
+      name: string;
+      position: string;
+      gamertag: string;
+      contractAmount: number;
+    }[];
+  } | null;
 }
 
 export function PlayerCard({
@@ -42,6 +61,7 @@ export function PlayerCard({
   canBid,
   isSubmitting,
   managedTeamId,
+  teamData,
 }: PlayerCardProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const positionColors = getPositionColors(player.position);
@@ -92,7 +112,7 @@ export function PlayerCard({
           </div>
           <div className="text-center p-2 rounded-lg bg-black/30 border border-white/5">
             <p className="text-sm text-muted-foreground">Min Contract</p>
-            <p className="font-mono font-bold">${player.contract.amount.toLocaleString()}</p>
+            <p className="font-mono font-bold">${player.contract?.amount ? player.contract.amount.toLocaleString() : '0'}</p>
             {/* Only show team name if it matches the user's team */}
             {showTeamName && player.currentTeamName && (
               <p className="text-xs text-gray-400 mt-1">{player.currentTeamName}</p>
@@ -137,6 +157,8 @@ export function PlayerCard({
           isSubmitting={isSubmitting}
           currentBid={player.currentBid === null ? null : player.currentBid}
           startingAmount={player.contract.amount}
+          teamData={teamData}
+          playerPosition={player.position}
         />
       </div>
     </div>

@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { useSession } from 'next-auth/react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface BiddingStatus {
   active: boolean;
@@ -45,6 +46,13 @@ export default function AdminBiddingPage() {
   const [isLoadingDebug, setIsLoadingDebug] = useState(false);
   const [dataStatus, setDataStatus] = useState<any>(null);
   const [selectedLeagueId, setSelectedLeagueId] = useState<string>('nhl');
+  const [isResetting, setIsResetting] = useState(false);
+  const [shouldReinitialize, setShouldReinitialize] = useState(false);
+  const [shouldResetDatabase, setShouldResetDatabase] = useState(true);
+  const [isFixingExpired, setIsFixingExpired] = useState(false);
+  const [isFixingDatabase, setIsFixingDatabase] = useState(false);
+  const [isPreparingBidding, setIsPreparingBidding] = useState(false);
+  const [isFixingRedis, setIsFixingRedis] = useState(false);
 
   // Fetch initial data
   useEffect(() => {
@@ -311,6 +319,183 @@ export default function AdminBiddingPage() {
       }
     } catch (error) {
       console.error('Error checking data status:', error);
+    }
+  };
+
+  // Add this section to the Card with other administrative buttons
+  const handleResetBidding = async () => {
+    // Confirm the dangerous operation with more details
+    if (!window.confirm('⚠️ EXTREME DANGER ZONE ⚠️\n\nThis will completely delete ALL bidding data, including:\n\n1. All Redis bidding cache\n2. All database bid records\n3. Player bidding status flags\n\nThis action CANNOT be undone and will require manual setup if you need to restore the system.\n\nAre you absolutely certain you want to proceed?')) {
+      return;
+    }
+    
+    try {
+      setIsResetting(true);
+      
+      const response = await fetch('/api/bidding/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reinitialize: shouldReinitialize,
+          resetDatabase: shouldResetDatabase,
+          leagueId: selectedLeagueId,
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to reset bidding data');
+      }
+      
+      const result = await response.json();
+      toast.success(result.message || 'Bidding data reset successfully');
+      
+      // Refresh data
+      fetchBiddingStatus();
+      checkBiddingDataStatus();
+    } catch (error: any) {
+      console.error('Error resetting bidding data:', error);
+      toast.error(error.message || 'Failed to reset bidding data');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  // Add a function to fix expired bids
+  const fixExpiredBids = async () => {
+    try {
+      setIsFixingExpired(true);
+
+      const response = await fetch('/api/bidding/fix-expired', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fix expired bids');
+      }
+
+      const data = await response.json();
+      toast.success(`Fixed ${data.fixedCount} expired bids`);
+
+      // Refresh bidding status
+      await fetchBiddingStatus();
+    } catch (error) {
+      console.error('Error fixing expired bids:', error);
+      toast.error('Failed to fix expired bids');
+    } finally {
+      setIsFixingExpired(false);
+    }
+  };
+
+  // Add a function to fix players in database
+  const fixPlayersInDatabase = async () => {
+    try {
+      setIsFixingDatabase(true);
+
+      const response = await fetch('/api/bidding/fix-database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fix players in database');
+      }
+
+      const data = await response.json();
+      toast.success(`Fixed ${data.fixedCount} players in database`);
+
+      // Refresh bidding status
+      await fetchBiddingStatus();
+    } catch (error) {
+      console.error('Error fixing players in database:', error);
+      toast.error('Failed to fix players in database');
+    } finally {
+      setIsFixingDatabase(false);
+    }
+  };
+
+  // Add a function to prepare players for bidding
+  const preparePlayersForBidding = async () => {
+    try {
+      setIsPreparingBidding(true);
+
+      const response = await fetch('/api/admin/prepare-bidding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          leagueId: selectedLeagueId,
+          initializeRedis: true
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to prepare players for bidding');
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.info(data.message);
+      }
+
+      // Refresh data
+      fetchBiddingStatus();
+      checkBiddingDataStatus();
+    } catch (error: any) {
+      console.error('Error preparing players for bidding:', error);
+      toast.error(error.message || 'Failed to prepare players for bidding');
+    } finally {
+      setIsPreparingBidding(false);
+    }
+  };
+
+  // Add a function to fix Redis data
+  const fixRedisData = async () => {
+    try {
+      setIsFixingRedis(true);
+
+      const response = await fetch('/api/bidding/fix-redis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fix Redis data');
+      }
+
+      const data = await response.json();
+      toast.success(`Redis cleanup completed successfully!`);
+      
+      // Show detailed stats
+      toast.info(`
+        Expired bids fixed: ${data.results.expiredBidsFixed}
+        Players on teams fixed: ${data.results.playersOnTeamsFixed}
+        Redis entries removed: ${data.results.redisEntriesRemoved}
+        Inconsistent states fixed: ${data.results.inconsistentStatesFixed}
+      `);
+
+      // Refresh bidding status
+      await fetchBiddingStatus();
+      await checkBiddingDataStatus();
+    } catch (error) {
+      console.error('Error fixing Redis data:', error);
+      toast.error('Failed to fix Redis data');
+    } finally {
+      setIsFixingRedis(false);
     }
   };
 
@@ -645,6 +830,244 @@ export default function AdminBiddingPage() {
               {isLoading ? 'Processing...' : 'Fix Bidding Data'}
             </button>
           </div>
+
+          {/* Add a new section for fixing expired bids */}
+          <div className="card-gradient rounded-lg p-4 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Fix Expired Bids</h2>
+            <p className="mb-4">
+              This will finalize any bids that have expired (showing as "Ending...") but haven't been processed:
+            </p>
+            
+            <Button 
+              onClick={fixExpiredBids} 
+              disabled={isFixingExpired}
+              className="mt-2"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {isFixingExpired ? 'Processing...' : 'Fix Expired Bids'}
+            </Button>
+          </div>
+
+          {/* Add a new section for fixing database */}
+          <div className="card-gradient rounded-lg p-4 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Fix Database Players</h2>
+            <p className="mb-4">
+              This will fix players stuck in bidding in the database, especially those already on teams:
+            </p>
+            
+            <Button 
+              onClick={fixPlayersInDatabase} 
+              disabled={isFixingDatabase}
+              className="mt-2"
+              variant="destructive"
+            >
+              <Database className="h-4 w-4 mr-2" />
+              {isFixingDatabase ? 'Processing...' : 'Fix Database Players'}
+            </Button>
+          </div>
+
+          {/* Add this section to the Card with other administrative buttons */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Reset Bidding Data</h3>
+            <Card className="bg-red-950/30 border-red-800/50">
+              <CardHeader>
+                <CardTitle>⚠️ Extreme Danger Zone ⚠️</CardTitle>
+                <CardDescription>
+                  This will completely delete all bidding data in Redis and the database. This action cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="resetDatabase" 
+                      checked={shouldResetDatabase} 
+                      onCheckedChange={(checked) => setShouldResetDatabase(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="resetDatabase"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Reset database records (bids, player flags)
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 ml-6">
+                    If checked, all database bid records will be deleted and player bidding flags will be reset.
+                  </p>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="reinitialize" 
+                      checked={shouldReinitialize} 
+                      onCheckedChange={(checked) => setShouldReinitialize(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="reinitialize"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Reinitialize players after reset
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 ml-6">
+                    If checked, eligible players will be reinitialized for bidding after the reset.
+                  </p>
+                </div>
+                
+                <Button 
+                  variant="destructive" 
+                  onClick={handleResetBidding} 
+                  disabled={isResetting}
+                  className="w-full"
+                >
+                  {isResetting ? (
+                    <>
+                      <span className="mr-2 animate-spin">⟳</span>
+                      Completely Resetting Bidding System...
+                    </>
+                  ) : (
+                    'COMPLETELY RESET BIDDING SYSTEM'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Bidding Management</CardTitle>
+              <CardDescription>
+                Control which leagues are active for bidding and manage player initialization
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4">
+                {/* League Selector and Status Indicators */}
+                <div className="flex flex-col space-y-4">
+                  {/* ... existing code ... */}
+                </div>
+
+                {/* League Bidding Controls */}
+                <div className="flex flex-col space-y-4 mt-4">
+                  <h3 className="text-lg font-semibold">Bidding Controls</h3>
+                  <div className="flex flex-row flex-wrap gap-2">
+                    <Button
+                      onClick={() => handleBiddingAction('start', selectedLeagueId)}
+                      disabled={
+                        isActionPending ||
+                        Boolean(biddingStatuses[selectedLeagueId]?.active)
+                      }
+                      className="flex items-center"
+                    >
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                      Start Bidding
+                    </Button>
+                    <Button
+                      onClick={() => handleBiddingAction('stop', selectedLeagueId)}
+                      disabled={
+                        isActionPending ||
+                        !Boolean(biddingStatuses[selectedLeagueId]?.active)
+                      }
+                      variant="destructive"
+                      className="flex items-center"
+                    >
+                      <TimerOff className="mr-2 h-4 w-4" />
+                      Stop Bidding
+                    </Button>
+                    <Button
+                      onClick={() => handleInitializeBidding(selectedLeagueId)}
+                      disabled={isInitializingBidding}
+                      variant="outline"
+                      className="flex items-center"
+                    >
+                      {isInitializingBidding ? (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          Initializing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Initialize Players
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={preparePlayersForBidding}
+                      disabled={isPreparingBidding}
+                      variant="outline"
+                      className="flex items-center"
+                    >
+                      {isPreparingBidding ? (
+                        <>
+                          <Database className="mr-2 h-4 w-4 animate-spin" />
+                          Preparing...
+                        </>
+                      ) : (
+                        <>
+                          <Database className="mr-2 h-4 w-4" />
+                          Prepare Players for Bidding
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={fixExpiredBids}
+                      disabled={isFixingExpired}
+                      variant="secondary"
+                      className="flex items-center"
+                    >
+                      {isFixingExpired ? (
+                        <>
+                          <Clock className="mr-2 h-4 w-4 animate-spin" />
+                          Fixing...
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="mr-2 h-4 w-4" />
+                          Fix Expired Bids
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={fixPlayersInDatabase}
+                      disabled={isFixingDatabase}
+                      variant="secondary"
+                      className="flex items-center"
+                    >
+                      {isFixingDatabase ? (
+                        <>
+                          <Database className="mr-2 h-4 w-4 animate-spin" />
+                          Fixing...
+                        </>
+                      ) : (
+                        <>
+                          <Database className="mr-2 h-4 w-4" />
+                          Fix Database Players
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={fixRedisData}
+                      disabled={isFixingRedis}
+                      variant="secondary"
+                      className="flex items-center"
+                    >
+                      {isFixingRedis ? (
+                        <>
+                          <Database className="mr-2 h-4 w-4 animate-spin" />
+                          Fixing Redis...
+                        </>
+                      ) : (
+                        <>
+                          <Database className="mr-2 h-4 w-4" />
+                          Fix Redis Data
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </div>
