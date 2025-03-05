@@ -17,6 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { PlayerCard } from './components/player-card';
 import { CompactPlayerCard } from './components/compact-player-card';
+import { useNotifications } from '@/hooks/use-notifications';
+import { NotificationType } from '@prisma/client';
 
 interface League {
   id: string;
@@ -165,6 +167,7 @@ export function BiddingBoard({
   const [isFetchingInBackground, setIsFetchingInBackground] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isRefreshPaused, setIsRefreshPaused] = useState(false);
+  const { notifications } = useNotifications();
 
   // State for filters
   const [positionFilter, setPositionFilter] = useState<string[]>([]);
@@ -412,6 +415,68 @@ export function BiddingBoard({
 
   // Determine if user can bid
   const canBid = Boolean(managedTeam && biddingStatus?.active);
+
+  // Effect to scroll to a specific player when they receive an outbid notification
+  useEffect(() => {
+    // Find recent outbid notifications
+    const outbidNotifications = notifications.filter(
+      (n) => 
+        n.type === NotificationType.TEAM && 
+        n.title === 'You have been outbid!' &&
+        n.metadata?.playerName
+    );
+    
+    if (outbidNotifications.length === 0) return;
+    
+    // Get the most recent notification
+    const latestNotification = outbidNotifications.reduce((latest, current) => {
+      const latestDate = new Date(latest.createdAt);
+      const currentDate = new Date(current.createdAt);
+      return currentDate > latestDate ? current : latest;
+    }, outbidNotifications[0]);
+    
+    // Check if this is a recent notification (last 10 seconds)
+    const notificationTime = new Date(latestNotification.createdAt).getTime();
+    const now = Date.now();
+    const isRecent = now - notificationTime < 10000; // 10 seconds
+    
+    if (!isRecent) return;
+    
+    // Find the player in the available players list
+    const playerName = latestNotification.metadata?.playerName;
+    const player = availablePlayers.find(p => p.name === playerName);
+    
+    if (player) {
+      // Get the previous and current bid amounts
+      const previousBid = latestNotification.metadata?.previousBid;
+      const newBid = latestNotification.metadata?.newBid;
+      
+      // Format the message with bid information but without revealing the competing team
+      let toastMessage = `You've been outbid on ${playerName}!`;
+      if (previousBid && newBid) {
+        toastMessage = `You've been outbid on ${playerName}! New bid: $${Number(newBid).toLocaleString()}`;
+      }
+      
+      // Highlight this player temporarily with a toast and scroll to them
+      toast.info(toastMessage, {
+        action: {
+          label: 'View Player',
+          onClick: () => {
+            // Find the player element and scroll to it
+            const playerElement = document.getElementById(`player-${player.id}`);
+            if (playerElement) {
+              playerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              // Add a highlight effect
+              playerElement.classList.add('flash-highlight');
+              setTimeout(() => {
+                playerElement.classList.remove('flash-highlight');
+              }, 2000);
+            }
+          }
+        }
+      });
+    }
+  }, [notifications, availablePlayers]);
 
   return (
     <div className="min-h-screen">

@@ -83,25 +83,27 @@ export function PlayerList({
     >
       {players.map((player) =>
         isDetailedView ? (
-          <PlayerCard
-            key={player.id}
-            player={player}
-            onPlaceBid={onPlaceBid}
-            canBid={canBid}
-            isSubmitting={isSubmitting}
-            managedTeamId={managedTeamId}
-            teamData={teamData}
-          />
+          <div key={player.id} id={`player-${player.id}`}>
+            <PlayerCard
+              player={player}
+              onPlaceBid={onPlaceBid}
+              canBid={canBid}
+              isSubmitting={isSubmitting}
+              managedTeamId={managedTeamId}
+              teamData={teamData}
+            />
+          </div>
         ) : (
-          <CompactPlayerCard
-            key={player.id}
-            player={player}
-            onPlaceBid={onPlaceBid}
-            canBid={canBid}
-            isSubmitting={isSubmitting}
-            managedTeamId={managedTeamId}
-            teamData={teamData}
-          />
+          <div key={player.id} id={`player-${player.id}`}>
+            <CompactPlayerCard
+              player={player}
+              onPlaceBid={onPlaceBid}
+              canBid={canBid}
+              isSubmitting={isSubmitting}
+              managedTeamId={managedTeamId}
+              teamData={teamData}
+            />
+          </div>
         )
       )}
 

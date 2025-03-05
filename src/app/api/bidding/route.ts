@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { AuthOptions } from '@/lib/auth-options';
 import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
+import { NotificationType } from '@prisma/client';
+import { UserService } from '@/lib/services/user-service';
 
 const prisma = new PrismaClient();
 
@@ -23,6 +25,54 @@ const isLeagueInBidding = async (leagueId: string) => {
   const status = await biddingUtils.getLeagueBiddingStatus(leagueId);
   return status && status.active;
 };
+
+// Helper function to send notifications to team managers when outbid
+async function sendOutbidNotifications(
+  outbidInfo: {
+    outbidTeamId: string;
+    outbidTeamName: string;
+    previousBidAmount: number;
+    playerName: string;
+  },
+  newBidAmount: number,
+  newTeamName: string
+) {
+  try {
+    // Get all managers for the outbid team
+    const teamManagers = await prisma.teamManager.findMany({
+      where: {
+        teamId: outbidInfo.outbidTeamId,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    // Send notification to each manager - without revealing the competing team
+    const notificationPromises = teamManagers.map(manager => {
+      return UserService.createNotification({
+        userId: manager.userId,
+        type: NotificationType.TEAM,
+        title: 'You have been outbid!',
+        message: `Your team (${outbidInfo.outbidTeamName}) has been outbid on ${outbidInfo.playerName} with a bid of $${newBidAmount.toLocaleString()}.`,
+        metadata: {
+          playerName: outbidInfo.playerName,
+          previousBid: outbidInfo.previousBidAmount,
+          newBid: newBidAmount,
+          outbidTeamId: outbidInfo.outbidTeamId,
+          outbidTeamName: outbidInfo.outbidTeamName
+          // Removed newTeamName to preserve bidding privacy
+        },
+      });
+    });
+
+    await Promise.all(notificationPromises);
+    console.log(`Sent outbid notifications to ${teamManagers.length} managers of ${outbidInfo.outbidTeamName}`);
+  } catch (error) {
+    console.error('Error sending outbid notifications:', error);
+    // Don't throw - we want the bid to succeed even if notifications fail
+  }
+}
 
 // GET /api/bidding?leagueId=nhl
 // Get all bidding data for a league
@@ -344,6 +394,15 @@ export async function POST(request: NextRequest) {
       amount,
       teamSeasonId: teamSeason.id,
     });
+
+    // If someone was outbid, send notifications
+    if (updatedBidding.outbid) {
+      await sendOutbidNotifications(
+        updatedBidding.outbid,
+        amount,
+        team.officialName
+      );
+    }
 
     console.log('Bid placed successfully:', {
       playerSeasonId,

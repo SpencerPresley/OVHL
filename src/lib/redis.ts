@@ -98,7 +98,44 @@ export const biddingUtils = {
       amount: number;
       teamSeasonId: string;
     }
-  ) {
+  ): Promise<{
+    id: string;
+    startingAmount: number;
+    tierId: string;
+    tierName: string;
+    playerName: string;
+    position: string;
+    contractId: string;
+    gamertag?: string;
+    stats?: {
+      gamesPlayed: number;
+      goals: number;
+      assists: number;
+      plusMinus: number;
+    };
+    currentBid: number;
+    currentTeamId: string;
+    currentTeamName: string;
+    endTime: number;
+    bids: Array<{
+      teamId: string;
+      teamName: string;
+      amount: number;
+      timestamp: number;
+    }>;
+    lastUpdate: number;
+    status: string;
+    contract?: {
+      id: string;
+      amount: number;
+    };
+    outbid: {
+      outbidTeamId: string;
+      outbidTeamName: string;
+      previousBidAmount: number;
+      playerName: string;
+    } | null;
+  }> {
     const key = createKey('bidding', playerSeasonId);
     const data = await redis.get(key);
 
@@ -107,6 +144,15 @@ export const biddingUtils = {
     }
 
     const playerData = JSON.parse(data);
+    
+    // Store outbid information for notifications
+    const wasOutbid = playerData.currentTeamId !== null && playerData.currentTeamId !== bidData.teamId;
+    const outbidInfo = wasOutbid ? {
+      outbidTeamId: playerData.currentTeamId,
+      outbidTeamName: playerData.currentTeamName,
+      previousBidAmount: playerData.currentBid,
+      playerName: playerData.playerName
+    } : null;
 
     // Validate bid amount
     const INCREMENT = 250000; // 250k increment
@@ -182,7 +228,10 @@ export const biddingUtils = {
     // Save updated player data
     await redis.set(key, JSON.stringify(updatedPlayerData));
 
-    return updatedPlayerData;
+    return {
+      ...updatedPlayerData,
+      outbid: wasOutbid ? outbidInfo : null
+    };
   },
 
   /**
