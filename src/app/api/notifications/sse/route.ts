@@ -157,7 +157,7 @@ export async function GET(request: Request) {
 
             // Send notifications if any exist
             if (notifications.length > 0) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ notifications })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'notifications', data: notifications })}\n\n`));
             }
           } catch (error) {
             console.error('Error checking for notifications:', error);
