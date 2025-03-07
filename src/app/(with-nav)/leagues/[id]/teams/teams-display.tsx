@@ -1,6 +1,3 @@
-'use client';
-
-import React, { useEffect } from 'react';
 import { LeagueNav } from '@/components/league-nav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BackToTop } from '@/components/back-to-top';
@@ -37,19 +34,14 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     a.team.officialName.localeCompare(b.team.officialName)
   );
 
-  // Add debug logging at the start of the component
-  useEffect(() => {
-    if (USE_DEBUG) {
-      teams.forEach((teamSeason) => {
-        teamSeason.players.forEach((player) => {
-          console.log('Player Contract Debug:', {
-            name: player.playerSeason.player.name,
-            contractAmount: player.playerSeason.contract.amount,
-          });
-        });
+  if (USE_DEBUG) {
+    teams.forEach((teamSeason) => {
+      console.log('Team Season Debug:', {
+        teamName: teamSeason.team.officialName,
+        players: teamSeason.players.length,
       });
-    }
-  }, [teams]);
+    });
+  }
 
 
   return (

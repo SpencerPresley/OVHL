@@ -1,5 +1,3 @@
-'use client';
-
 import { LeagueNav } from '@/components/league-nav';
 import { System, TeamManagementRole } from '@prisma/client';
 
