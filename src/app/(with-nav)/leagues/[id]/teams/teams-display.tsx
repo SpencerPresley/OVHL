@@ -1,13 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { LeagueNav } from '@/components/league-nav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BackToTop } from '@/components/back-to-top';
-import { NHL_TEAMS } from '@/lib/teams/nhl';
-import { AHL_TEAMS } from '@/lib/teams/ahl';
-import { ECHL_TEAMS } from '@/lib/teams/echl';
-import { CHL_TEAMS } from '@/lib/teams/chl';
 import type { NHLTeam, AHLTeam, ECHLTeam, CHLTeam } from '@/lib/teams/types';
 
 // Utilities
