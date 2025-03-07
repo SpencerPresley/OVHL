@@ -1,15 +1,17 @@
-import { StandingsDisplay } from './standings-display';
 import { notFound } from 'next/navigation';
 
-/**
- * League configuration type
- */
-interface League {
-  id: string;
-  name: string;
-  logo: string;
-  bannerColor: string;
-}
+// Secondary Nav
+import { LeagueNav } from '@/components/league-nav';
+
+// Page Components
+import { LeagueBanner } from './components/league-banner';
+import { DivisionTable } from './components/division-table';
+
+// Types
+import { League, DivisionStandings } from './types';
+
+// Utils
+import { fetchStandings } from './utils/fetch-standings';
 
 /**
  * Available leagues in the system with their specific configurations
@@ -42,12 +44,38 @@ const leagues: Record<string, League> = {
 };
 
 export default async function LeagueStandingsPage({ params }: { params: { id: string } }) {
-  const { id } = await params;
+  const { id } = params;
   const league = leagues[id.toLowerCase()];
 
   if (!league) {
     notFound();
   }
 
-  return <StandingsDisplay league={league} />;
+  // Fetch standings data server-side
+  const standings = await fetchStandings(id);
+
+  return (
+    <div className="min-h-screen">
+      <LeagueBanner league={league} />
+      <LeagueNav leagueId={id} />
+
+      {/* Standings Content */}
+      <div className="container mx-auto px-4 py-8">
+        {standings.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-xl">No standings data available.</p>
+          </div>
+        ) : (
+          standings.map((divisionStandings) => (
+            <DivisionTable
+              key={divisionStandings.division}
+              division={divisionStandings.division}
+              teams={divisionStandings.teams}
+              leagueId={id}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
