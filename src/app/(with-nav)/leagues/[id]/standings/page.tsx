@@ -8,7 +8,7 @@ import { LeagueBanner } from './components/league-banner';
 import { DivisionTable } from './components/division-table';
 
 // Types
-import { League, DivisionStandings } from './types';
+import { League } from './types';
 
 // Utils
 import { fetchStandings } from './utils/fetch-standings';
