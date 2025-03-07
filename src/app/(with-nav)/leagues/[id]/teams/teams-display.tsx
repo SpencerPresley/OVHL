@@ -1,63 +1,10 @@
-/**
- * @file teams-display.tsx
- * @author Spencer Presley
- * @version 1.0.0
- * @license Proprietary - Copyright (c) 2025 Spencer Presley
- * @copyright All rights reserved. This code is the exclusive property of Spencer Presley.
- * @notice Unauthorized copying, modification, distribution, or use is strictly prohibited.
- *
- * @description Comprehensive Team Roster and Performance Visualization Component
- * @module components/teams-display
- *
- * @requires react
- * @requires next/image
- * @requires next/link
- * @requires shadcn/ui
- *
- * Teams Display Component for League Management System
- *
- * Features:
- * - Detailed team roster visualization
- * - Position-based player organization
- * - Performance statistics tracking
- * - Responsive and interactive design
- * - Dynamic team and player information display
- *
- * Technical Implementation:
- * - Modular component architecture
- * - Efficient data processing and filtering
- * - Responsive layout with mobile optimization
- * - Advanced state management
- * - Performance-optimized rendering
- *
- * Design Principles:
- * - Clean, intuitive user interface
- * - Comprehensive data representation
- * - Seamless user interaction
- * - Accessibility-focused design
- *
- * Performance Considerations:
- * - Memoization of complex calculations
- * - Lazy loading of heavy components
- * - Efficient re-rendering strategies
- * - Minimal computational overhead
- *
- * @example
- * // Basic usage in a league page
- * <TeamsDisplay
- *   league={leagueData}
- *   teams={teamSeasonData}
- * />
- */
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { LeagueNav } from '@/components/league-nav';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { System, TeamManagementRole } from '@prisma/client';
+import { TeamManagementRole } from '@prisma/client';
 import { BackToTop } from '@/components/back-to-top';
 import { NHL_TEAMS } from '@/lib/teams/nhl';
 import { AHL_TEAMS } from '@/lib/teams/ahl';
@@ -65,107 +12,16 @@ import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
 import type { NHLTeam, AHLTeam, ECHLTeam, CHLTeam } from '@/lib/teams/types';
 
-/**
- * League information interface
- */
-interface League {
-  id: string;
-  name: string;
-  logo: string;
-  bannerColor: string;
-}
+// Types
+import { League } from './types/league';
+import { TeamSeason } from './types/team-season';
 
-/**
- * Player information interface including season stats and contract details
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface Player {
-  playerSeason: {
-    player: {
-      id: string;
-      name: string;
-      gamertags: {
-        gamertag: string;
-        system: System;
-      }[];
-    };
-    position: string;
-    contract: {
-      amount: number;
-    };
-  };
-  plusMinus: number;
-  goalsAgainst: number | null;
-  saves: number | null;
-}
+// Utilitiy Functions
+import { getPositionPlayers } from './utils/player-utils';
 
-/**
- * Manager information interface
- */
-interface Manager {
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    username: string | null;
-    player: {
-      id: string;
-      gamertags: {
-        gamertag: string;
-      }[];
-    } | null;
-  };
-  role: TeamManagementRole;
-}
-
-/**
- * Team season player information
- */
-interface TeamSeasonPlayer {
-  playerSeason: {
-    player: {
-      id: string;
-      name: string;
-      user: {
-        id: string;
-      };
-      gamertags: {
-        gamertag: string;
-        system: System;
-      }[];
-    };
-    position: string;
-    contract: {
-      amount: number;
-    };
-  };
-  gamesPlayed: number;
-  goals: number;
-  assists: number;
-  plusMinus: number;
-  goalsAgainst: number | null;
-  saves: number | null;
-}
-
-/**
- * Team season information including roster and performance stats
- */
-interface TeamSeason {
-  team: {
-    id: string;
-    officialName: string;
-    teamIdentifier: string;
-    managers: Manager[];
-  };
-  tier: {
-    name: string;
-    salaryCap: number;
-  };
-  wins: number;
-  losses: number;
-  otLosses: number;
-  players: TeamSeasonPlayer[];
-}
+// Page Components
+import { LeagueBannerTeams } from './components/league-banner-teams';
+import { TeamQuickNav } from './components/team-quick-nav';
 
 /**
  * Props for the TeamsDisplay component
@@ -173,26 +29,6 @@ interface TeamSeason {
 interface TeamsDisplayProps {
   league: League;
   teams: TeamSeason[];
-}
-
-/**
- * Player card interface
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface PlayerCard {
-  id: string;
-  name: string;
-  position: string;
-  system: System;
-  gamertag: string;
-  gamesPlayed: number;
-  goals: number;
-  assists: number;
-  points: number;
-  plusMinus: number;
-  contract: {
-    amount: number;
-  };
 }
 
 type LeagueTeam = NHLTeam | AHLTeam | ECHLTeam | CHLTeam;
@@ -252,55 +88,13 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
     });
   }, [teams]);
 
-  /**
-   * Filters and sorts players by position
-   * @param {TeamSeasonPlayer[]} players - Array of players to filter
-   * @param {string[]} positions - Array of positions to filter by
-   * @returns {TeamSeasonPlayer[]} Filtered and sorted players
-   */
-  const getPositionPlayers = (players: TeamSeasonPlayer[], positions: string[]) => {
-    return players
-      .filter((p) => positions.includes(p.playerSeason.position))
-      .sort((a, b) => a.playerSeason.player.name.localeCompare(b.playerSeason.player.name));
-  };
-
-  /**
-   * Scrolls to a specific team's card
-   * @param {string} teamId - ID of the team to scroll to
-   */
-  const scrollToTeam = (teamId: string) => {
-    const element = document.getElementById(teamId);
-    if (element) {
-      const isMobile = window.innerWidth < 768;
-      const headerOffset = isMobile ? 220 : 120; // Much more padding on mobile for wrapped buttons
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - headerOffset,
-        behavior: 'smooth',
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen">
       {/* League Banner Section
        * Displays league logo, name, and title
        * Uses league-specific banner color for branding
        */}
-      <div className={`w-full ${league.bannerColor} py-8`}>
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Image
-              src={league.logo}
-              alt={`${league.name} Logo`}
-              width={80}
-              height={80}
-              className="object-contain"
-            />
-            <h1 className="text-4xl font-bold text-white">{league.name} Teams</h1>
-          </div>
-        </div>
-      </div>
+      <LeagueBannerTeams league={league} />
 
       <LeagueNav leagueId={league.id} />
 
@@ -309,21 +103,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
        * Allows quick jumping to specific teams
        * Features glass-morphism design with blur effect
        */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap gap-2">
-            {sortedTeams.map((team) => (
-              <button
-                key={team.team.id}
-                onClick={() => scrollToTeam(team.team.id)}
-                className="px-3 py-1.5 text-sm font-medium rounded-md bg-secondary hover:bg-secondary/80 hover:opacity-75 transition-all"
-              >
-                {team.team.teamIdentifier}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <TeamQuickNav sortedTeams={sortedTeams} />
 
       {/* Teams Grid Section
        * Main content area displaying team cards
