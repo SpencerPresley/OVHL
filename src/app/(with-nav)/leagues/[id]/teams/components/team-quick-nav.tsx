@@ -9,7 +9,7 @@ interface TeamQuickNavProps {
 
 export function TeamQuickNav({ sortedTeams }: TeamQuickNavProps) {
     return (
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
+        <div className="top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-wrap gap-2">
             {sortedTeams.map((team) => (

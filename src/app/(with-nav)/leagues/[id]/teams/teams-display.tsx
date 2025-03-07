@@ -34,51 +34,27 @@ interface TeamsDisplayProps {
 type LeagueTeam = NHLTeam | AHLTeam | ECHLTeam | CHLTeam;
 
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
-  // Create a map of team identifiers to colors based on league
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const teamColorsMap = new Map<string, LeagueTeam>(
-    league.id === 'nhl'
-      ? NHL_TEAMS.map((team) => [team.id, team])
-      : league.id === 'ahl'
-        ? AHL_TEAMS.map((team) => [team.id, team])
-        : league.id === 'echl'
-          ? ECHL_TEAMS.map((team) => [team.id, team])
-          : league.id === 'chl'
-            ? CHL_TEAMS.map((team) => [team.id, team])
-            : []
-  );
-
+  const USE_DEBUG = false;
+  
   // Sort teams alphabetically by name and filter by league-specific teams
   const sortedTeams = [...teams].sort((a, b) =>
     a.team.officialName.localeCompare(b.team.officialName)
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   // Add debug logging at the start of the component
   useEffect(() => {
-    teams.forEach((teamSeason) => {
-      teamSeason.players.forEach((player) => {
-        console.log('Player Contract Debug:', {
-          name: player.playerSeason.player.name,
-          contractAmount: player.playerSeason.contract.amount,
+    if (USE_DEBUG) {
+      teams.forEach((teamSeason) => {
+        teamSeason.players.forEach((player) => {
+          console.log('Player Contract Debug:', {
+            name: player.playerSeason.player.name,
+            contractAmount: player.playerSeason.contract.amount,
+          });
         });
       });
-    });
+    }
   }, [teams]);
 
-  const USE_DEBUG = false;
 
   return (
     <div className="min-h-screen">
@@ -91,11 +67,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {sortedTeams.map((teamSeason) => {
-            const { 
-              totalSalary,
-              salaryCap,
-              salaryColor
-            } = calculateTeamSalary(teamSeason);
+            const { totalSalary, salaryCap, salaryColor } = calculateTeamSalary(teamSeason);
 
             // Debug log for team salary data
             if (USE_DEBUG) {
@@ -115,7 +87,6 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
               >
                 <CardHeader className="border-b border-border">
                   <CardTitle className="flex flex-col">
-
                     <TeamsCardTitleContent
                       teamSeason={teamSeason}
                       league={league}
@@ -123,7 +94,6 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                       salaryCap={salaryCap}
                       salaryColor={salaryColor}
                     />
-
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
