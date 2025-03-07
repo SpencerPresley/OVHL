@@ -23,3 +23,14 @@ export function calculateTeamSalary(teamSeason: TeamSeason): SalaryInfo {
 
     return { totalSalary, salaryCap, salaryColor };
 }
+
+export function calculateTeamSalaryFromValues(totalSalary: number, salaryCap: number): SalaryInfo {
+    let salaryColor = 'text-green-500';
+    if (totalSalary > salaryCap) {
+      salaryColor = 'text-red-500';
+    } else if (totalSalary === salaryCap) {
+      salaryColor = 'text-white';
+    }
+    
+    return { totalSalary, salaryCap, salaryColor };
+  }
