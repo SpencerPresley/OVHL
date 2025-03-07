@@ -75,6 +75,7 @@ export interface Player {
 export type UserWithoutPlayer = Omit<UserProfileResponse, 'player'> & { player: null };
 export type UserWithPlayer = Omit<UserProfileResponse, 'player'> & {
   player: Player;
+  avatarUrl: string | null;
 };
 
 export interface NoPlayerProfile {

@@ -1,4 +1,8 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { 
+  Avatar, 
+  AvatarFallback, 
+  AvatarImage 
+} from '@/components/ui/avatar';
 import type { CareerStats } from '@/lib/services/user-service';
 
 interface ProfileBannerProps {
@@ -7,6 +11,7 @@ interface ProfileBannerProps {
     system: string;
     currentContract: number;
     careerStats: CareerStats;
+    avatarUrl?: string | null;
 }
 
 export function ProfileBanner({
@@ -15,11 +20,13 @@ export function ProfileBanner({
     system,
     currentContract,
     careerStats,
+    avatarUrl,
 }: ProfileBannerProps) {
     return (
         <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 mb-8 text-white">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
+            {avatarUrl && <AvatarImage src={avatarUrl} />}
             <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
           </Avatar>
           <div>

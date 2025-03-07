@@ -1,9 +1,3 @@
-'use client';
-
-import React from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
 import {
   UserService,
   type UserProfileResponse,
@@ -37,7 +31,7 @@ export function UserProfileView({ user }: UserProfileViewProps) {
     system,
     currentContract,
     careerStats,
-    user: { player },
+    user: { player, avatarUrl },
   } = profileData;
 
   return (
@@ -49,6 +43,7 @@ export function UserProfileView({ user }: UserProfileViewProps) {
           system={system}
           currentContract={currentContract}
           careerStats={careerStats}
+          avatarUrl={avatarUrl}
         />
 
         {/* Season Stats */}
