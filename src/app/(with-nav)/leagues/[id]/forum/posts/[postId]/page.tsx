@@ -162,7 +162,10 @@ export default async function PostPage({ params }: { params: { id: string; postI
   const prisma = new PrismaClient();
 
   try {
-    const { id, postId } = await params;
+    // Fix: Create a static copy of params
+    const resolvedParams = await params;
+    const { id, postId } = resolvedParams;
+
     const league = leagues[id as keyof typeof leagues];
     if (!league) {
       notFound();

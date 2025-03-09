@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ForumPostStatus } from '@prisma/client';
-
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
 import { ForumService } from '@/lib/services/forum-service';
+import { getServerSession } from 'next-auth';
+import { AuthOptions } from '@/lib/auth-options';
 
 type Subscriber = {
   userId: string;
@@ -22,22 +21,45 @@ export async function POST(
 ) {
   try {
     const { id, postId } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
+    
+    // Check for NextAuth session first
+    const session = await getServerSession(AuthOptions);
+    let user;
+    
+    if (session?.user?.id) {
+      user = {
+        id: session.user.id,
+        name: session.user.name,
+      };
+    } else {
+      // Fall back to JWT token
+      const cookieStore = await cookies();
+      const token = cookieStore.get('token');
 
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      if (!token) {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+
+      try {
+        const decoded = verify(token.value, process.env.JWT_SECRET!) as {
+          id: string;
+          name: string;
+        };
+
+        user = {
+          id: decoded.id,
+          name: decoded.name,
+        };
+      } catch (tokenError) {
+        console.error('Token verification failed:', tokenError);
+        return NextResponse.json({ error: 'Authentication invalid' }, { status: 401 });
+      }
     }
 
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      name: string;
-    };
-
-    const user = {
-      id: decoded.id,
-      name: decoded.name,
-    };
+    // No valid authentication found
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
 
     const post = await ForumService.getPostBasicInfo(postId);
 
