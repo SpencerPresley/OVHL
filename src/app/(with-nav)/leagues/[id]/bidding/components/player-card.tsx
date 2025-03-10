@@ -1,7 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { BidSection } from './bid-section';
-import Link from 'next/link';
 import { getPositionColors } from '@/lib/utils';
 import { CountdownTimer } from './countdown-timer';
 

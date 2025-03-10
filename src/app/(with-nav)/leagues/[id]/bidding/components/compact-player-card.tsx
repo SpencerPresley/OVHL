@@ -3,16 +3,16 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { BidSection } from './bid-section';
-import Link from 'next/link';
 import { getPositionColors } from '@/lib/utils';
 import { CountdownTimer } from './countdown-timer';
+import { Bid } from '../types';
 
-interface Bid {
-  teamId: string;
-  teamName: string;
-  amount: number;
-  timestamp: number;
-}
+// interface Bid {
+//   teamId: string;
+//   teamName: string;
+//   amount: number;
+//   timestamp: number;
+// }
 
 interface CompactPlayerCardProps {
   player: {

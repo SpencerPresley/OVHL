@@ -6,40 +6,42 @@ import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
 import { NHLTeam, AHLTeam, ECHLTeam, CHLTeam } from '@/lib/teams/types';
+import { League, Team } from './types';
+
 
 const prisma = new PrismaClient();
 
-interface League {
-  id: string;
-  name: string;
-  logo: string;
-  bannerColor: string;
-}
+// interface League {
+//   id: string;
+//   name: string;
+//   logo: string;
+//   bannerColor: string;
+// }
 
-interface Team {
-  id: string;
-  name: string;
-  identifier: string;
-  managers: {
-    userId: string;
-    name: string;
-    role: TeamManagementRole;
-  }[];
-  stats: {
-    wins: number;
-    losses: number;
-    otLosses: number;
-  };
-  roster: {
-    forwards: number;
-    defense: number;
-    goalies: number;
-  };
-  salary: {
-    current: number;
-    cap: number;
-  };
-}
+// interface Team {
+//   id: string;
+//   name: string;
+//   identifier: string;
+//   managers: {
+//     userId: string;
+//     name: string;
+//     role: TeamManagementRole;
+//   }[];
+//   stats: {
+//     wins: number;
+//     losses: number;
+//     otLosses: number;
+//   };
+//   roster: {
+//     forwards: number;
+//     defense: number;
+//     goalies: number;
+//   };
+//   salary: {
+//     current: number;
+//     cap: number;
+//   };
+// }
 
 const leagues: Record<string, League> = {
   nhl: {

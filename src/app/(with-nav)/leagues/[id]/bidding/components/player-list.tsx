@@ -3,13 +3,14 @@
 import { PlayerCard } from './player-card';
 import { CompactPlayerCard } from './compact-player-card';
 import { cn } from '@/lib/utils';
+import { Bid } from '../types';
 
-interface Bid {
-  teamId: string;
-  teamName: string;
-  amount: number;
-  timestamp: number;
-}
+// interface Bid {
+//   teamId: string;
+//   teamName: string;
+//   amount: number;
+//   timestamp: number;
+// }
 
 interface PlayerListProps {
   players: Array<{
