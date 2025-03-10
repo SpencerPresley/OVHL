@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Path, Body
 from typing import List, Dict, Any, Optional, Set
-from _psnawp import get_psn_user, PSNUserProfile
+from src._psnawp import get_psn_user, PSNUserProfile
 from pydantic import BaseModel, Field
 
 # Create router with API prefix and tags for better documentation

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from psnawp_api import PSNAWP
 from psnawp_api.models import User as PSNUser
 from functools import lru_cache
+
 try:
     # For region information
     import pycountry
