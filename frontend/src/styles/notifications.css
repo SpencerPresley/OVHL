@@ -1,0 +1,25 @@
+@keyframes notification-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.notification-toast {
+  position: relative;
+  overflow: hidden;
+}
+
+.notification-toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  transform-origin: left;
+  animation: notification-progress 2s linear;
+}
