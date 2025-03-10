@@ -11,7 +11,7 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8000
-      # Add any other environment variables your service needs
+      # Here other environment variables can be added
     restart: unless-stopped
     networks:
       - ovhl_network
