@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { AuthOptions } from '@/lib/auth-options';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -36,6 +35,7 @@ export async function GET() {
     }
 
     // Fall back to JWT token if no valid NextAuth session
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const cookieStore = await cookies();
     const token = await cookieStore.get('token');
 

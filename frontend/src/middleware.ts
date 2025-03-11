@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { getToken } from 'next-auth/jwt';
 
 /**
@@ -47,6 +48,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/bidding/debug')
   ) {
     // Get NextAuth session token
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
@@ -73,6 +75,7 @@ export async function middleware(request: NextRequest) {
     // For admin pages, redirect to login if not authenticated
     const token = await getToken({
       req: request,
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
     });
 

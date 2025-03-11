@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { ForumService } from '@/lib/services/forum-service';
 import { getServerSession } from 'next-auth';
@@ -27,6 +28,7 @@ export async function POST(
       };
     } else {
       // Fall back to JWT token
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       const cookieStore = await cookies();
       const token = cookieStore.get('token');
 
@@ -35,6 +37,7 @@ export async function POST(
       }
 
       try {
+        // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
         const decoded = verify(token.value, process.env.JWT_SECRET!) as {
           id: string;
         };

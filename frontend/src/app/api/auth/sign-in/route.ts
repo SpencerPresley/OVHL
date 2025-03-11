@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-// import { cookies } from "next/headers"
+import { prisma } from '@/lib/prisma';
 
 // Disable Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -13,7 +12,6 @@ export const revalidate = 0;
  * @constant
  * @type {PrismaClient}
  */
-const prisma = new PrismaClient();
 
 /**
  * Sign In API Route
@@ -79,6 +77,7 @@ export async function POST(request: Request) {
     }
 
     console.log('SignInAPI: Generating JWT...');
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     // Generate JWT with appropriate expiration
     const token = sign(
       { id: user.id, email: user.email, isAdmin: user.isAdmin },
@@ -98,6 +97,7 @@ export async function POST(request: Request) {
 
     console.log('SignInAPI: Setting JWT cookie...');
     // Set secure cookie with JWT
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     response.cookies.set({
       name: 'token',
       value: token,

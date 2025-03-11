@@ -2,17 +2,15 @@ import { LeagueNav } from '@/components/league-nav';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { default as dynamicImport } from 'next/dynamic';
-import { PrismaClient } from '@prisma/client';
 import { LeagueQuickStats } from '@/components/league-quick-stats';
 import { serverAuth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
 // Use nodejs runtime to avoid edge runtime issues with crypto
 export const runtime = 'nodejs';
 
 // Force dynamic to ensure real-time updates
 export const revalidate = 0;
-
-const prisma = new PrismaClient();
 
 /**
  * Dynamic import of the chat component with loading state
@@ -245,6 +243,7 @@ async function getLeagueStats(leagueId: string) {
   };
 }
 
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 /**
  * League Page Component
  *

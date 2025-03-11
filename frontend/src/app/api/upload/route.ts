@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { cloudinary } from '@/lib/cloudinary';
 
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
     }
 
     try {
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       verify(token, process.env.JWT_SECRET!);
     } catch (error) {
       console.error('Token verification error:', error);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
   // Get token directly instead of using getServerSession
   const token = await getToken({
     req: request,
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
   });
 

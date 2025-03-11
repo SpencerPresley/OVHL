@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ForumPostStatus } from '@prisma/client';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
 import { ForumService } from '@/lib/services/forum-service';
@@ -32,6 +33,7 @@ export async function POST(
         name: session.user.name,
       };
     } else {
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       // Fall back to JWT token
       const cookieStore = await cookies();
       const token = cookieStore.get('token');
@@ -41,6 +43,7 @@ export async function POST(
       }
 
       try {
+        // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
         const decoded = verify(token.value, process.env.JWT_SECRET!) as {
           id: string;
           name: string;

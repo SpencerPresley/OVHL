@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
 import { getServerSession } from 'next-auth';
@@ -26,6 +27,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
       id: string;
     };
@@ -58,6 +60,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
       }
 
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       const decoded = verify(token.value, process.env.JWT_SECRET!) as {
         id: string;
         isAdmin?: boolean;

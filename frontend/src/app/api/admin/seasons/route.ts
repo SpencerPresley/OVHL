@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verify } from 'jsonwebtoken';
 import { NHL_TEAMS } from '@/lib/teams/nhl';
 import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
       id: string;
       isAdmin?: boolean;

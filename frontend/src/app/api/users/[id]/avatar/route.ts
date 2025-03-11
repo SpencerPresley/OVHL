@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -17,6 +18,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
       id: string;
     };
@@ -71,6 +73,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
+    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const decoded = verify(token.value, process.env.JWT_SECRET!) as {
       id: string;
     };

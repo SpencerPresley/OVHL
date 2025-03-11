@@ -1,48 +1,6 @@
-/**
- * @file route.ts
- * @author Spencer Presley
- * @version 1.0.0
- * @license Proprietary - Copyright (c) 2025 Spencer Presley
- * @copyright All rights reserved. This code is the exclusive property of Spencer Presley.
- * @notice Unauthorized copying, modification, distribution, or use is strictly prohibited.
- *
- * @description Server-Sent Events (SSE) API Route for Real-Time Notifications
- * @module api/notifications/sse
- *
- * @requires next/server
- * @requires jsonwebtoken
- * @requires @prisma/client
- *
- * Server-Sent Events (SSE) Notification Streaming Endpoint
- *
- * Features:
- * - Persistent real-time notification connection
- * - JWT-based authentication and NextAuth authentication
- * - Efficient connection management
- * - Automatic reconnection handling
- *
- * Technical Implementation:
- * - Uses ReadableStream for efficient data streaming
- * - Periodic ping to maintain connection
- * - Secure token validation
- * - Graceful error handling
- *
- * Performance Considerations:
- * - Minimal server resource consumption
- * - Low-latency notification delivery
- * - Scalable connection management
- *
- * @example
- * // Client-side SSE connection
- * const eventSource = new EventSource('/api/notifications/sse');
- * eventSource.onmessage = (event) => {
- *   const notifications = JSON.parse(event.data);
- *   // Handle notifications
- * };
- */
-
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { verify } from 'jsonwebtoken';
 import { getServerSession } from 'next-auth';
 import { AuthOptions } from '@/lib/auth-options';
@@ -78,6 +36,7 @@ export async function GET(request: Request) {
     } else {
       // Fall back to token-based auth
       const cookieStore = await cookies();
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       const token = cookieStore.get('token');
 
       if (!token) {
@@ -93,6 +52,7 @@ export async function GET(request: Request) {
       }
 
       // Decode and verify JWT token
+      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
       try {
         const decoded = verify(token.value, process.env.JWT_SECRET!) as {
           id: string;

@@ -1,10 +1,8 @@
 import { verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { getServerSession } from 'next-auth';
 import { AuthOptions } from './auth-options';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 /**
  * Verifies a JWT token and returns the associated user
@@ -13,6 +11,7 @@ const prisma = new PrismaClient();
  */
 export async function verifyAuth(token: string) {
   try {
+    // TODO: PART OF JWT AUTH THAT NEEDS TO BE REMOVED
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error('JWT_SECRET is not defined');
@@ -74,6 +73,7 @@ export async function serverAuth(): Promise<AuthUser | null> {
       }
     }
 
+    // TODO: PART OF JWT AUTH THAT NEEDS TO BE REMOVED
     // Fall back to JWT token auth
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
