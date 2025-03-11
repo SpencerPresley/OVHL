@@ -123,3 +123,5 @@ next-env.d.ts
 
 # Shadnc doc json
 **/src/lib/shadcn-docs.json
+
+backend/database_service/prisma/*.py
