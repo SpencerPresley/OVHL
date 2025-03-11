@@ -1,7 +1,3 @@
-// ! REFERENCE ONLY WILL BE DELETED SOON
-
-
-
 // @file schema.prisma
 // @author Spencer Presley
 // @version 1.0.0
@@ -31,12 +27,10 @@ generator client {
 }
 
 generator python {
-  provider = "prisma-client-py"
-  output = "../../backend/database_service/prisma/"
+  provider             = "prisma-client-py"
+  output               = "../../backend/database_service/prisma/"
   recursive_type_depth = -1
 }
-
-
 
 // PostgreSQL Database Connection Configuration
 // Defines secure connection parameters for the application's primary database
@@ -125,7 +119,7 @@ model Tier {
   id            String              @id @default(uuid())
   seasonId      String              @map("season_id")
   leagueLevel   Int                 @map("league_level")
-  name          String              // NHL, AHL, CHL, etc.
+  name          String // NHL, AHL, CHL, etc.
   salaryCap     Int                 @default(0) @map("salary_cap") // Added salary cap at tier level
   createdAt     DateTime            @default(now()) @map("created_at")
   updatedAt     DateTime            @updatedAt @map("updated_at")
@@ -140,13 +134,13 @@ model Tier {
 // Team model represents a sports team with comprehensive tracking capabilities
 // Supports team affiliations, historical data, and cross-league relationships
 model Team {
-  id             String       @id @default(uuid())
-  eaClubId       String       @map("ea_club_id")
-  eaClubName     String       @map("ea_club_name")
-  officialName   String       @map("official_name")
-  teamIdentifier String       @unique @map("team_identifier") @db.VarChar(14)
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id             String        @id @default(uuid())
+  eaClubId       String        @map("ea_club_id")
+  eaClubName     String        @map("ea_club_name")
+  officialName   String        @map("official_name")
+  teamIdentifier String        @unique @map("team_identifier") @db.VarChar(14)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
   seasons        TeamSeason[]
   managers       TeamManager[]
 
@@ -171,9 +165,9 @@ model TeamSeason {
   teamId                   String @map("team_id")
   tierId                   String @map("tier_id")
   // Roster counts
-  forwardCount            Int    @default(0) @map("forward_count")
-  defenseCount            Int    @default(0) @map("defense_count")
-  goalieCount             Int    @default(0) @map("goalie_count")
+  forwardCount             Int    @default(0) @map("forward_count")
+  defenseCount             Int    @default(0) @map("defense_count")
+  goalieCount              Int    @default(0) @map("goalie_count")
   // Team stats
   wins                     Int    @default(0)
   losses                   Int    @default(0)
@@ -270,26 +264,26 @@ model PlayerTeamSeason {
 
 // New models for contracts and bidding
 model Contract {
-  id             String       @id @default(uuid())
-  amount         Int // Contract amount in dollars, required
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  playerSeason   PlayerSeason?
-  bids           Bid[] // One-to-many relation with Bid
+  id           String        @id @default(uuid())
+  amount       Int // Contract amount in dollars, required
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  playerSeason PlayerSeason?
+  bids         Bid[] // One-to-many relation with Bid
 
   @@map("contracts")
 }
 
 model Bid {
-  id            String      @id @default(uuid())
-  contract      Contract    @relation(fields: [contractId], references: [id])
-  contractId    String      @map("contract_id")
-  teamSeason    TeamSeason  @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
-  teamSeasonId  String      @map("team_season_id")
-  amount        Int         // Bid amount in dollars
-  status        BidStatus   @default(PENDING)
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id           String     @id @default(uuid())
+  contract     Contract   @relation(fields: [contractId], references: [id])
+  contractId   String     @map("contract_id")
+  teamSeason   TeamSeason @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
+  teamSeasonId String     @map("team_season_id")
+  amount       Int // Bid amount in dollars
+  status       BidStatus  @default(PENDING)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   @@index([contractId])
   @@index([teamSeasonId])
@@ -492,7 +486,7 @@ enum TeamManagementRole {
 }
 
 model TeamManager {
-  id        String              @id @default(cuid())
+  id        String             @id @default(cuid())
   userId    String             @map("user_id")
   teamId    String             @map("team_id")
   role      TeamManagementRole
