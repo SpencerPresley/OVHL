@@ -124,4 +124,13 @@ next-env.d.ts
 # Shadnc doc json
 **/src/lib/shadcn-docs.json
 
+# Prisma Python client generated files
 backend/database_service/prisma/*.py
+backend/database_service/prisma/*.py
+backend/database_service/prisma/_vendor/
+backend/database_service/prisma/binaries/
+backend/database_service/prisma/cli/
+backend/database_service/prisma/engine/
+backend/database_service/prisma/generator/
+backend/database_service/prisma/__pycache__/
+backend/database_service/prisma/binary_paths.json
