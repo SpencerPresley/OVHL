@@ -134,3 +134,13 @@ backend/database_service/prisma/engine/
 backend/database_service/prisma/generator/
 backend/database_service/prisma/__pycache__/
 backend/database_service/prisma/binary_paths.json
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+**/__pycache__/
