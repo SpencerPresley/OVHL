@@ -1,44 +1,34 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { requireAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 // Update avatar URL
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
+    const { id } = params;
+    
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
     // Only allow users to update their own avatar
-    if (decoded.id !== id) {
+    if (user.id !== id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
     }
 
     const { avatarUrl } = await request.json();
 
     try {
-      const user = await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id },
         data: {
           avatarUrl,
         },
       });
 
-      return NextResponse.json({ user });
+      return NextResponse.json({ user: updatedUser });
     } catch (prismaError) {
       if (prismaError instanceof Prisma.PrismaClientKnownRequestError) {
         console.error('Prisma error:', prismaError.message);
@@ -65,33 +55,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 // Remove avatar
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
+    const { id } = params;
+    
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
     // Only allow users to remove their own avatar
-    if (decoded.id !== id) {
+    if (user.id !== id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
     }
 
     try {
-      const user = await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id },
         data: {
           avatarUrl: null,
         },
       });
 
-      return NextResponse.json({ user });
+      return NextResponse.json({ user: updatedUser });
     } catch (prismaError) {
       if (prismaError instanceof Prisma.PrismaClientKnownRequestError) {
         console.error('Prisma error:', prismaError.message);

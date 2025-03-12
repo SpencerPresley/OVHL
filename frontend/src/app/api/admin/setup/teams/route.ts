@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { NHL_TEAMS } from '@/lib/teams/nhl';
 import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
 import { CHL_TEAMS } from '@/lib/teams/chl';
-
-const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 

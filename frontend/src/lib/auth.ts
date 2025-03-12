@@ -1,45 +1,7 @@
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import { getServerSession } from 'next-auth';
+import { getServerSession as nextAuthGetServerSession } from 'next-auth';
 import { AuthOptions } from './auth-options';
 import { prisma } from './prisma';
-
-/**
- * Verifies a JWT token and returns the associated user
- * @param token JWT token string
- * @returns User object or null if invalid
- */
-export async function verifyAuth(token: string) {
-  try {
-    // TODO: PART OF JWT AUTH THAT NEEDS TO BE REMOVED
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
-
-    const decoded = verify(token, secret) as { id: string };
-    if (!decoded?.id) {
-      return null;
-    }
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        isAdmin: true,
-      },
-    });
-
-    return user;
-  } catch (error) {
-    console.error('Error verifying auth:', error);
-    return null;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
+import { cookies, headers } from 'next/headers';
 
 /**
  * Interface for user data returned by auth functions
@@ -51,13 +13,33 @@ export interface AuthUser {
 }
 
 /**
- * Comprehensive server auth function that checks both NextAuth and JWT token
+ * A safe wrapper around getServerSession that properly handles cookies and headers
+ * for Next.js 14+ compatibility
+ */
+async function getSessionSafely() {
+  try {
+    // In Next.js 14, cookies() and headers() are synchronous
+    // Just access them directly to get the values
+    cookies();
+    headers();
+    
+    // Now call getServerSession
+    return nextAuthGetServerSession(AuthOptions);
+  } catch (error) {
+    console.error('Error in getSessionSafely:', error);
+    return null;
+  }
+}
+
+/**
+ * Server auth function that uses NextAuth session
  * @returns User object or null if not authenticated
  */
 export async function serverAuth(): Promise<AuthUser | null> {
   try {
-    // Try NextAuth session first
-    const session = await getServerSession(AuthOptions);
+    // Use our safe wrapper to get the session
+    const session = await getSessionSafely();
+    
     if (session?.user?.id) {
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
@@ -71,15 +53,6 @@ export async function serverAuth(): Promise<AuthUser | null> {
       if (user) {
         return user;
       }
-    }
-
-    // TODO: PART OF JWT AUTH THAT NEEDS TO BE REMOVED
-    // Fall back to JWT token auth
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (token?.value) {
-      return await verifyAuth(token.value);
     }
 
     return null;
@@ -124,3 +97,9 @@ export async function requireAdmin(): Promise<AuthUser> {
 
   return user;
 }
+
+/**
+ * Export getSessionSafely for any route that needs direct access to the session
+ * This should be used instead of importing getServerSession directly
+ */
+export { getSessionSafely };

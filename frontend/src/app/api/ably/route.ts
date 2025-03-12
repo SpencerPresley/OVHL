@@ -2,7 +2,6 @@ import * as Ably from 'ably';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 /**
  * Ably authentication endpoint
  *

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verify } from 'jsonwebtoken';
+import { requireAdmin } from '@/lib/auth';
 import { NHL_TEAMS } from '@/lib/teams/nhl';
 import { AHL_TEAMS } from '@/lib/teams/ahl';
 import { ECHL_TEAMS } from '@/lib/teams/echl';
@@ -17,28 +17,19 @@ const LEAGUE_TIERS = [
   { name: 'CHL', level: 4, teams: CHL_TEAMS, salaryCap: 25000000 },
 ] as const;
 
+/**
+ * Create New Season API Route
+ * 
+ * Creates a new season with tiers and associates teams.
+ * Requires admin authentication.
+ * 
+ * @route POST /api/admin/seasons
+ * @returns {Promise<NextResponse>} JSON response with creation status
+ */
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
-    // Verify admin status
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
 
     const body = await request.json();
     const { seasonId } = body;
@@ -111,6 +102,17 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to create season:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to create season' }, { status: 500 });
   }
 }

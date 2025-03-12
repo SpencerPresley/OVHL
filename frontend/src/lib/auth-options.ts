@@ -3,7 +3,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 export const AuthOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
@@ -12,8 +11,7 @@ export const AuthOptions: NextAuthOptions = {
   pages: {
     signIn: '/sign-in',
   },
-  // TODO: CHANGE TO ONLY BE NEXTAUTH_SECRET
-  secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
+  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-123',
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -50,19 +48,7 @@ export const AuthOptions: NextAuthOptions = {
       },
     }),
   ],
-  cookies: {
-    sessionToken: {
-      name: `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    },
-  },
   callbacks: {
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -73,7 +59,6 @@ export const AuthOptions: NextAuthOptions = {
       }
       return token;
     },
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
@@ -109,7 +94,6 @@ declare module 'next-auth' {
   }
 }
 
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;

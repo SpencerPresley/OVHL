@@ -1,32 +1,14 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { UserService } from '@/lib/services/user-service';
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    // Check if user is an admin
-    const isAdmin = await UserService.isAdmin(decoded.id);
-    if (!isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-    }
-
+    // Authenticate using NextAuth and verify admin status
+    await requireAdmin();
+    
     // Get search query
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');

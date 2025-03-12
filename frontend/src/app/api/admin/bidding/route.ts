@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { getToken } from 'next-auth/jwt';
-
-const prisma = new PrismaClient();
+import { requireAdmin } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
 // Define the type for bidding status
 interface BiddingStatus {
@@ -16,14 +13,20 @@ interface BiddingStatus {
   lastUpdate?: number;
 }
 
-// GET /api/admin/bidding
-// Returns the status of all bidding periods
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * Admin Bidding API - Get Status
+ * 
+ * Returns the status of all bidding periods across leagues.
+ * Requires admin authentication.
+ * 
+ * @route GET /api/admin/bidding
+ * @returns {Promise<NextResponse>} JSON response with bidding status for all leagues
+ */
 export async function GET(request: NextRequest) {
-  // Debug authentication
-  console.log('GET /api/admin/bidding - Checking admin access');
-
   try {
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
+    
     const leagueIds = ['nhl', 'ahl', 'echl', 'chl'];
     const biddingStatus: Record<string, BiddingStatus> = {};
 
@@ -42,32 +45,38 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching bidding status:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch bidding status' }, { status: 500 });
   }
 }
 
-// POST /api/admin/bidding
-// Controls bidding period (start, stop, finalize)
+/**
+ * Admin Bidding API - Control Bidding
+ * 
+ * Controls bidding periods (start, stop, finalize) for specific leagues.
+ * Requires admin authentication.
+ * 
+ * @route POST /api/admin/bidding
+ * @param {Object} body - Request body
+ * @param {string} body.action - Action to perform (start, stop, finalize)
+ * @param {string} body.leagueId - League ID to perform action on
+ * @returns {Promise<NextResponse>} JSON response with operation result
+ */
 export async function POST(request: NextRequest) {
-  // Debug authentication
-  console.log('POST /api/admin/bidding - Checking admin access');
-
-  // Get token directly instead of using getServerSession
-  const token = await getToken({
-    req: request,
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
-  });
-
-  console.log('Token exists:', !!token);
-  console.log('Is admin:', token?.isAdmin ? 'Yes' : 'No');
-
-  if (!token?.isAdmin) {
-    console.log('Unauthorized access attempt to bidding admin');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
+
     const body = await request.json();
     const { action, leagueId } = body;
 
@@ -220,6 +229,17 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error managing bidding:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to manage bidding' }, { status: 500 });
   }
 }

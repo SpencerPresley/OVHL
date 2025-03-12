@@ -1,34 +1,26 @@
 import { NextResponse } from 'next/server';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Admin Free Agents API Route
+ * 
+ * Retrieves players in the bidding pool for a specific league tier.
+ * Supports filtering by position and searching by name or gamertag.
+ * Requires admin authentication.
+ * 
+ * @route GET /api/admin/free-agents
+ * @param {string} league - League tier name to fetch free agents for
+ * @param {string} [search] - Optional search term for player name or gamertag
+ * @param {string} [position] - Optional position filter (all, forwards, defense, G)
+ * @returns {Promise<NextResponse>} JSON response with free agent data
+ */
 export async function GET(request: Request) {
   try {
-    // Verify admin authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
@@ -127,6 +119,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ players });
   } catch (error) {
     console.error('Failed to fetch free agents:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch free agents' }, { status: 500 });
   }
 }

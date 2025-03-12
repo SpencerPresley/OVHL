@@ -1,27 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request, context: { params: { id: string } }) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    // Get params.id safely by awaiting the context
-    const { id } = await context.params;
+    // Authenticate with NextAuth
+    const user = await requireAuth();
+    
+    // Get params.id from the context
+    const { id } = context.params;
 
     // Verify the notification belongs to the user
     const notification = await prisma.notification.findUnique({
@@ -32,7 +21,7 @@ export async function POST(request: Request, context: { params: { id: string } }
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
     }
 
-    if (notification.userId !== decoded.id) {
+    if (notification.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

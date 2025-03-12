@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { biddingUtils } from '@/lib/redis';
 
-const prisma = new PrismaClient();
 
 // Order of leagues for bidding
 const LEAGUE_ORDER = ['nhl', 'ahl', 'echl', 'chl'];

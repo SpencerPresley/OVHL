@@ -1,35 +1,17 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { TeamManagementService } from '@/lib/services/team-management-service';
-import { UserService } from '@/lib/services/user-service';
 import { TeamManagementRole } from '@prisma/client';
+import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 // Get team managers
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id: teamId } = await params;
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    // Check if user is an admin
-    const isAdmin = await UserService.isAdmin(decoded.id);
-    if (!isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-    }
+    const { id: teamId } = params;
+    
+    // Authenticate and verify admin status with NextAuth
+    await requireAdmin();
 
     const managers = await TeamManagementService.getTeamManagers(teamId);
     return NextResponse.json({ managers });
@@ -44,23 +26,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id: teamId } = params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    // Check if user is an admin
-    const isAdmin = await UserService.isAdmin(decoded.id);
-    if (!isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-    }
+    
+    // Authenticate and verify admin status with NextAuth
+    await requireAdmin();
 
     const { userId, role } = await request.json();
 
@@ -86,23 +54,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id: teamId } = params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    // Check if user is an admin
-    const isAdmin = await UserService.isAdmin(decoded.id);
-    if (!isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
-    }
+    
+    // Authenticate and verify admin status with NextAuth
+    await requireAdmin();
 
     const { userId, role } = await request.json();
 

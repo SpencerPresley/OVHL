@@ -1,77 +1,33 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { serverAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * Get authenticated user data
+ * 
+ * Returns the current user's basic information or null if not authenticated.
+ * Uses NextAuth session for authentication.
+ * 
+ * @route GET /api/auth/me
+ * @returns {Promise<NextResponse>} JSON response with user data or null
+ */
 export async function GET() {
   try {
-    // First try NextAuth session
-    const session = await getServerSession(AuthOptions);
-
-    if (session?.user?.id) {
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          isAdmin: true,
-        },
-      });
-
-      if (user) {
-        return NextResponse.json({
-          user: {
-            id: user.id,
-            name: user.name || user.username,
-            username: user.username,
-            isAdmin: user.isAdmin,
-          },
-        });
-      }
-    }
-
-    // Fall back to JWT token if no valid NextAuth session
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const cookieStore = await cookies();
-    const token = await cookieStore.get('token');
-
-    if (!token) {
+    // Use our serverAuth helper which handles NextAuth session
+    const authUser = await serverAuth();
+    
+    if (!authUser) {
       return NextResponse.json({ user: null });
     }
-
-    // Check token validity
-    try {
-      const decoded = verify(token.value, process.env.JWT_SECRET!) as { id: string };
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          isAdmin: true,
-        },
-      });
-
-      if (!user) {
-        return NextResponse.json({ user: null });
-      }
-
-      return NextResponse.json({
-        user: {
-          id: user.id,
-          name: user.name || user.username,
-          username: user.username,
-          isAdmin: user.isAdmin,
-        },
-      });
-    } catch (tokenError) {
-      console.error('Token verification failed:', tokenError);
-      return NextResponse.json({ user: null });
-    }
+    
+    // Format user response data
+    return NextResponse.json({
+      user: {
+        id: authUser.id,
+        name: authUser.name || null,
+        isAdmin: authUser.isAdmin,
+      },
+    });
   } catch (error) {
     console.error('Error checking auth:', error);
     return NextResponse.json({ user: null });

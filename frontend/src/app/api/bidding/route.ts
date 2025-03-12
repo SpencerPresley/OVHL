@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getSessionSafely, requireAuth } from '@/lib/auth';
 import { AuthOptions } from '@/lib/auth-options';
-import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
 import { NotificationType } from '@prisma/client';
 import { UserService } from '@/lib/services/user-service';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // Helper to check if the user is a team manager
 const isTeamManager = async (userId: string, teamId: string) => {
@@ -79,15 +77,26 @@ async function sendOutbidNotifications(
 // GET /api/bidding?leagueId=nhl
 // Get all bidding data for a league
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const leagueId = searchParams.get('leagueId');
-  const teamId = searchParams.get('teamId');
-
-  if (!leagueId) {
-    return NextResponse.json({ error: 'League ID is required' }, { status: 400 });
-  }
-
   try {
+    // Use requireAuth instead of direct session check
+    const authUser = await requireAuth();
+    
+    const { searchParams } = new URL(request.url);
+    const leagueId = searchParams.get('leagueId') || 'nhl';
+    const teamId = searchParams.get('teamId');
+
+    if (!leagueId) {
+      return NextResponse.json({ error: 'League ID is required' }, { status: 400 });
+    }
+
+    // Check if user has permissions for this team
+    if (teamId) {
+      const isManager = await isTeamManager(authUser.id, teamId);
+      if (!isManager) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     // Get the current tier for this league
     const tier = await prisma.tier.findFirst({
       where: {
@@ -108,7 +117,8 @@ export async function GET(request: NextRequest) {
     // If teamId is provided, also get team-specific data
     let teamData = null;
     if (teamId) {
-      const session = await getServerSession(AuthOptions);
+      // Use our safe getServerSession instead of the direct NextAuth one
+      const session = await getSessionSafely();
 
       if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -219,22 +229,18 @@ export async function GET(request: NextRequest) {
 // POST /api/bidding
 // Place a bid on a player
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    const body = await request.json();
-    const { playerSeasonId, teamId, amount, leagueId } = body;
+    // Use requireAuth instead of direct session check
+    const authUser = await requireAuth();
+    
+    const { playerSeasonId, teamId, amount, leagueId } = await request.json();
 
     if (!playerSeasonId || !teamId || !amount || !leagueId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Check if user is a manager for this team
-    const isManager = await isTeamManager(session.user.id, teamId);
+    const isManager = await isTeamManager(authUser.id, teamId);
 
     if (!isManager) {
       return NextResponse.json(
@@ -442,7 +448,8 @@ export async function POST(request: NextRequest) {
 // PATCH /api/bidding/manage
 // Admin endpoint to manage bidding (start, stop, finalize)
 export async function PATCH(request: NextRequest) {
-  const session = await getServerSession(AuthOptions);
+  // Use our safe getServerSession instead of the direct NextAuth one
+  const session = await getSessionSafely();
 
   if (!session?.user?.isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

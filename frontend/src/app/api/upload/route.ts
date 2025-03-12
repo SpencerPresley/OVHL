@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { cloudinary } from '@/lib/cloudinary';
+import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime
 export const runtime = 'nodejs';
@@ -10,24 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    // Check authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ message: 'No authentication token found' }, { status: 401 });
-    }
-
-    try {
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      verify(token, process.env.JWT_SECRET!);
-    } catch (error) {
-      console.error('Token verification error:', error);
-      return NextResponse.json(
-        { message: 'Invalid or expired authentication token' },
-        { status: 401 }
-      );
-    }
+    // Authenticate with NextAuth
+    await requireAuth();
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

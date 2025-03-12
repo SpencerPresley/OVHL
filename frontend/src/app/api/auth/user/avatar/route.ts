@@ -1,25 +1,13 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
+import { requireAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
     const formData = await request.formData();
     const file = formData.get('avatar') as File;
@@ -38,8 +26,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
-    const user = await UserService.updateAvatar(decoded.id, file);
-    return NextResponse.json({ user });
+    const updatedUser = await UserService.updateAvatar(user.id, file);
+    return NextResponse.json({ user: updatedUser });
   } catch (error) {
     console.error('Failed to upload avatar:', error);
     return NextResponse.json({ error: 'Failed to upload avatar' }, { status: 500 });
@@ -48,20 +36,11 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    const user = await UserService.removeAvatar(decoded.id);
-    return NextResponse.json({ user });
+    const updatedUser = await UserService.removeAvatar(user.id);
+    return NextResponse.json({ user: updatedUser });
   } catch (error) {
     console.error('Failed to remove avatar:', error);
     return NextResponse.json({ error: 'Failed to remove avatar' }, { status: 500 });

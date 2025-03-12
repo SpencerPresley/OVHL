@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
-import { PrismaClient } from '@prisma/client';
+import { requireAdmin } from '@/lib/auth';
 import { biddingUtils } from '@/lib/redis';
 import redis from '@/lib/redis';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+// Define types for Redis player data
+interface RedisPlayerData {
+  id: string;
+  name: string;
+  position: string;
+  status: string;
+  endTime: string | null;
+  currentBid: number | null;
+  currentTeam: string | null;
+}
 
 /**
  * GET /api/admin/check-bidding-discrepancies
@@ -15,14 +23,11 @@ const prisma = new PrismaClient();
  * in "Ending..." state.
  */
 export async function GET(request: NextRequest) {
-  // Only allow admins to access this endpoint
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Use requireAdmin instead of direct session check
+    await requireAdmin();
+    // The function will throw if user is not an admin, so no need for additional checks
+
     // 1. Get all Redis bidding keys
     const allKeys = await redis.keys('ovhl:bidding:*');
     console.log(`Found ${allKeys.length} keys in Redis`);
@@ -48,7 +53,7 @@ export async function GET(request: NextRequest) {
     console.log(`Found ${playersInBiddingDB.length} players marked as in bidding in the database`);
 
     // 3. Parse Redis data
-    const redisPlayers = [];
+    const redisPlayers: RedisPlayerData[] = [];
     for (const key of allKeys) {
       const playerSeasonId = key.replace('ovhl:bidding:', '');
       const data = await redis.get(key);
@@ -80,7 +85,7 @@ export async function GET(request: NextRequest) {
         name: p.player.name,
         position: p.position,
         hasTeam: p.teamSeasons.length > 0,
-        teamName: p.teamSeasons[0]?.teamSeason.team.name || null,
+        teamName: p.teamSeasons[0]?.teamSeason.team.officialName || null,
       }));
 
     // 4.2 Players in Redis but not marked as in bidding in DB
@@ -118,7 +123,7 @@ export async function GET(request: NextRequest) {
       id: p.id,
       name: p.player.name,
       position: p.position,
-      teamName: p.teamSeasons[0]?.teamSeason.team.name || 'Unknown',
+      teamName: p.teamSeasons[0]?.teamSeason.team.officialName || 'Unknown',
       tier: p.teamSeasons[0]?.teamSeason.tier.name || 'Unknown',
     }));
 

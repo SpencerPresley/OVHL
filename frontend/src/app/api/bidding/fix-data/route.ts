@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { getSessionSafely, requireAdmin } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import redis from '@/lib/redis';
 
-const prisma = new PrismaClient();
 const keyPrefix = {
   bidding: 'bidding:',
   leagueStatus: 'leagueStatus:',
@@ -19,9 +17,9 @@ function createKey(prefix: keyof typeof keyPrefix, id: string) {
 // Fix player data in Redis - adds gamertags and removes endTime for players without bids
 export async function POST(request: NextRequest) {
   // Only admins should be able to fix bidding data
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
+  try {
+    await requireAdmin();
+  } catch (error) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -136,9 +134,9 @@ export async function POST(request: NextRequest) {
 // Check the status of player data in Redis
 export async function GET(request: NextRequest) {
   // Only admins should be able to check bidding data
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
+  try {
+    await requireAdmin();
+  } catch (error) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

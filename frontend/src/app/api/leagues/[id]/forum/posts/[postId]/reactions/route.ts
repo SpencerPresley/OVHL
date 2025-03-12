@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { ForumService } from '@/lib/services/forum-service';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAuth } from '@/lib/auth';
 import { ReactionType } from '@prisma/client';
 
 export async function POST(
@@ -12,56 +8,18 @@ export async function POST(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    // Fix 1: Await params to properly handle dynamic route data
-    const paramsData = { ...(await params) };
-    const { postId } = paramsData;
-
+    const { postId } = params;
     const { type, commentId, userId } = await request.json();
 
-    // Check for NextAuth session first
-    const session = await getServerSession(AuthOptions);
-    let authenticatedUser;
-
-    if (session?.user?.id) {
-      authenticatedUser = {
-        id: session.user.id,
-      };
-    } else {
-      // Fall back to JWT token
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      const cookieStore = await cookies();
-      const token = cookieStore.get('token');
-
-      if (!token) {
-        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-      }
-
-      try {
-        // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-        const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-          id: string;
-        };
-
-        authenticatedUser = {
-          id: decoded.id,
-        };
-      } catch (tokenError) {
-        console.error('Token verification failed:', tokenError);
-        return NextResponse.json({ error: 'Authentication invalid' }, { status: 401 });
-      }
-    }
-
-    // No valid authentication found
-    if (!authenticatedUser) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
     // Verify that the authenticated user matches the requested userId
-    if (authenticatedUser.id !== userId) {
+    if (user.id !== userId) {
       return NextResponse.json({ error: 'User ID mismatch' }, { status: 403 });
     }
 
-    // Fix 2: Implement toggle reaction logic using the actual methods available in ForumService
+    // Implement toggle reaction logic
     // First, check if the reaction already exists
     const existingReaction = await ForumService.findReaction({
       userId,

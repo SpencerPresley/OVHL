@@ -1,34 +1,22 @@
 import { NextResponse } from 'next/server';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Admin Teams API Route
+ * 
+ * Retrieves all teams with roster information.
+ * Requires admin authentication.
+ * 
+ * @route GET /api/admin/teams
+ * @returns {Promise<NextResponse>} JSON response with teams data
+ */
 export async function GET() {
   try {
-    // Verify admin authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
 
     // Get the latest season
     const season = await prisma.season.findFirst({
@@ -104,6 +92,17 @@ export async function GET() {
     return NextResponse.json({ teams: transformedTeams });
   } catch (error) {
     console.error('Failed to fetch teams:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch teams' }, { status: 500 });
   }
 }

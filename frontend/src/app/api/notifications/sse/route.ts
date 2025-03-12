@@ -1,9 +1,11 @@
-import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionSafely } from '@/lib/auth';
 import { AuthOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/prisma';
+import redis from '@/lib/redis';
+import { cookies, headers } from 'next/headers';
+// Fix the import path - this utility doesn't seem to exist or has a different path
+// import createNotificationCounter from '@/app/utils/notifications-counter';
 
 /**
  * TextEncoder instance for converting strings to Uint8Array
@@ -16,7 +18,7 @@ const encoder = new TextEncoder();
  *
  * Establishes a persistent SSE connection and streams notifications to authenticated users.
  * The connection:
- * - Validates user authentication via JWT or NextAuth
+ * - Validates user authentication via NextAuth
  * - Sends periodic pings (every 5s) to keep connection alive
  * - Checks for new notifications on each ping
  * - Handles connection cleanup on client disconnect
@@ -24,63 +26,18 @@ const encoder = new TextEncoder();
  * @param {Request} request - Incoming request object
  * @returns {Response} SSE stream response or 204 for unauthenticated users
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // Validate authentication - Check for NextAuth session first
-    const session = await getServerSession(AuthOptions);
-    let userId: string | undefined;
-
-    if (session?.user?.id) {
-      // User is authenticated with NextAuth
-      userId = session.user.id;
-    } else {
-      // Fall back to token-based auth
-      const cookieStore = await cookies();
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      const token = cookieStore.get('token');
-
-      if (!token) {
-        // Return a 204 No Content instead of 401 for unauthenticated users
-        // This prevents aggressive reconnection attempts
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'Cache-Control': 'no-cache, no-transform',
-            'Content-Type': 'text/event-stream',
-          },
-        });
-      }
-
-      // Decode and verify JWT token
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      try {
-        const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-          id: string;
-        };
-        userId = decoded.id;
-      } catch (error) {
-        console.error('Token verification failed:', error);
-        // Invalid token, return 204 as well
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'Cache-Control': 'no-cache, no-transform',
-            'Content-Type': 'text/event-stream',
-          },
-        });
-      }
+    // Use our safe wrapper that's compatible with Next.js 14
+    const session = await getSessionSafely();
+    
+    // If there's no user, return an empty response
+    if (!session?.user) {
+      return new NextResponse(null, { status: 204 });
     }
 
-    // If we still don't have a userId, return 204
-    if (!userId) {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Cache-Control': 'no-cache, no-transform',
-          'Content-Type': 'text/event-stream',
-        },
-      });
-    }
+    // User is authenticated with NextAuth
+    const userId = session.user.id;
 
     // Create readable stream for SSE
     const stream = new ReadableStream({
@@ -143,7 +100,7 @@ export async function GET(request: Request) {
     });
 
     // Return SSE stream response
-    return new Response(stream, {
+    return new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-transform',
@@ -152,7 +109,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('SSE connection error:', error);
-    return new Response(null, {
+    return new NextResponse(null, {
       status: 204,
       headers: {
         'Cache-Control': 'no-cache, no-transform',

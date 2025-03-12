@@ -1,34 +1,24 @@
 import { NextResponse } from 'next/server';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Admin Team Roster API Route
+ * 
+ * Retrieves detailed roster information for a specific team.
+ * Requires admin authentication.
+ * 
+ * @route GET /api/admin/teams/[id]/roster
+ * @param {Object} params - Route parameters
+ * @param {string} params.id - Team ID
+ * @returns {Promise<NextResponse>} JSON response with team roster data
+ */
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    // Verify admin authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
 
     // Get team data with current season and players
     const team = await prisma.team.findUnique({
@@ -139,6 +129,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ team: transformedTeam });
   } catch (error) {
     console.error('Failed to fetch team roster:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch team roster' }, { status: 500 });
   }
 }

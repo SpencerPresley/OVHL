@@ -1,38 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Try to get NextAuth session first
-    const session = await getServerSession(AuthOptions);
+    // Authenticate with NextAuth
+    const user = await requireAuth();
 
-    if (session?.user?.id) {
-      // User is authenticated with NextAuth
-      const notifications = await UserService.getUserNotifications(session.user.id);
-      return NextResponse.json({ notifications });
-    }
-
-    // Fall back to token-based auth if no NextAuth session
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    const notifications = await UserService.getUserNotifications(decoded.id);
+    // Get notifications for the authenticated user
+    const notifications = await UserService.getUserNotifications(user.id);
     return NextResponse.json({ notifications });
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
@@ -42,39 +20,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Try to get NextAuth session first
-    const session = await getServerSession(AuthOptions);
-    let userId: string;
-    let isAdmin: boolean = false;
-
-    if (session?.user?.id) {
-      // User is authenticated with NextAuth
-      userId = session.user.id;
-      isAdmin = session.user.isAdmin || false;
-    } else {
-      // Fall back to token-based auth
-      const cookieStore = await cookies();
-      const token = cookieStore.get('token');
-
-      if (!token) {
-        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-      }
-
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-        id: string;
-        isAdmin?: boolean;
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      userId = decoded.id;
-      isAdmin = decoded.isAdmin || false;
-    }
-
-    // Only admins can create notifications
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Authenticate and verify admin status with NextAuth
+    await requireAdmin();
 
     const { userId: targetUserId, type, title, message, link, metadata } = await request.json();
 

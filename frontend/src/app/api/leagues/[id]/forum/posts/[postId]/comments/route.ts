@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ForumPostStatus } from '@prisma/client';
-import { cookies } from 'next/headers';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
 import { UserService } from '@/lib/services/user-service';
 import { ForumService } from '@/lib/services/forum-service';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAuth } from '@/lib/auth';
 
 type Subscriber = {
   userId: string;
@@ -21,48 +17,14 @@ export async function POST(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const { id, postId } = await params;
+    const { id, postId } = params;
 
-    // Check for NextAuth session first
-    const session = await getServerSession(AuthOptions);
-    let user;
-
-    if (session?.user?.id) {
-      user = {
-        id: session.user.id,
-        name: session.user.name,
-      };
-    } else {
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      // Fall back to JWT token
-      const cookieStore = await cookies();
-      const token = cookieStore.get('token');
-
-      if (!token) {
-        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-      }
-
-      try {
-        // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-        const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-          id: string;
-          name: string;
-        };
-
-        user = {
-          id: decoded.id,
-          name: decoded.name,
-        };
-      } catch (tokenError) {
-        console.error('Token verification failed:', tokenError);
-        return NextResponse.json({ error: 'Authentication invalid' }, { status: 401 });
-      }
-    }
-
-    // No valid authentication found
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
+    // Authenticate with NextAuth
+    const authUser = await requireAuth();
+    const user = {
+      id: authUser.id,
+      name: authUser.name || 'User',
+    };
 
     const post = await ForumService.getPostBasicInfo(postId);
 

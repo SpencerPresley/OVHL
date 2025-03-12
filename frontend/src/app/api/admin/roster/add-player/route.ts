@@ -1,33 +1,22 @@
 import { NextResponse } from 'next/server';
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Admin Add Player to Roster API Route
+ * 
+ * Adds a player to a team's roster for a specific league tier.
+ * Requires admin authentication.
+ * 
+ * @route POST /api/admin/roster/add-player
+ * @returns {Promise<NextResponse>} JSON response with operation status
+ */
 export async function POST(request: Request) {
   try {
-    // Verify admin authentication
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET!) as {
-      id: string;
-      isAdmin?: boolean;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+    // Verify admin authentication using NextAuth
+    await requireAdmin();
 
     // Get request body
     const body = await request.json();
@@ -141,6 +130,17 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Failed to add player to team:', error);
+    
+    // Check if it's an authentication error
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      if (error.message === 'Admin privileges required') {
+        return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      }
+    }
+    
     return NextResponse.json({ error: 'Failed to add player to team' }, { status: 500 });
   }
 }

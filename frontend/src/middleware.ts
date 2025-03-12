@@ -1,24 +1,22 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 import { getToken } from 'next-auth/jwt';
 
 /**
  * Define protected routes that require authentication
  * Route types:
- * - Protected API: Requires token in cookies
- * - Protected Pages: Redirects to sign-in page if no token
+ * - Protected API: Requires NextAuth session
+ * - Protected Pages: Redirects to sign-in page if no session
  * - Public: Everything else (freely accessible)
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check for either token or next-auth session
-  const hasToken = request.cookies.has('token');
+  // Check for NextAuth session
   const hasNextAuthSession =
     request.cookies.has('next-auth.session-token') ||
     request.cookies.has('__Secure-next-auth.session-token');
-  const isAuthenticated = hasToken || hasNextAuthSession;
+  const isAuthenticated = hasNextAuthSession;
 
   // Protected API routes
   if (
@@ -27,7 +25,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/auth/user') ||
     pathname.startsWith('/api/notifications')
   ) {
-    // For protected API routes, require token in cookies
+    // For protected API routes, require NextAuth session
     if (!isAuthenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -35,7 +33,7 @@ export async function middleware(request: NextRequest) {
 
   // Protected profile page routes
   if (pathname.startsWith('/profile')) {
-    // For protected pages, redirect to sign-in if no token
+    // For protected pages, redirect to sign-in if no session
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
@@ -48,10 +46,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/bidding/debug')
   ) {
     // Get NextAuth session token
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
     const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
+      secret: process.env.NEXTAUTH_SECRET || 'dev-secret-123',
     });
 
     console.log('Middleware check:', pathname);
@@ -75,8 +72,7 @@ export async function middleware(request: NextRequest) {
     // For admin pages, redirect to login if not authenticated
     const token = await getToken({
       req: request,
-      // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-      secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'dev-secret-123',
+      secret: process.env.NEXTAUTH_SECRET || 'dev-secret-123',
     });
 
     if (!token || token.isAdmin !== true) {

@@ -243,7 +243,6 @@ async function getLeagueStats(leagueId: string) {
   };
 }
 
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
 /**
  * League Page Component
  *
@@ -257,7 +256,7 @@ async function getLeagueStats(leagueId: string) {
  * Authentication:
  * - Chat is only available to authenticated users with a valid name
  * - Non-authenticated users can still view the page but see a sign-in prompt for chat
- * - Uses JWT token from cookies for authentication
+ * - Uses NextAuth session for authentication
  *
  * @component
  * @param {Object} props - Component props

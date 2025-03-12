@@ -1,22 +1,17 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
+import { signIn } from 'next-auth/react';
 
 // Disable Next.js caching for this route
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 /**
- * Prisma client instance for database operations
- * @constant
- * @type {PrismaClient}
- */
-
-/**
  * Sign In API Route
  *
- * Handles user authentication and session management.
+ * Handles user authentication by validating credentials and redirecting
+ * to NextAuth's signIn flow.
  *
  * @async
  * @route POST /api/auth/sign-in
@@ -27,29 +22,26 @@ export const revalidate = 0;
  * @param {string} request.body.password - User's password
  * @param {boolean} request.body.rememberMe - Whether to extend session duration
  *
- * @returns {Promise<NextResponse>} JSON response with user data and session cookie
+ * @returns {Promise<NextResponse>} JSON response with user data
  * @throws {Error} When authentication fails or database operations fail
  *
  * Response Codes:
- * - 200: Success with user data and JWT cookie
+ * - 200: Success with user data
  * - 400: Missing credentials
  * - 401: Invalid credentials
  * - 500: Server error
  *
  * Security Features:
  * - Passwords compared using bcrypt
- * - HTTP-only cookies
- * - HTTPS-only in production
+ * - Authentication handled by NextAuth
  * - Same error for invalid email/password
- * - Session duration based on rememberMe
- * - CSRF protection via SameSite
  */
 export async function POST(request: Request) {
   try {
     console.log('SignInAPI: Starting sign-in process...');
     // Parse and validate request body
     const body = await request.json();
-    const { email, password, rememberMe } = body;
+    const { email, password } = body;
 
     if (!email || !password) {
       console.log('SignInAPI: Missing credentials');
@@ -76,40 +68,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    console.log('SignInAPI: Generating JWT...');
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    // Generate JWT with appropriate expiration
-    const token = sign(
-      { id: user.id, email: user.email, isAdmin: user.isAdmin },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: rememberMe ? '30d' : '24h' }
-    );
-
-    console.log('SignInAPI: Creating response with user data...');
-    // Create response with user data (excluding sensitive fields)
-    const response = NextResponse.json({
+    console.log('SignInAPI: Authentication successful');
+    
+    // Return user information - authentication will be handled by NextAuth
+    // Note: This API endpoint should only be used for credential verification
+    // The actual sign-in should be performed on the client using NextAuth's signIn function
+    return NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
+        name: user.name,
+        username: user.username,
       },
+      message: 'Authentication successful. Use NextAuth signIn on the client side to complete the process.'
     });
-
-    console.log('SignInAPI: Setting JWT cookie...');
-    // Set secure cookie with JWT
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    response.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
-      path: '/',
-    });
-
-    console.log('SignInAPI: Sign-in successful');
-    return response;
+    
   } catch (error) {
     // Log error but don't expose details to client
     console.error('SignInAPI: Error during sign-in:', error);

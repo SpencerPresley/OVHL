@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-// TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-import { verify } from 'jsonwebtoken';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,20 +16,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request) {
   try {
-    // Verify authentication
-    const cookieStore = await cookies();
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const token = cookieStore.get('token');
-
-    if (!token) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    // TODO: (JWT) NEEDS TO BE REDONE FOR NEXT AUTH
-    const decoded = verify(token.value, process.env.JWT_SECRET || '') as {
-      id: string;
-      email: string;
-    };
+    // Authenticate with NextAuth
+    const authUser = await requireAuth();
 
     // Get request body
     const body = await request.json();
@@ -55,7 +41,7 @@ export async function POST(request: Request) {
 
     // Get player record
     const player = await prisma.player.findUnique({
-      where: { id: decoded.id },
+      where: { id: authUser.id },
     });
 
     if (!player) {

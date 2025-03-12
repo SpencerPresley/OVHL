@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAdmin } from '@/lib/auth';
+// import { getServerSession } from 'next-auth';
+// import { AuthOptions } from '@/lib/auth-options';
 import redis from '@/lib/redis';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { biddingUtils } from '@/lib/redis';
 
-const prisma = new PrismaClient();
 
 // Define the key prefixes used in Redis
 const keyPrefix = {
@@ -25,14 +25,11 @@ const keyPrefix = {
  * This is a destructive operation and should only be available to admins.
  */
 export async function POST(request: NextRequest) {
-  // Only allow admins to access this endpoint
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Use requireAdmin instead of direct session check
+    await requireAdmin();
+    // The function will throw if user is not an admin, so no need for additional checks
+
     const {
       reinitialize = false,
       leagueId = 'nhl',
