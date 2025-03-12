@@ -3,17 +3,16 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import '@/styles/notifications.css';
-import { NotificationsProvider } from '@/providers/notifications-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthSessionProvider } from '../providers/auth-session-provider';
 
 const inter = Inter({
-  variable: '--font-geist-sans',
+  variable: '--font-inter',
   subsets: ['latin'],
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-geist-mono',
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
 });
 
@@ -39,7 +38,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
         <AuthSessionProvider>
-          <NotificationsProvider>{children}</NotificationsProvider>
+          {children}
         </AuthSessionProvider>
         <Toaster />
       </body>

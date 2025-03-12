@@ -9,6 +9,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import { SignOut } from '@/components/auth/sign-out-button';
 // import { cn } from "@/lib/utils"
 
 /**
@@ -36,6 +37,7 @@ interface UserNavProps {
  * - Accessible navigation structure
  * - Consistent styling with main navigation
  * - Responsive design that works in both desktop and mobile contexts
+ * - Authentication using Auth.js
  *
  * @component
  * @param {UserNavProps} props - Component props
@@ -45,16 +47,6 @@ export function UserNav({ user }: UserNavProps) {
   const initials = user.name
     ? user.name.charAt(0).toUpperCase()
     : user.email.charAt(0).toUpperCase();
-
-  /**
-   * Handles user sign out
-   * - Clears the authentication cookie
-   * - Redirects to sign-in page
-   */
-  const handleSignOut = () => {
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    window.location.href = '/sign-in';
-  };
 
   /**
    * Handles navigation to user profile
@@ -85,12 +77,11 @@ export function UserNav({ user }: UserNavProps) {
                 </button>
               </li>
               <li>
-                <button
-                  onClick={handleSignOut}
-                  className="w-full text-left cursor-pointer rounded-md p-2 text-sm leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-blue-400"
+                <SignOut 
+                  className="w-full text-left justify-start font-normal p-2 text-sm leading-none hover:bg-accent hover:text-blue-400"
                 >
                   Log out
-                </button>
+                </SignOut>
               </li>
             </ul>
           </NavigationMenuContent>

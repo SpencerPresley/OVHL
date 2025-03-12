@@ -27,7 +27,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
-import { signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react'; // Use client-side imports for client components
 
 /**
  * Zod schema for sign-in form validation
@@ -47,6 +47,11 @@ const signInSchema = z.object({
 
 type SignInValues = z.infer<typeof signInSchema>;
 
+type SignInFormProps = {
+  callbackUrl?: string;
+  error?: string;
+};
+
 /**
  * SignInForm Component
  *
@@ -57,9 +62,9 @@ type SignInValues = z.infer<typeof signInSchema>;
  * - Error handling and loading states
  * - Links to forgot password and sign up
  */
-export function SignInForm() {
+export function SignInForm({ callbackUrl, error: initialError }: SignInFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(initialError || '');
   const router = useRouter();
 
   // Initialize form with zod validation
@@ -77,7 +82,7 @@ export function SignInForm() {
    * @param values - Form values containing email, password, and rememberMe
    *
    * On successful sign-in:
-   * - Signs in with NextAuth
+   * - Signs in with Auth.js
    * - Cookie expiration varies based on rememberMe
    * - Redirects to dashboard
    */
@@ -86,31 +91,40 @@ export function SignInForm() {
     setError('');
 
     try {
-      // Use NextAuth's signIn function instead of custom API
-      const result = await signIn('credentials', {
-        redirect: false,
+      // Use Auth.js signIn function
+      const formData = new FormData();
+      formData.append('email', values.email);
+      formData.append('password', values.password);
+      
+      await signIn('credentials', {
         email: values.email,
         password: values.password,
-        callbackUrl: '/',
+        redirect: true,
+        redirectTo: callbackUrl || '/',
       });
-
-      if (!result?.ok) {
-        throw new Error(result?.error || 'Failed to sign in');
-      }
-
-      // Wait for session to be set up
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Redirect to home
-      router.push('/');
-      router.refresh();
+      
+      // If redirect is false, we'd handle the redirect manually
+      // But Auth.js will handle the redirect if redirect: true
     } catch (error) {
       console.error(error);
       setError(error instanceof Error ? error.message : 'An error occurred');
-    } finally {
       setIsLoading(false);
     }
   }
+
+  // If there's an initial error (e.g., from the URL), display it
+  React.useEffect(() => {
+    if (initialError) {
+      let errorMessage = 'An error occurred during sign in';
+      
+      // Map error codes to user-friendly messages
+      if (initialError === 'CredentialsSignin') {
+        errorMessage = 'Invalid email or password';
+      }
+      
+      setError(errorMessage);
+    }
+  }, [initialError]);
 
   return (
     <Card className="w-[400px] card-gradient">

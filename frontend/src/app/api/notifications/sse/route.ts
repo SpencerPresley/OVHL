@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionSafely } from '@/lib/auth';
-import { AuthOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
-import redis from '@/lib/redis';
-import { cookies, headers } from 'next/headers';
+// Remove unused imports 
+// import { AuthOptions } from '@/lib/auth-options'; 
+// import redis from '@/lib/redis';
+// import { cookies, headers } from 'next/headers';
 // Fix the import path - this utility doesn't seem to exist or has a different path
 // import createNotificationCounter from '@/app/utils/notifications-counter';
 
@@ -18,7 +19,7 @@ const encoder = new TextEncoder();
  *
  * Establishes a persistent SSE connection and streams notifications to authenticated users.
  * The connection:
- * - Validates user authentication via NextAuth
+ * - Validates user authentication via Auth.js
  * - Sends periodic pings (every 5s) to keep connection alive
  * - Checks for new notifications on each ping
  * - Handles connection cleanup on client disconnect
@@ -28,7 +29,7 @@ const encoder = new TextEncoder();
  */
 export async function GET(request: NextRequest) {
   try {
-    // Use our safe wrapper that's compatible with Next.js 14
+    // Use our safe wrapper that's compatible with Auth.js
     const session = await getSessionSafely();
     
     // If there's no user, return an empty response
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(null, { status: 204 });
     }
 
-    // User is authenticated with NextAuth
+    // User is authenticated with Auth.js
     const userId = session.user.id;
 
     // Create readable stream for SSE

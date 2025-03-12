@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionSafely, requireAuth } from '@/lib/auth';
-import { AuthOptions } from '@/lib/auth-options';
 import { biddingUtils } from '@/lib/redis';
 import { NotificationType } from '@prisma/client';
 import { UserService } from '@/lib/services/user-service';

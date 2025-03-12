@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAdmin } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
-  // Only admins should be able to initialize bidding data
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Only admins should be able to initialize bidding data
+    try {
+      await requireAdmin(); // This will throw if user is not admin
+    } catch (error) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const { leagueId = 'nhl' } = await request.json();
 
     // Get the latest season
@@ -119,14 +118,14 @@ export async function POST(request: NextRequest) {
 
 // Create a test player for bidding if needed
 export async function GET(request: NextRequest) {
-  // Only admins should be able to create test data
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Only admins should be able to create test data
+    try {
+      await requireAdmin(); // This will throw if user is not admin
+    } catch (error) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const { searchParams } = new URL(request.url);
     const leagueId = searchParams.get('leagueId') || 'nhl';
     const count = parseInt(searchParams.get('count') || '5', 10);

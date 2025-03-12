@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
-import { PrismaClient } from '@prisma/client';
+import { requireAdmin } from '@/lib/auth';
 import { biddingUtils } from '@/lib/redis';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 /**
  * POST /api/admin/prepare-bidding
@@ -19,14 +16,14 @@ const prisma = new PrismaClient();
  * - initializeRedis: boolean - Whether to also initialize players in Redis (default: true)
  */
 export async function POST(request: NextRequest) {
-  // Only allow admins to access this endpoint
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Only allow admins to access this endpoint
+    try {
+      await requireAdmin(); // This will throw if user is not admin
+    } catch (error) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { leagueId, initializeRedis = true } = await request.json();
 
     if (!leagueId) {

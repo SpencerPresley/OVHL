@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAdmin } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
 import redis from '@/lib/redis';
@@ -18,14 +17,15 @@ const prisma = new PrismaClient();
  * 3. Aligns Redis state with database state
  */
 export async function POST(request: NextRequest) {
-  // Security - only admins can access this endpoint
-  const session = await getServerSession(AuthOptions);
-
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // Security - only admins can access this endpoint
+    // Using requireAdmin from our Auth.js-compatible helper
+    try {
+      await requireAdmin(); // This will throw if user is not admin
+    } catch (error) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Results to track what we've fixed
     const results = {
       expiredBidsFixed: 0,

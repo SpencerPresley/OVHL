@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { signIn } from 'next-auth/react';
 
 // Disable Next.js caching for this route
 export const dynamic = 'force-dynamic';

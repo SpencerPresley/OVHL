@@ -1,7 +1,5 @@
-import { getServerSession as nextAuthGetServerSession } from 'next-auth';
-import { AuthOptions } from './auth-options';
+import { auth as getAuth } from '../../auth';
 import { prisma } from './prisma';
-import { cookies, headers } from 'next/headers';
 
 /**
  * Interface for user data returned by auth functions
@@ -13,18 +11,13 @@ export interface AuthUser {
 }
 
 /**
- * A safe wrapper around getServerSession that properly handles cookies and headers
- * for Next.js 14+ compatibility
+ * A wrapper around Auth.js auth() function
+ * for compatibility with existing code
  */
 async function getSessionSafely() {
   try {
-    // In Next.js 14, cookies() and headers() are synchronous
-    // Just access them directly to get the values
-    cookies();
-    headers();
-    
-    // Now call getServerSession
-    return nextAuthGetServerSession(AuthOptions);
+    // Use Auth.js auth() function to get the session
+    return getAuth();
   } catch (error) {
     console.error('Error in getSessionSafely:', error);
     return null;
@@ -32,7 +25,7 @@ async function getSessionSafely() {
 }
 
 /**
- * Server auth function that uses NextAuth session
+ * Server auth function that uses Auth.js session
  * @returns User object or null if not authenticated
  */
 export async function serverAuth(): Promise<AuthUser | null> {
@@ -100,6 +93,6 @@ export async function requireAdmin(): Promise<AuthUser> {
 
 /**
  * Export getSessionSafely for any route that needs direct access to the session
- * This should be used instead of importing getServerSession directly
+ * This should be used instead of importing auth directly
  */
 export { getSessionSafely };

@@ -61,8 +61,10 @@ export default async function ForumPage({
   params: { id: string };
   searchParams: { page?: string };
 }) {
-  const { id } = params;
-  const page = Number(searchParams.page) || 1;
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams.page) || 1;
   const league = leagues[id.toLowerCase()];
 
   if (!league) {

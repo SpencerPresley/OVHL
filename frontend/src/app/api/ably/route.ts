@@ -6,7 +6,7 @@ import { requireAuth } from '@/lib/auth';
  * Ably authentication endpoint
  *
  * This endpoint provides Ably token requests for authenticated users only.
- * It strictly requires authentication via either NextAuth or JWT token.
+ * It strictly requires authentication via Auth.js.
  * Anonymous users are rejected with a 401 Unauthorized response.
  */
 export async function GET() {
@@ -16,6 +16,7 @@ export async function GET() {
     }
 
     // This will throw an error if not authenticated
+    // Our updated requireAuth function now uses Auth.js
     const user = await requireAuth();
 
     // Create an Ably client with the API key

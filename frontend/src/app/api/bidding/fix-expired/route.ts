@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { biddingUtils } from '@/lib/redis';
-import { getServerSession } from 'next-auth';
-import { AuthOptions } from '@/lib/auth-options';
+import { requireAdmin } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -11,9 +10,10 @@ const prisma = new PrismaClient();
  */
 export async function POST(request: NextRequest) {
   try {
-    // Ensure user is authorized (admin)
-    const session = await getServerSession(AuthOptions);
-    if (!session?.user?.isAdmin) {
+    // Ensure user is authorized (admin) using our Auth.js-compatible helper
+    try {
+      await requireAdmin(); // This will throw if user is not admin
+    } catch (error) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
