@@ -42,6 +42,7 @@ async function createAdmin() {
         playerId: player.id,
         system: System.PS,
         gamertag: 'AdminGT',
+        // No verification data needed for admin user
       },
     });
 

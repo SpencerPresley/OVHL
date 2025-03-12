@@ -1,13 +1,25 @@
 import { Nav } from '@/components/nav';
 import { NotificationsProvider } from '@/providers/notifications-provider';
+import { auth } from '../../../auth';
 
-export default function WithNavLayout({ children }: { children: React.ReactNode }) {
+export default async function WithNavLayout({ children }: { children: React.ReactNode }) {
+  // Check if user is authenticated
+  const session = await auth();
+  const isAuthenticated = !!session;
+
   return (
     <>
-      <NotificationsProvider>
-        <Nav />
-        {children}
-      </NotificationsProvider>
+      {isAuthenticated ? (
+        <NotificationsProvider>
+          <Nav />
+          {children}
+        </NotificationsProvider>
+      ) : (
+        <>
+          <Nav />
+          {children}
+        </>
+      )}
     </>
   );
 }

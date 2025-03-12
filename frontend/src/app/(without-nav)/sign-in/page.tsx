@@ -21,17 +21,18 @@ export default async function SignInPage({
 }) {
   // Check if user is already authenticated
   const session = await auth();
+  const resolvedSearchParams = await searchParams;
   
   // If already logged in, redirect to the callback URL or home
   if (session) {
-    return redirect(searchParams.callbackUrl || '/');
+    return redirect(resolvedSearchParams.callbackUrl || '/');
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <SignInForm 
-        callbackUrl={searchParams.callbackUrl}
-        error={searchParams.error}
+        callbackUrl={resolvedSearchParams.callbackUrl}
+        error={resolvedSearchParams.error}
       />
     </div>
   );

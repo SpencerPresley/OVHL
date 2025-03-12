@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { UserNav } from '@/components/user-nav';
 import { useEffect, useState } from 'react';
 import { Images } from '@/constants/images';
+import { useSession } from 'next-auth/react';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -60,12 +61,20 @@ const leagues: League[] = [
  * - Smooth hover effects and transitions
  */
 export function Nav() {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === 'authenticated';
   const [user, setUser] = useState<User | null>(null);
   const [isLeaguesOpen, setIsLeaguesOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Only fetch user data if authenticated
+      if (!isAuthenticated) {
+        setUser(null);
+        return;
+      }
+      
       try {
         const response = await fetch('/api/auth/user', {
           credentials: 'include',
@@ -84,7 +93,7 @@ export function Nav() {
     };
 
     checkAuth();
-  }, []);
+  }, [isAuthenticated]);
 
   /**
    * Navigation Links Configuration
@@ -198,16 +207,19 @@ export function Nav() {
                 </NavigationMenuItem>
               )}
               <NavigationMenuItem className="flex">
-                {user ? (
-                  <div className="flex items-center gap-2">
-                    <NotificationBell />
+                {/* Right side - Auth, Notifications */}
+                <div className="flex gap-4 items-center">
+                  {isAuthenticated && <NotificationBell />}
+                  {user ? (
                     <UserNav user={user} />
-                  </div>
-                ) : (
-                  <Button asChild>
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
-                )}
+                  ) : (
+                    <Link href="/sign-in">
+                      <Button variant="outline" size="sm" className="bg-gradient-to-br from-blue-500 to-blue-600">
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -335,15 +347,20 @@ export function Nav() {
                       </CollapsibleContent>
                     </Collapsible>
                   )}
+                </div>
+              </div>
+              {/* Mobile menu footer with auth/avatar */}
+              <div className="border-t border-white/10 mt-auto">
+                <div className="flex justify-between items-center p-4">
+                  {isAuthenticated && <NotificationBell />}
                   {user ? (
-                    <div className="flex items-center gap-2">
-                      <NotificationBell />
-                      <UserNav user={user} />
-                    </div>
+                    <UserNav user={user} />
                   ) : (
-                    <Button asChild>
-                      <Link href="/sign-in">Sign In</Link>
-                    </Button>
+                    <Link href="/sign-in">
+                      <Button variant="outline" size="sm" className="bg-gradient-to-br from-blue-500 to-blue-600">
+                        Sign In
+                      </Button>
+                    </Link>
                   )}
                 </div>
               </div>

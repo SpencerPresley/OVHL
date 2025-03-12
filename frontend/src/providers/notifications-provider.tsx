@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { Notification, NotificationStatus } from '@/types/notifications';
 import { useNotificationToast } from '@/hooks/use-notification-toast';
+import { useSession } from 'next-auth/react';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Bell } from 'lucide-react';
@@ -39,6 +40,9 @@ export function useNotifications() {
 }
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
+  const { status: authStatus } = useSession();
+  const isAuthenticated = authStatus === 'authenticated';
+  
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -70,17 +74,34 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchNotifications = useCallback(async () => {
+    // Don't try to fetch notifications if user is not authenticated
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       const response = await fetch('/api/notifications');
-      if (!response.ok) throw new Error('Failed to fetch notifications');
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 500) {
+          // Handle auth errors silently - likely just not logged in
+          setNotifications([]);
+          setUnreadCount(0);
+          return;
+        }
+        throw new Error('Failed to fetch notifications');
+      }
       const data = await response.json();
       updateNotificationsState(data.notifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      // Don't show error state to users, just provide empty notifications
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
-  }, [updateNotificationsState]);
+  }, [updateNotificationsState, isAuthenticated]);
 
   const optimisticUpdate = useCallback((id: string, newStatus: NotificationStatus) => {
     setNotifications((prev) => {
@@ -105,11 +126,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    initialize();
+    if (isAuthenticated) {
+      initialize();
+    } else {
+      // Reset state when not authenticated
+      setNotifications([]);
+      setUnreadCount(0);
+      setLoading(false);
+    }
 
     let eventSource: EventSource | null = null;
 
     const connectSSE = () => {
+      // Only connect to SSE if user is authenticated
+      if (!isAuthenticated) return;
+      
       eventSource = new EventSource('/api/notifications/sse');
 
       eventSource.onopen = () => {
@@ -144,9 +175,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       mounted = false;
       eventSource?.close();
     };
-  }, [fetchNotifications, updateNotificationsState]);
+  }, [fetchNotifications, updateNotificationsState, isAuthenticated]);
 
   const markAsRead = async (id: string) => {
+    // Skip API calls if not authenticated
+    if (!isAuthenticated) return;
+    
     optimisticUpdate(id, NotificationStatus.READ);
     try {
       const response = await fetch(`/api/notifications/${id}/read`, {
@@ -162,6 +196,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   };
 
   const archiveNotification = async (id: string) => {
+    // Skip API calls if not authenticated
+    if (!isAuthenticated) return;
+    
     optimisticUpdate(id, NotificationStatus.ARCHIVED);
     try {
       const response = await fetch(`/api/notifications/${id}/archive`, {
@@ -177,6 +214,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   };
 
   const restoreNotification = async (id: string) => {
+    // Skip API calls if not authenticated
+    if (!isAuthenticated) return;
+    
     optimisticUpdate(id, NotificationStatus.READ);
     try {
       const response = await fetch(`/api/notifications/${id}/restore`, {

@@ -20,7 +20,6 @@ class Platform(str, Enum):
 class VerificationInput(BaseModel):
     platform: Platform
     gamertag: str = Field(..., min_length=1, max_length=16)
-    user_id: str = Field(..., description="User ID from the database")
 
 def _generate_hash_part(input_data: VerificationInput) -> str:
     """Generate deterministic hash part of the code
@@ -33,7 +32,7 @@ def _generate_hash_part(input_data: VerificationInput) -> str:
     """
     # Create seed value
     timestamp = time.time()
-    seed_parts = [input_data.platform.value, input_data.gamertag, input_data.user_id, str(timestamp)]
+    seed_parts = [input_data.platform.value, input_data.gamertag, str(timestamp)]
     
     seed = ":".join(seed_parts)
     

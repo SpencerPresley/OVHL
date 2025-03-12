@@ -19,6 +19,10 @@ export async function GET() {
     return NextResponse.json({ user });
   } catch (error) {
     console.error('Failed to fetch user:', error);
+    // Check if the error is related to authentication
+    if (error instanceof Error && error.message === 'Authentication required') {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
   }
 }
@@ -34,6 +38,10 @@ export async function PUT(request: Request) {
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
     console.error('Failed to update user:', error);
+    // Check if the error is related to authentication
+    if (error instanceof Error && error.message === 'Authentication required') {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }

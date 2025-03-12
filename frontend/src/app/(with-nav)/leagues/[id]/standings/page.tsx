@@ -44,7 +44,8 @@ const leagues: Record<string, League> = {
 };
 
 export default async function LeagueStandingsPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
   const league = leagues[id.toLowerCase()];
 
   if (!league) {

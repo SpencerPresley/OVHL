@@ -14,6 +14,10 @@ export async function GET() {
     return NextResponse.json({ notifications });
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
+    // Check if the error is related to authentication
+    if (error instanceof Error && error.message === 'Authentication required') {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
 }
@@ -37,6 +41,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ notification });
   } catch (error) {
     console.error('Failed to create notification:', error);
+    // Check if the error is related to authentication
+    if (error instanceof Error && (error.message === 'Authentication required' || error.message === 'Admin privileges required')) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
   }
 }
