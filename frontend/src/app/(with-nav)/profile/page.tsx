@@ -5,6 +5,7 @@ import { ProfileHeader } from './components/ProfileHeader';
 import { ProfileTabs } from './components/ProfileTabs';
 import { ProfileTab } from './components/ProfileTab';
 import { AccountTab } from './components/AccountTab';
+import { IntegrationsTab } from './components/IntegrationsTab';
 
 export default function ProfilePage() {
   const {
@@ -54,6 +55,7 @@ export default function ProfilePage() {
                 onDeleteAccount={deleteAccount}
               />
             }
+            integrationsTab={<IntegrationsTab />}
             // Additional tabs can be added here in the future:
             // securityTab={<SecurityTab />}
             // notificationsTab={<NotificationsTab />}
