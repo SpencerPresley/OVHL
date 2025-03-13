@@ -109,7 +109,7 @@ export function Nav() {
   ];
 
   return (
-    <nav className="nav-blur sticky top-0 z-50">
+    <nav className="nav-blur top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/">
           <Image src={Images.LOGO_MAIN.path} alt="OVHL Logo" width={120} height={60} priority />

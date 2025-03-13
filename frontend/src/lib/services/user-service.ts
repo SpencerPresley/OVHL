@@ -489,6 +489,19 @@ export class UserService {
       throw error;
     }
   }
+
+  static async getUserPSNProfile(userId: string) {
+    try {
+      const response = await fetch(`/api/users/${userId}/psn`);
+      if (!response.ok) {
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch PSN profile:', error);
+      return null;
+    }
+  }
 }
 
 export type UserProfileResponse = Prisma.PromiseReturnType<typeof UserService.getUserById>;

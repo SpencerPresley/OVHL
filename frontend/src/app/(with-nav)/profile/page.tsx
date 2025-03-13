@@ -4,8 +4,11 @@ import { useUserProfile } from '@/hooks/use-user-profile';
 import { ProfileHeader } from './components/ProfileHeader';
 import { ProfileTabs } from './components/ProfileTabs';
 import { ProfileTab } from './components/ProfileTab';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { AvatarUpload } from './avatar-upload';
 import { AccountTab } from './components/AccountTab';
 import { IntegrationsTab } from './components/IntegrationsTab';
+import { PSNProfileTab } from './components/PSNProfileTab';
 
 export default function ProfilePage() {
   const {
@@ -31,36 +34,44 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto">
           <ProfileHeader userId={user.id} />
 
-          <ProfileTabs 
-            profileTab={
-              <ProfileTab
-                formData={{
-                  name: formData.name,
-                  username: formData.username,
-                  avatarUrl: formData.avatarUrl,
-                }}
+          <div className="space-y-8">
+            <div>
+              <AvatarUpload
+                imageUrl={user?.avatarUrl || null}
                 initials={initials}
-                onAvatarUpload={updateAvatar}
-                onAvatarRemove={removeAvatar}
-                onProfileSubmit={updateProfile}
-                onFieldChange={updateFormField}
+                name={user?.name || ''}
+                username={user?.username || null}
+                onUpload={updateAvatar}
+                onRemove={removeAvatar}
               />
-            }
-            accountTab={
-              <AccountTab
-                email={formData.email}
-                isAdmin={user.isAdmin}
-                onEmailChange={(value) => updateFormField('email', value)}
-                onResetPassword={resetPassword}
-                onDeleteAccount={deleteAccount}
-              />
-            }
-            integrationsTab={<IntegrationsTab />}
-            // Additional tabs can be added here in the future:
-            // securityTab={<SecurityTab />}
-            // notificationsTab={<NotificationsTab />}
-            // integrationsTab={<IntegrationsTab />}
-          />
+            </div>
+
+            <Tabs defaultValue="account" className="space-y-4">
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="account">Account</TabsTrigger>
+                <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                <TabsTrigger value="psn">PSN Profile</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="account">
+                <AccountTab
+                  email={user?.email || ''}
+                  isAdmin={user?.isAdmin || false}
+                  onEmailChange={(value) => updateFormField('email', value)}
+                  onResetPassword={resetPassword}
+                  onDeleteAccount={deleteAccount}
+                />
+              </TabsContent>
+              
+              <TabsContent value="integrations">
+                <IntegrationsTab />
+              </TabsContent>
+              
+              <TabsContent value="psn">
+                <PSNProfileTab />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
     </div>
