@@ -1,7 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
+    // unoptimized: true,
     domains: [
       'media0.giphy.com',
       'media1.giphy.com',
@@ -16,6 +17,9 @@ const nextConfig = {
       'media.giphy.com',
     ],
   },
+  experimental: {
+    reactCompiler: true,
+  },
 };
 
-module.exports = nextConfig; 
+export default nextConfig;

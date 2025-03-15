@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const { postId } = params;
+    const resolvedParams = await params;
+    const { postId } = resolvedParams;
     const post = await ForumService.getPost(postId);
 
     if (!post) {

@@ -17,7 +17,8 @@ export async function POST(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const { id, postId } = params;
+    const resolvedParams = await params;
+    const { id, postId } = resolvedParams;
 
     // Authenticate with NextAuth
     const authUser = await requireAuth();
@@ -95,7 +96,9 @@ export async function GET(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const comments = await ForumService.getComments(params.postId);
+    const resolvedParams = await params;
+    const { id, postId } = resolvedParams;
+    const comments = await ForumService.getComments(postId);
     return NextResponse.json({ comments });
   } catch (error) {
     console.error('Error fetching comments:', error);

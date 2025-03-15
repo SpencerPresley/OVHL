@@ -8,7 +8,8 @@ export async function POST(
   { params }: { params: { id: string; postId: string } }
 ) {
   try {
-    const { postId } = params;
+    const resolvedParams = await params;
+    const { postId } = resolvedParams;
     const { type, commentId, userId } = await request.json();
 
     // Authenticate with NextAuth

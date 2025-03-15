@@ -3,7 +3,9 @@ import { ForumService } from '@/lib/services/forum-service';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const posts = await ForumService.getLeaguePosts(params.id);
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    const posts = await ForumService.getLeaguePosts(id);
     return NextResponse.json({ posts });
   } catch (error) {
     console.error('Error fetching forum posts:', error);
@@ -13,13 +15,15 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const { title, content, authorId } = await request.json();
 
     const post = await ForumService.createPost({
       title,
       content,
       authorId,
-      leagueId: params.id,
+      leagueId: id,
     });
 
     return NextResponse.json({ post });
