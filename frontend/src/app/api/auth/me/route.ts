@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * Get authenticated user data
- * 
+ *
  * Returns the current user's basic information or null if not authenticated.
  * Uses NextAuth session for authentication.
- * 
+ *
  * @route GET /api/auth/me
  * @returns {Promise<NextResponse>} JSON response with user data or null
  */
@@ -15,11 +15,11 @@ export async function GET() {
   try {
     // Use our serverAuth helper which handles NextAuth session
     const authUser = await serverAuth();
-    
+
     if (!authUser) {
       return NextResponse.json({ user: null });
     }
-    
+
     // Format user response data
     return NextResponse.json({
       user: {

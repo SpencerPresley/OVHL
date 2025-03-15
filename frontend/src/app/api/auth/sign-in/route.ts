@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     }
 
     console.log('SignInAPI: Authentication successful');
-    
+
     // Return user information - authentication will be handled by NextAuth
     // Note: This API endpoint should only be used for credential verification
     // The actual sign-in should be performed on the client using NextAuth's signIn function
@@ -80,9 +80,9 @@ export async function POST(request: Request) {
         name: user.name,
         username: user.username,
       },
-      message: 'Authentication successful. Use NextAuth signIn on the client side to complete the process.'
+      message:
+        'Authentication successful. Use NextAuth signIn on the client side to complete the process.',
     });
-    
   } catch (error) {
     // Log error but don't expose details to client
     console.error('SignInAPI: Error during sign-in:', error);

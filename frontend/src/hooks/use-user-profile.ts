@@ -75,12 +75,12 @@ export function useUserProfile() {
         username: formData.username,
         email: formData.email,
       });
-      
+
       setUser({
         ...updatedUser,
         avatarUrl: user.avatarUrl, // Preserve the avatar URL
       });
-      
+
       toast({
         title: 'Profile Updated',
         description: 'Your profile has been successfully updated.',
@@ -169,9 +169,7 @@ export function useUserProfile() {
   // Calculate user's initials
   const getUserInitials = () => {
     if (!user) return '';
-    return user.name
-      ? user.name.charAt(0).toUpperCase()
-      : user.email.charAt(0).toUpperCase();
+    return user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
   };
 
   return {
@@ -186,4 +184,4 @@ export function useUserProfile() {
     updateFormField,
     getUserInitials,
   };
-} 
+}

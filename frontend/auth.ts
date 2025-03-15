@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import type { Provider } from "next-auth/providers"
+import type { Provider } from 'next-auth/providers';
 
 // Define types for the user and token
 type User = {
@@ -34,18 +34,15 @@ const providers: Provider[] = [
         return null;
       }
 
-      const user = await prisma.user.findUnique({
+      const user = (await prisma.user.findUnique({
         where: { email: credentials.email as string },
-      }) as User | null;
+      })) as User | null;
 
       if (!user) {
         return null;
       }
 
-      const passwordValid = await bcrypt.compare(
-        credentials.password as string, 
-        user.password
-      );
+      const passwordValid = await bcrypt.compare(credentials.password as string, user.password);
 
       if (!passwordValid) {
         return null;
@@ -60,23 +57,23 @@ const providers: Provider[] = [
       };
     },
   }),
-]
+];
 
 export const providerMap = providers
   .map((provider) => {
-    if (typeof provider === "function") {
-      const providerData = provider()
-      return { id: providerData.id, name: providerData.name }
+    if (typeof provider === 'function') {
+      const providerData = provider();
+      return { id: providerData.id, name: providerData.name };
     } else {
-      return { id: provider.id, name: provider.name }
+      return { id: provider.id, name: provider.name };
     }
   })
-  .filter((provider) => provider.id !== "credentials")
+  .filter((provider) => provider.id !== 'credentials');
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
   pages: {
-    signIn: "/sign-in",
+    signIn: '/sign-in',
   },
   session: {
     strategy: 'jwt',
@@ -99,7 +96,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user = {
           id: token.id as string,
           email: token.email as string,
-          name: token.name as string || '',
+          name: (token.name as string) || '',
           username: token.username as string,
           isAdmin: token.isAdmin as boolean,
         };
@@ -108,4 +105,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   debug: process.env.NODE_ENV === 'development',
-})
+});

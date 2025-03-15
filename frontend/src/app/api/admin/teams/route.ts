@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Admin Teams API Route
- * 
+ *
  * Retrieves all teams with roster information.
  * Requires admin authentication.
- * 
+ *
  * @route GET /api/admin/teams
  * @returns {Promise<NextResponse>} JSON response with teams data
  */
@@ -92,7 +92,7 @@ export async function GET() {
     return NextResponse.json({ teams: transformedTeams });
   } catch (error) {
     console.error('Failed to fetch teams:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -102,7 +102,7 @@ export async function GET() {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to fetch teams' }, { status: 500 });
   }
 }

@@ -42,7 +42,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Failed to create notification:', error);
     // Check if the error is related to authentication
-    if (error instanceof Error && (error.message === 'Authentication required' || error.message === 'Admin privileges required')) {
+    if (
+      error instanceof Error &&
+      (error.message === 'Authentication required' || error.message === 'Admin privileges required')
+    ) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });

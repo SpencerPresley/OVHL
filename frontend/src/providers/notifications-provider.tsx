@@ -42,7 +42,7 @@ export function useNotifications() {
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { status: authStatus } = useSession();
   const isAuthenticated = authStatus === 'authenticated';
-  
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    
+
     try {
       const response = await fetch('/api/notifications');
       if (!response.ok) {
@@ -140,7 +140,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const connectSSE = () => {
       // Only connect to SSE if user is authenticated
       if (!isAuthenticated) return;
-      
+
       eventSource = new EventSource('/api/notifications/sse');
 
       eventSource.onopen = () => {
@@ -180,7 +180,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const markAsRead = async (id: string) => {
     // Skip API calls if not authenticated
     if (!isAuthenticated) return;
-    
+
     optimisticUpdate(id, NotificationStatus.READ);
     try {
       const response = await fetch(`/api/notifications/${id}/read`, {
@@ -198,7 +198,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const archiveNotification = async (id: string) => {
     // Skip API calls if not authenticated
     if (!isAuthenticated) return;
-    
+
     optimisticUpdate(id, NotificationStatus.ARCHIVED);
     try {
       const response = await fetch(`/api/notifications/${id}/archive`, {
@@ -216,7 +216,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const restoreNotification = async (id: string) => {
     // Skip API calls if not authenticated
     if (!isAuthenticated) return;
-    
+
     optimisticUpdate(id, NotificationStatus.READ);
     try {
       const response = await fetch(`/api/notifications/${id}/restore`, {

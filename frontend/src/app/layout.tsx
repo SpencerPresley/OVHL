@@ -37,9 +37,7 @@ export default function RootLayout({
         `}</Script>
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
-        <AuthSessionProvider>
-          {children}
-        </AuthSessionProvider>
+        <AuthSessionProvider>{children}</AuthSessionProvider>
         <Toaster />
       </body>
     </html>

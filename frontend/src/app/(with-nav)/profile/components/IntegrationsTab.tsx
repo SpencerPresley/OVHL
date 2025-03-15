@@ -5,18 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { 
-  AlertDialog, AlertDialogAction, AlertDialogCancel, 
-  AlertDialogContent, AlertDialogDescription, AlertDialogFooter, 
-  AlertDialogHeader, AlertDialogTitle 
-} from '@/components/ui/alert-dialog';
 import {
-  Alert, AlertDescription, AlertTitle
-} from '@/components/ui/alert';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle2, AlertCircle, Gamepad2, Loader2 } from 'lucide-react';
 
@@ -95,7 +102,7 @@ export function IntegrationsTab() {
 
       setVerificationCode(data.code);
       setShowCodeDialog(true);
-      
+
       // Refresh integrations list
       await fetchIntegrations();
     } catch (error) {
@@ -114,30 +121,30 @@ export function IntegrationsTab() {
 
     setIsLoading(true);
     setError('');
-    
+
     console.log('Starting verification process for:', {
       platform: selectedPlatform,
       username: username,
-      code: inputVerificationCode
+      code: inputVerificationCode,
     });
 
     try {
-      const verifyPayload = { 
-        platform: selectedPlatform, 
-        username, 
-        code: inputVerificationCode 
+      const verifyPayload = {
+        platform: selectedPlatform,
+        username,
+        code: inputVerificationCode,
       };
-      
+
       console.log('Sending verification request:', verifyPayload);
-      
+
       const response = await fetch('/api/integrations/verifyCode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(verifyPayload),
       });
-      
+
       console.log('Verification response status:', response.status);
-      
+
       const data = await response.json();
       console.log('Verification response data:', data);
 
@@ -145,11 +152,14 @@ export function IntegrationsTab() {
         throw new Error(data.error || 'Failed to verify code');
       }
 
-      setSuccess(data.message || `Your ${selectedPlatform.toUpperCase()} account has been successfully verified!`);
+      setSuccess(
+        data.message ||
+          `Your ${selectedPlatform.toUpperCase()} account has been successfully verified!`
+      );
       setCurrentStep('select');
       setUsername('');
       setInputVerificationCode('');
-      
+
       // Refresh integrations list
       await fetchIntegrations();
     } catch (error) {
@@ -187,15 +197,15 @@ export function IntegrationsTab() {
     setInputVerificationCode(integration.verificationCode || '');
     setCurrentStep('verify');
     setActiveTab('add'); // Switch to the Add Integration tab where verification form is displayed
-    
+
     // Clear any previous messages
     setError('');
     setSuccess('');
-    
+
     console.log('Preparing for verification:', {
       platform: integration.platform,
       username: integration.username,
-      code: integration.verificationCode
+      code: integration.verificationCode,
     });
   };
 
@@ -222,7 +232,7 @@ export function IntegrationsTab() {
             <TabsTrigger value="add">Add Integration</TabsTrigger>
             <TabsTrigger value="manage">Manage Integrations</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="add" className="space-y-6 pt-4">
             {error && (
               <Alert variant="destructive">
@@ -231,7 +241,7 @@ export function IntegrationsTab() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             {success && (
               <Alert variant="default" className="bg-green-900/20 text-green-400 border-green-800">
                 <CheckCircle2 className="h-4 w-4" />
@@ -244,8 +254,8 @@ export function IntegrationsTab() {
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="platform">Select Platform</Label>
-                  <Select 
-                    value={selectedPlatform} 
+                  <Select
+                    value={selectedPlatform}
                     onValueChange={(value) => setSelectedPlatform(value as Platform)}
                   >
                     <SelectTrigger>
@@ -253,7 +263,9 @@ export function IntegrationsTab() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="psn">PlayStation Network (PSN)</SelectItem>
-                      <SelectItem value="xbox" disabled>Xbox (Coming Soon)</SelectItem>
+                      <SelectItem value="xbox" disabled>
+                        Xbox (Coming Soon)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -286,7 +298,8 @@ export function IntegrationsTab() {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  To verify your account, please enter the verification code that you've placed in your PSN profile's "About Me" section.
+                  To verify your account, please enter the verification code that you've placed in
+                  your PSN profile's "About Me" section.
                 </p>
 
                 <div className="grid gap-2">
@@ -325,7 +338,7 @@ export function IntegrationsTab() {
               </div>
             )}
           </TabsContent>
-          
+
           <TabsContent value="manage" className="pt-4">
             {isLoadingIntegrations ? (
               <div className="flex justify-center items-center py-8">
@@ -343,9 +356,13 @@ export function IntegrationsTab() {
                       <div>
                         <h3 className="font-medium">{integration.platform.toUpperCase()}</h3>
                         <p className="text-sm text-muted-foreground">{integration.username}</p>
-                        <div className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-flex items-center ${getStatusBadgeClass(integration.verificationStatus)}`}>
+                        <div
+                          className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-flex items-center ${getStatusBadgeClass(integration.verificationStatus)}`}
+                        >
                           {integration.isVerified ? (
-                            <><CheckCircle2 className="h-3 w-3 mr-1" /> Verified</>
+                            <>
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                            </>
                           ) : (
                             integration.verificationStatus
                           )}
@@ -358,8 +375,8 @@ export function IntegrationsTab() {
                           </span>
                         ) : (
                           <>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               className="bg-blue-900/20 text-blue-400 border-blue-800 hover:bg-blue-900/40"
                               onClick={() => prepareForVerification(integration)}
@@ -367,9 +384,13 @@ export function IntegrationsTab() {
                               Verify Now
                             </Button>
                             {integration.codeExpiresAt && (
-                              <span className={`text-xs ${new Date() > new Date(integration.codeExpiresAt) 
-                                ? 'text-red-400' 
-                                : 'text-amber-400'}`}>
+                              <span
+                                className={`text-xs ${
+                                  new Date() > new Date(integration.codeExpiresAt)
+                                    ? 'text-red-400'
+                                    : 'text-amber-400'
+                                }`}
+                              >
                                 {new Date() > new Date(integration.codeExpiresAt)
                                   ? 'Expired: '
                                   : 'Expires: '}
@@ -401,25 +422,22 @@ export function IntegrationsTab() {
           <AlertDialogHeader>
             <AlertDialogTitle>Verification Code Generated</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
-              Add the following code to your {selectedPlatform.toUpperCase()} profile's "About Me" section:
-              
+              Add the following code to your {selectedPlatform.toUpperCase()} profile's "About Me"
+              section:
               <code className="block bg-muted p-3 rounded-md font-mono text-center text-lg mt-2">
                 {verificationCode}
               </code>
-              
               <span className="block mt-2 text-amber-500">
-                This code expires in 10 minutes. After adding this code to your profile, 
-                visit the "Manage Integrations" tab to verify your account.
+                This code expires in 10 minutes. After adding this code to your profile, visit the
+                "Manage Integrations" tab to verify your account.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleDialogClose}>
-              Close
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDialogClose}>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </Card>
   );
-} 
+}

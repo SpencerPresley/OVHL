@@ -95,14 +95,14 @@ export function SignInForm({ callbackUrl, error: initialError }: SignInFormProps
       const formData = new FormData();
       formData.append('email', values.email);
       formData.append('password', values.password);
-      
+
       await signIn('credentials', {
         email: values.email,
         password: values.password,
         redirect: true,
         redirectTo: callbackUrl || '/',
       });
-      
+
       // If redirect is false, we'd handle the redirect manually
       // But Auth.js will handle the redirect if redirect: true
     } catch (error) {
@@ -116,12 +116,12 @@ export function SignInForm({ callbackUrl, error: initialError }: SignInFormProps
   React.useEffect(() => {
     if (initialError) {
       let errorMessage = 'An error occurred during sign in';
-      
+
       // Map error codes to user-friendly messages
       if (initialError === 'CredentialsSignin') {
         errorMessage = 'Invalid email or password';
       }
-      
+
       setError(errorMessage);
     }
   }, [initialError]);

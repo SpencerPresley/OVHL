@@ -74,7 +74,7 @@ export function Nav() {
         setUser(null);
         return;
       }
-      
+
       try {
         const response = await fetch('/api/auth/user', {
           credentials: 'include',
@@ -214,7 +214,11 @@ export function Nav() {
                     <UserNav user={user} />
                   ) : (
                     <Link href="/sign-in">
-                      <Button variant="outline" size="sm" className="bg-gradient-to-br from-blue-500 to-blue-600">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-gradient-to-br from-blue-500 to-blue-600"
+                      >
                         Sign In
                       </Button>
                     </Link>
@@ -357,7 +361,11 @@ export function Nav() {
                     <UserNav user={user} />
                   ) : (
                     <Link href="/sign-in">
-                      <Button variant="outline" size="sm" className="bg-gradient-to-br from-blue-500 to-blue-600">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-gradient-to-br from-blue-500 to-blue-600"
+                      >
                         Sign In
                       </Button>
                     </Link>

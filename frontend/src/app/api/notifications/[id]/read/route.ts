@@ -8,7 +8,7 @@ export async function POST(request: Request, context: { params: { id: string } }
   try {
     // Authenticate with NextAuth
     const user = await requireAuth();
-    
+
     // Get params.id from the context
     const { id } = context.params;
 

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ButtonHTMLAttributes } from 'react';
 import { Button } from '@/components/ui/button';
@@ -29,22 +29,17 @@ export function SignOut({
   ...props
 }: SignOutProps) {
   const router = useRouter();
-  
+
   const handleSignOut = async () => {
     // Use the official signOut function which handles CSRF tokens automatically
     await signOut({ callbackUrl, redirect: true });
-    
+
     // Note: The redirect is handled by signOut when redirect: true
     // so we don't need to manually redirect with window.location.href
   };
 
   return (
-    <Button 
-      onClick={handleSignOut}
-      variant={variant}
-      className={className}
-      {...props}
-    >
+    <Button onClick={handleSignOut} variant={variant} className={className} {...props}>
       {children}
     </Button>
   );

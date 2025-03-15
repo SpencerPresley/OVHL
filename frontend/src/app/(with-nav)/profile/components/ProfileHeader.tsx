@@ -25,4 +25,4 @@ export function ProfileHeader({ userId }: ProfileHeaderProps) {
       </Link>
     </div>
   );
-} 
+}

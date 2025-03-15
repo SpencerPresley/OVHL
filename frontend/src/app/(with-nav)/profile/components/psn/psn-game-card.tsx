@@ -1,11 +1,7 @@
 import Image from 'next/image';
 import { Gamepad2, Clock } from 'lucide-react';
 import type { Game } from '../../types/psn-types';
-import { 
-    formatPlaytime, 
-    formatDate, 
-    getPlatformLabel 
-} from '../../utils/psn-formatters';
+import { formatPlaytime, formatDate, getPlatformLabel } from '../../utils/psn-formatters';
 
 interface PSNGameCardProps {
   game: Game;

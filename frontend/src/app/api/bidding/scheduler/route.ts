@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { biddingUtils } from '@/lib/redis';
 
-
 // Order of leagues for bidding
 const LEAGUE_ORDER = ['nhl', 'ahl', 'echl', 'chl'];
 

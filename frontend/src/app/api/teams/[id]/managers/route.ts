@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id: teamId } = params;
-    
+
     // Authenticate and verify admin status with NextAuth
     await requireAdmin();
 
@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id: teamId } = params;
-    
+
     // Authenticate and verify admin status with NextAuth
     await requireAdmin();
 
@@ -54,7 +54,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id: teamId } = params;
-    
+
     // Authenticate and verify admin status with NextAuth
     await requireAdmin();
 

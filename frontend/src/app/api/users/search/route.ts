@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   try {
     // Authenticate using NextAuth and verify admin status
     await requireAdmin();
-    
+
     // Get search query
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');

@@ -52,7 +52,7 @@ export default function ProfilePage() {
                 <TabsTrigger value="integrations">Integrations</TabsTrigger>
                 <TabsTrigger value="psn">PSN Profile</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="account">
                 <AccountTab
                   email={user?.email || ''}
@@ -62,11 +62,11 @@ export default function ProfilePage() {
                   onDeleteAccount={deleteAccount}
                 />
               </TabsContent>
-              
+
               <TabsContent value="integrations">
                 <IntegrationsTab />
               </TabsContent>
-              
+
               <TabsContent value="psn">
                 <PSNProfileTab />
               </TabsContent>

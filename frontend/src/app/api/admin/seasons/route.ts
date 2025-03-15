@@ -19,10 +19,10 @@ const LEAGUE_TIERS = [
 
 /**
  * Create New Season API Route
- * 
+ *
  * Creates a new season with tiers and associates teams.
  * Requires admin authentication.
- * 
+ *
  * @route POST /api/admin/seasons
  * @returns {Promise<NextResponse>} JSON response with creation status
  */
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to create season:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to create season' }, { status: 500 });
   }
 }

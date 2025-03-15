@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Admin Team Roster API Route
- * 
+ *
  * Retrieves detailed roster information for a specific team.
  * Requires admin authentication.
- * 
+ *
  * @route GET /api/admin/teams/[id]/roster
  * @param {Object} params - Route parameters
  * @param {string} params.id - Team ID
@@ -129,7 +129,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ team: transformedTeam });
   } catch (error) {
     console.error('Failed to fetch team roster:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -139,7 +139,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to fetch team roster' }, { status: 500 });
   }
 }

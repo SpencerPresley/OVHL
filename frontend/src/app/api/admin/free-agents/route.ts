@@ -6,11 +6,11 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Admin Free Agents API Route
- * 
+ *
  * Retrieves players in the bidding pool for a specific league tier.
  * Supports filtering by position and searching by name or gamertag.
  * Requires admin authentication.
- * 
+ *
  * @route GET /api/admin/free-agents
  * @param {string} league - League tier name to fetch free agents for
  * @param {string} [search] - Optional search term for player name or gamertag
@@ -119,7 +119,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ players });
   } catch (error) {
     console.error('Failed to fetch free agents:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to fetch free agents' }, { status: 500 });
   }
 }

@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     // Authenticate with NextAuth
     const user = await requireAuth();
-    
+
     const { withLink } = await request.json();
 
     // Create a test notification for the current user

@@ -6,7 +6,6 @@ import redis from '@/lib/redis';
 import { prisma } from '@/lib/prisma';
 import { biddingUtils } from '@/lib/redis';
 
-
 // Define the key prefixes used in Redis
 const keyPrefix = {
   bidding: 'bidding:',

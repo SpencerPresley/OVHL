@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionSafely } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-// Remove unused imports 
-// import { AuthOptions } from '@/lib/auth-options'; 
+// Remove unused imports
+// import { AuthOptions } from '@/lib/auth-options';
 // import redis from '@/lib/redis';
 // import { cookies, headers } from 'next/headers';
 // Fix the import path - this utility doesn't seem to exist or has a different path
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     // Use our safe wrapper that's compatible with Auth.js
     const session = await getSessionSafely();
-    
+
     // If there's no user, return an empty response
     if (!session?.user) {
       return new NextResponse(null, { status: 204 });

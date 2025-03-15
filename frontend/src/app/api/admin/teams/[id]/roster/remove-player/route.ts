@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Remove Player from Team Roster API Route
- * 
+ *
  * Removes a player from a team and puts them back in bidding.
  * Requires admin authentication.
- * 
+ *
  * @route POST /api/admin/teams/[id]/roster/remove-player
  * @param {Object} params - Route parameters
  * @param {string} params.id - Team ID
@@ -88,7 +88,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     });
   } catch (error) {
     console.error('Failed to remove player from team:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -98,7 +98,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to remove player from team' }, { status: 500 });
   }
 }

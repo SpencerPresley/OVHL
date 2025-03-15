@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
   try {
     // Use requireAuth instead of direct session check
     const authUser = await requireAuth();
-    
+
     const { searchParams } = new URL(request.url);
     const leagueId = searchParams.get('leagueId') || 'nhl';
     const teamId = searchParams.get('teamId');
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
   try {
     // Use requireAuth instead of direct session check
     const authUser = await requireAuth();
-    
+
     const { playerSeasonId, teamId, amount, leagueId } = await request.json();
 
     if (!playerSeasonId || !teamId || !amount || !leagueId) {

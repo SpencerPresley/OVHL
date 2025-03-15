@@ -15,10 +15,10 @@ interface BiddingStatus {
 
 /**
  * Admin Bidding API - Get Status
- * 
+ *
  * Returns the status of all bidding periods across leagues.
  * Requires admin authentication.
- * 
+ *
  * @route GET /api/admin/bidding
  * @returns {Promise<NextResponse>} JSON response with bidding status for all leagues
  */
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   try {
     // Verify admin authentication using NextAuth
     await requireAdmin();
-    
+
     const leagueIds = ['nhl', 'ahl', 'echl', 'chl'];
     const biddingStatus: Record<string, BiddingStatus> = {};
 
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching bidding status:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -55,17 +55,17 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to fetch bidding status' }, { status: 500 });
   }
 }
 
 /**
  * Admin Bidding API - Control Bidding
- * 
+ *
  * Controls bidding periods (start, stop, finalize) for specific leagues.
  * Requires admin authentication.
- * 
+ *
  * @route POST /api/admin/bidding
  * @param {Object} body - Request body
  * @param {string} body.action - Action to perform (start, stop, finalize)
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error managing bidding:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to manage bidding' }, { status: 500 });
   }
 }

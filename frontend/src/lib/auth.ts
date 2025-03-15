@@ -32,7 +32,7 @@ export async function serverAuth(): Promise<AuthUser | null> {
   try {
     // Use our safe wrapper to get the session
     const session = await getSessionSafely();
-    
+
     if (session?.user?.id) {
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },

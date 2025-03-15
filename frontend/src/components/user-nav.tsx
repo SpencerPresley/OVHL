@@ -77,9 +77,7 @@ export function UserNav({ user }: UserNavProps) {
                 </button>
               </li>
               <li>
-                <SignOut 
-                  className="w-full text-left justify-start font-normal p-2 text-sm leading-none hover:bg-accent hover:text-blue-400"
-                >
+                <SignOut className="w-full text-left justify-start font-normal p-2 text-sm leading-none hover:bg-accent hover:text-blue-400">
                   Log out
                 </SignOut>
               </li>

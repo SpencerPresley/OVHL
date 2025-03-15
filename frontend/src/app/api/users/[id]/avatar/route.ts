@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    
+
     // Authenticate with NextAuth
     const user = await requireAuth();
 
@@ -56,7 +56,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    
+
     // Authenticate with NextAuth
     const user = await requireAuth();
 

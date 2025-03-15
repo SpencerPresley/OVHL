@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Admin Team Update API Route
- * 
+ *
  * Updates EA club information for a specific team.
  * Requires admin authentication.
- * 
+ *
  * @route PATCH /api/admin/teams/[id]
  * @param {Object} params - Route parameters
  * @param {string} params.id - Team ID
@@ -38,7 +38,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ team });
   } catch (error) {
     console.error('Failed to update team:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -48,7 +48,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to update team' }, { status: 500 });
   }
 }

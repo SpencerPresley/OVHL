@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const { leagueId = 'nhl' } = await request.json();
 
     // Get the latest season
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const { searchParams } = new URL(request.url);
     const leagueId = searchParams.get('leagueId') || 'nhl';
     const count = parseInt(searchParams.get('count') || '5', 10);

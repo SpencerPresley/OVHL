@@ -19,27 +19,27 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
   try {
     // Get PSN profile data from database directly
     const profile = await prisma.pSNProfile.findUnique({
-      where: { 
-        userId: id 
+      where: {
+        userId: id,
       },
       include: {
         avatars: true,
-      }
+      },
     });
-    
+
     if (profile) {
       // Get trophy data
       const trophyData = await prisma.pSNTrophy.findUnique({
-        where: { profileId: profile.id }
+        where: { profileId: profile.id },
       });
-      
+
       // Get games data (limited to last 100 for performance)
       const games = await prisma.pSNGame.findMany({
         where: { profileId: profile.id },
         orderBy: { lastPlayed: 'desc' },
         take: 100,
       });
-      
+
       psnProfile = {
         id: profile.id,
         onlineId: profile.onlineId,
@@ -56,21 +56,23 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
         lastProfileSync: profile.lastProfileSync,
         lastTrophySync: profile.lastTrophySync,
         lastGameSync: profile.lastGameSync,
-        avatars: profile.avatars.map(avatar => ({
+        avatars: profile.avatars.map((avatar) => ({
           size: avatar.size,
-          url: avatar.url
+          url: avatar.url,
         })),
-        trophy: trophyData ? {
-          trophyLevel: trophyData.trophyLevel,
-          progress: trophyData.progress,
-          tier: trophyData.tier,
-          platinumCount: trophyData.platinumCount,
-          goldCount: trophyData.goldCount,
-          silverCount: trophyData.silverCount,
-          bronzeCount: trophyData.bronzeCount,
-          totalTrophies: trophyData.totalTrophies
-        } : null,
-        games: games.map(game => ({
+        trophy: trophyData
+          ? {
+              trophyLevel: trophyData.trophyLevel,
+              progress: trophyData.progress,
+              tier: trophyData.tier,
+              platinumCount: trophyData.platinumCount,
+              goldCount: trophyData.goldCount,
+              silverCount: trophyData.silverCount,
+              bronzeCount: trophyData.bronzeCount,
+              totalTrophies: trophyData.totalTrophies,
+            }
+          : null,
+        games: games.map((game) => ({
           id: game.id,
           name: game.name,
           platform: game.platform,
@@ -80,7 +82,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
           firstPlayed: game.firstPlayed ? game.firstPlayed.toISOString() : null,
           lastPlayed: game.lastPlayed ? game.lastPlayed.toISOString() : null,
           playDuration: game.playDuration,
-        }))
+        })),
       };
     }
   } catch (error) {

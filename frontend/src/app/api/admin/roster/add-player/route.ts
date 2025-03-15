@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Admin Add Player to Roster API Route
- * 
+ *
  * Adds a player to a team's roster for a specific league tier.
  * Requires admin authentication.
- * 
+ *
  * @route POST /api/admin/roster/add-player
  * @returns {Promise<NextResponse>} JSON response with operation status
  */
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Failed to add player to team:', error);
-    
+
     // Check if it's an authentication error
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
       }
     }
-    
+
     return NextResponse.json({ error: 'Failed to add player to team' }, { status: 500 });
   }
 }
