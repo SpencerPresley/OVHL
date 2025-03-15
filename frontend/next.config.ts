@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       'media8.giphy.com',
       'media9.giphy.com',
       'media.giphy.com',
+      'image.api.playstation.com',
     ],
   },
   experimental: {

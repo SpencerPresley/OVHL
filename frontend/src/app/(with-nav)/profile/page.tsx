@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AvatarUpload } from './avatar-upload';
 import { AccountTab } from './components/AccountTab';
 import { IntegrationsTab } from './components/IntegrationsTab';
-import { PSNProfileTab } from './components/PSNProfileTab';
+import { PSNProfileTab } from './components/psn/psn-profile-tab';
 
 export default function ProfilePage() {
   const {

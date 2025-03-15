@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   UserService,
@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import { NoPlayerProfile } from './components/no-player-profile';
 import { ProfileBanner } from './components/profile-banner';
 import { SeasonStatsCard } from './components/season-stats-card';
-import { PSNProfilePublicView } from './PSNProfilePublicView';
+import { PSNProfileDisplay } from './components/psn/psn-profile-display';
 
 interface UserProfileViewProps {
   user: UserProfileResponse;
@@ -31,11 +31,11 @@ export function UserProfileView({ user, psnProfile }: UserProfileViewProps) {
   useEffect(() => {
     const fetchPSNProfile = async () => {
       if (psnProfile || !user || !user.id) return;
-      
+
       try {
         setIsLoading(true);
         const response = await fetch(`/api/users/${user.id}/psn`);
-        
+
         if (response.ok) {
           const data = await response.json();
           setPsnProfileData(data);
@@ -46,7 +46,7 @@ export function UserProfileView({ user, psnProfile }: UserProfileViewProps) {
         setIsLoading(false);
       }
     };
-    
+
     fetchPSNProfile();
   }, [user, psnProfile]);
 
@@ -78,7 +78,7 @@ export function UserProfileView({ user, psnProfile }: UserProfileViewProps) {
         {/* PSN Profile */}
         {!isLoading && (
           <div className="mt-6">
-            <PSNProfilePublicView profile={psnProfileData} />
+            <PSNProfileDisplay profile={psnProfileData} />
           </div>
         )}
 
