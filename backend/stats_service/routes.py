@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Query, Path
+from __future__ import annotations
+
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Dict, Any, Union
+from typing import Dict, Any
 from functools import lru_cache
 
 from src.utils import WebRequest, PlatformValidator
@@ -53,7 +55,7 @@ class ClubFullResponse(BaseModel):
 @router.get("/club/id", response_model=ClubResponse, summary="Get Club ID")
 async def get_club_id(
     search_name: str = Query(..., description="The name of the club to search for"),
-    platform: str = Query("common-gen5", description="The gaming platform identifier"),
+    platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
     Get the club ID for a given club name.
@@ -74,7 +76,7 @@ async def get_club_id(
 @router.get("/club/data", response_model=ClubDataResponse, summary="Get Club Data")
 async def get_club_data(
     search_name: str = Query(..., description="The name of the club to search for"),
-    platform: str = Query("common-gen5", description="The gaming platform identifier"),
+    platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
     Get the club data for a given club name.
@@ -98,7 +100,7 @@ async def get_club_data(
 )
 async def get_club_full(
     search_name: str = Query(..., description="The name of the club to search for"),
-    platform: str = Query("common-gen5", description="The gaming platform identifier"),
+    platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
     Get both the club ID and complete club data for a given club name.
