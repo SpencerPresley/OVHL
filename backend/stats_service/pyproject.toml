@@ -1,0 +1,24 @@
+[project]
+name = "stats-service"
+version = "0.1.0"
+description = "A service for interacting with the EA NHL Proclubs API and getting data in a format suitable for frontend use."
+authors = [
+    {name = "Spencer Presley",email = "153392395+SpencerPresley@users.noreply.github.com"}
+]
+license = {text = "Proprietary"}
+# readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic",
+    "requests",
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+]
+
+[tool.poetry]
+packages = [{include = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
