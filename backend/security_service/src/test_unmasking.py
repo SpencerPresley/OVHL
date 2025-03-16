@@ -10,7 +10,7 @@ expected_user_id = os.getenv("EXPECTED_USER_ID")
 # Try to unmask it
 try:
     unmasked_id = unmask_user_id(masked_token)
-    
+
     if unmasked_id is None:
         print("❌ Failed: Token could not be unmasked (returned None)")
     elif unmasked_id == expected_user_id:

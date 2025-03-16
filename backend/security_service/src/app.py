@@ -11,19 +11,22 @@ load_dotenv()
 app = FastAPI(
     title="Security Service API",
     description="API for security services",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 # Include the router from routes.py
 app.include_router(router)
 
+
 @app.get("/", include_in_schema=False)
 async def root_redirect():
     return {"message": "API is running."}
 
+
 # This allows you to run the app with uvicorn
 if __name__ == "__main__":
     import uvicorn
+
     # Use environment variables with defaults for configuration
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 8000))

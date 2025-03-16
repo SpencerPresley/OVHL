@@ -1,36 +1,40 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from ..utils import WebRequest, PlatformValidator
 
+# Import the Pydantic models
+from ..models.club_response.club_data import ClubResponse
+
+
 class GetClubsRequest:
     """Handles requests to fetch club data from the EA NHL API.
-    
+
     This class encapsulates the logic for making requests to the EA NHL API
     to search for clubs by name.
-    
+
     Attributes:
         search_name: The name of the club to search for.
         platform: The gaming platform identifier.
     """
-    
+
     def __init__(
         self,
-        search_name: str, # The name of the club to search for.
-        platform: str, # This should almost always be "common-gen5"
+        search_name: str,  # The name of the club to search for.
+        platform: str,  # This should almost always be "common-gen5"
         web_request: WebRequest,
         platform_validator: PlatformValidator,
     ) -> None:
         """Initialize a new GetClubsRequest instance.
-        
+
         Args:
             search_name: The name of the club to search for.
             platform: The gaming platform identifier.
             web_request: WebRequest instance for making HTTP requests.
             platform_validator: Validator for platform identifiers.
-            
+
         Raises:
             ValueError: If any of the validators are None or if platform is invalid.
         """
@@ -44,13 +48,17 @@ class GetClubsRequest:
         self._search_name = search_name
         self._platform = platform
         self._web_request = web_request
-        self._club_data = self._get_club_data()
+        self._club_data = self._parse_club_data(self._fetch_raw_club_data())
         self._club_id = self._get_club_id()
 
     def get_club_id(self) -> int:
         """Get the club ID."""
         return self._club_id
-    
+
+    def get_club_data(self) -> ClubResponse:
+        """Get the validated club data as a Pydantic model."""
+        return self._club_data
+
     @property
     def search_name(self) -> str:
         """Get the search name."""
@@ -67,23 +75,33 @@ class GetClubsRequest:
         club_name_formatted = self.search_name.replace(" ", "+").lower()
         return f"https://proclubs.ea.com/api/nhl/clubs/search?platform={self.platform}&clubName={club_name_formatted}"
 
-    def _get_club_data(self) -> Union[Dict[str, Any], List[Any]]:
-        """Fetch club data from the API.
-        
+    def _fetch_raw_club_data(self) -> Dict[str, Any]:
+        """Fetch raw club data from the API.
+
         Returns:
             The parsed JSON response from the API.
-            
+
         Raises:
             requests.exceptions.RequestException: If the HTTP request fails.
         """
         return self._web_request.process(self.url)
-    
+
+    def _parse_club_data(self, raw_club_data: Dict[str, Any]) -> ClubResponse:
+        """Parse raw club data using Pydantic model.
+
+        Returns:
+            Validated ClubResponse object
+
+        Raises:
+            ValidationError: If the data doesn't match the expected schema
+        """
+        return ClubResponse.model_validate(raw_club_data)
+
     def _get_club_id(self) -> int:
         """Get the club ID from the club data."""
-        # Make list of keys
-        keys = list(self._club_data.keys())
-
-        # Club ID is the first and only top level key
-        club_id = keys[0]
-        return club_id
-
+        # In Pydantic v2, for a RootModel we need to access the root attribute
+        # or use model_dump() to get the underlying dictionary
+        for club_id, club_data in self._club_data.root.items():
+            if club_data.name == self.search_name:
+                return int(club_id)
+        raise ValueError(f"Club not found: {self.search_name}")

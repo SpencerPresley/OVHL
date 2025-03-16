@@ -8,13 +8,16 @@ from functools import lru_cache
 try:
     # For region information
     import pycountry
+
     HAS_PYCOUNTRY = True
 except ImportError:
     HAS_PYCOUNTRY = False
 
+
 class PSNClient:
     """Singleton client for PSNAWP API"""
-    _instance: ClassVar[Optional['PSNClient']] = None
+
+    _instance: ClassVar[Optional["PSNClient"]] = None
     _client: PSNAWP
 
     def __new__(cls):
@@ -30,8 +33,10 @@ class PSNClient:
     def client(self) -> PSNAWP:
         return self._client
 
+
 class PSNUserProfile(BaseModel):
     """Pydantic model for a PlayStation Network user profile"""
+
     online_id: str
     _user: Optional[PSNUser] = None
     _profile_data: Optional[Dict[str, Any]] = None
@@ -85,7 +90,7 @@ class PSNUserProfile(BaseModel):
                 print(f"Error fetching presence for {self.online_id}: {str(e)}")
                 self._presence_data = {}
         return self._presence_data
-    
+
     @property
     def friendship(self) -> Dict[str, Any]:
         """Get or fetch the friendship data"""
@@ -112,33 +117,33 @@ class PSNUserProfile(BaseModel):
     def get_about_me(self) -> str:
         """Get the user's about me text"""
         return self.profile.get("aboutMe", "")
-    
+
     def get_avatars(self) -> List[Dict[str, str]]:
         """Get the user's avatars"""
         return self.profile.get("avatars", [])
-        
+
     def get_languages(self) -> List[str]:
         """Get the user's languages"""
         return self.profile.get("languages", [])
-    
+
     def get_is_plus(self) -> bool:
         """Check if the user has PlayStation Plus"""
         return self.profile.get("isPlus", False)
-    
+
     def get_is_officially_verified(self) -> bool:
         """Check if the user is officially verified"""
         return self.profile.get("isOfficiallyVerified", False)
-    
+
     def get_account_id(self) -> str:
         """Get the user's PSN account ID"""
         return self.account_id
-    
+
     def get_np_id(self) -> str:
         """Get the user's NP ID"""
         # This is not directly available in the standard API methods,
         # so we'll return empty as it's not crucial
         return ""
-    
+
     # Presence information
     def get_online_status(self) -> str:
         """Get the user's online status"""
@@ -146,28 +151,30 @@ class PSNUserProfile(BaseModel):
             return self.presence.get("primaryPlatformInfo", {}).get("onlineStatus", "")
         except Exception:
             return ""
-    
+
     def get_platform(self) -> str:
         """Get the user's current platform"""
         try:
             return self.presence.get("primaryPlatformInfo", {}).get("platform", "")
         except Exception:
             return ""
-    
+
     def get_last_online_date(self) -> str:
         """Get when the user was last online"""
         try:
-            return self.presence.get("primaryPlatformInfo", {}).get("lastOnlineDate", "")
+            return self.presence.get("primaryPlatformInfo", {}).get(
+                "lastOnlineDate", ""
+            )
         except Exception:
             return ""
-    
+
     def get_availability(self) -> str:
         """Get the user's availability status"""
         try:
             return self.presence.get("availability", "")
         except Exception:
             return ""
-    
+
     # Friendship information
     def get_friends_count(self) -> int:
         """Get the user's friend count"""
@@ -182,14 +189,14 @@ class PSNUserProfile(BaseModel):
             return self.friendship.get("mutualFriendsCount", 0)
         except Exception:
             return 0
-            
+
     def get_friend_relation(self) -> str:
         """Get the friendship relation with this user"""
         try:
             return self.friendship.get("friendRelation", "")
         except Exception:
             return ""
-    
+
     # Access methods to check blocking/following status
     def get_is_blocking(self) -> bool:
         """Check if you are blocking this user"""
@@ -197,11 +204,11 @@ class PSNUserProfile(BaseModel):
             return self.user.is_blocked()
         except Exception:
             return False
-    
+
     def get_is_following(self) -> bool:
         """This info isn't directly available through PSNAWP API"""
         return False
-    
+
     # Trophy information - using direct methods
     def get_trophy_level(self) -> int:
         """Get the user's trophy level"""
@@ -210,7 +217,7 @@ class PSNUserProfile(BaseModel):
             return trophy_data.trophy_level
         except Exception:
             return 0
-    
+
     def get_trophy_progress(self) -> int:
         """Get the user's trophy progress"""
         try:
@@ -218,7 +225,7 @@ class PSNUserProfile(BaseModel):
             return trophy_data.progress
         except Exception:
             return 0
-    
+
     def get_trophy_tier(self) -> int:
         """Get the user's trophy tier"""
         try:
@@ -226,7 +233,7 @@ class PSNUserProfile(BaseModel):
             return trophy_data.tier
         except Exception:
             return 0
-    
+
     def get_earned_trophies(self) -> Dict[str, int]:
         """Get the user's earned trophies"""
         try:
@@ -236,11 +243,11 @@ class PSNUserProfile(BaseModel):
                 "platinum": earned.platinum,
                 "gold": earned.gold,
                 "silver": earned.silver,
-                "bronze": earned.bronze
+                "bronze": earned.bronze,
             }
         except Exception:
             return {"platinum": 0, "gold": 0, "silver": 0, "bronze": 0}
-    
+
     # Pass-through methods for more advanced trophy functions
     def get_trophy_titles(self, limit=None):
         """Get user's trophy titles"""
@@ -249,7 +256,7 @@ class PSNUserProfile(BaseModel):
         except Exception as e:
             print(f"Error fetching trophy titles: {str(e)}")
             return []
-    
+
     def get_trophy_titles_for_title(self, title_ids):
         """Get user's trophy titles for specific titles"""
         try:
@@ -257,22 +264,22 @@ class PSNUserProfile(BaseModel):
         except Exception as e:
             print(f"Error fetching trophy titles for title: {str(e)}")
             return []
-    
+
     def get_trophies(self, np_communication_id, platform, include_progress=False):
         """Get trophies for a specific game"""
         try:
             return self.user.trophies(
                 np_communication_id=np_communication_id,
                 platform=platform,
-                include_progress=include_progress
+                include_progress=include_progress,
             )
         except Exception as e:
             print(f"Error fetching trophies: {str(e)}")
             return []
-    
+
     def get_title_stats(self, limit=None):
         """Get detailed information about games the user has played
-        
+
         Returns information about play time, play count, and other stats
         for each game title the user has played.
         """
@@ -281,7 +288,7 @@ class PSNUserProfile(BaseModel):
         except Exception as e:
             print(f"Error fetching title stats: {str(e)}")
             return []
-    
+
     # Construct full profile object
     def get_full_profile(self) -> Dict[str, Any]:
         """Get a complete profile with all available information"""
@@ -294,28 +301,26 @@ class PSNUserProfile(BaseModel):
             "languages": self.get_languages(),
             "is_plus": self.get_is_plus(),
             "is_officially_verified": self.get_is_officially_verified(),
-            
             # Presence information
             "online_status": self.get_online_status(),
             "platform": self.get_platform(),
             "last_online": self.get_last_online_date(),
             "availability": self.get_availability(),
-            
             # Friendship information
             "friends_count": self.get_friends_count(),
             "mutual_friends_count": self.get_mutual_friends_count(),
             "friend_relation": self.get_friend_relation(),
             "is_blocking": self.get_is_blocking(),
-            
             # Trophy information
             "trophy_level": self.get_trophy_level(),
             "trophy_progress": self.get_trophy_progress(),
             "trophy_tier": self.get_trophy_tier(),
             "earned_trophies": self.get_earned_trophies(),
         }
-        
+
         # Clean up the profile by removing empty/zero values
         return {k: v for k, v in profile.items() if v or v == 0 or v == False}
+
 
 @lru_cache(maxsize=100)
 def get_psn_user(online_id: str) -> PSNUserProfile:

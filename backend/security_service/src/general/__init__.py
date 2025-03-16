@@ -11,4 +11,3 @@ __all__ = [
     "generate_platform_verification_code",
     "unmask_user_id",
 ]
-

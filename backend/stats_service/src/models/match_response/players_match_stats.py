@@ -6,22 +6,17 @@ including both skater and goalie statistics.
 """
 
 from typing import Optional
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    computed_field
-)
+from pydantic import BaseModel, Field, field_validator, computed_field
 
 
 class PlayerStats(BaseModel):
     """
     Comprehensive player statistics for a single game.
-    
+
     Contains all stats for both skater and goalie positions, along with
     general player and game information.
     """
-    
+
     # Basic Information
     player_level: int = Field(alias="class")  # Player's level in the game
     position: str
@@ -29,12 +24,12 @@ class PlayerStats(BaseModel):
     player_name: str = Field(alias="playername")
     client_platform: str = Field(alias="clientPlatform")
     player_level_display: int = Field(alias="playerLevel")  # Level shown in-game
-    
+
     # Game Status
     is_guest: int = Field(alias="isGuest")
     player_dnf: int = Field(alias="player_dnf")
     pnhl_online_game_type: str = Field(alias="pNhlOnlineGameType")
-    
+
     # Team Information
     team_id: int = Field(alias="teamId")
     team_side: int = Field(alias="teamSide")
@@ -42,16 +37,16 @@ class PlayerStats(BaseModel):
     opponent_team_id: int = Field(alias="opponentTeamId")
     opponent_score: int = Field(alias="opponentScore")
     score: int
-    
+
     # Player Ratings
     rating_defense: float = Field(alias="ratingDefense")
     rating_offense: float = Field(alias="ratingOffense")
     rating_teamplay: float = Field(alias="ratingTeamplay")
-    
+
     # Time Stats
     toi: int = Field(alias="toi")  # Time on ice (minutes)
     toi_seconds: int = Field(alias="toiseconds")  # Time on ice in seconds
-    
+
     # Skater Stats
     skassists: int  # Assists
     skbs: int  # Blocked shots
@@ -80,7 +75,7 @@ class PlayerStats(BaseModel):
     skshotpct: float  # Shooting percentage
     skshots: int  # Shots on goal
     sktakeaways: int  # Takeaways
-    
+
     # Goalie Stats
     glbrksavepct: float  # Breakaway save percentage
     glbrksaves: int  # Breakaway saves
@@ -100,20 +95,53 @@ class PlayerStats(BaseModel):
 
     # Field validators for string-to-numeric conversion
     @field_validator(
-        'player_level', 'pos_sorted', 'player_level_display',
-        'is_guest', 'player_dnf', 'team_id', 'team_side',
-        'opponent_team_id', 'opponent_score', 'score',
-        'toi', 'toi_seconds',
-        'skassists', 'skbs', 'skdeflections', 'skfol', 'skfow',
-        'skgiveaways', 'skgoals', 'skgwg', 'skhits', 'skinterceptions',
-        'skpassattempts', 'skpasses', 'skpenaltiesdrawn', 'skpim',
-        'skpkclearzone', 'skplusmin', 'skpossession', 'skppg',
-        'sksaucerpasses', 'skshg', 'skshotattempts', 'skshots',
-        'sktakeaways',
-        'glbrksaves', 'glbrkshots', 'gldsaves', 'glga',
-        'glpensaves', 'glpenshots', 'glpkclearzone', 'glpokechecks',
-        'glsaves', 'glshots', 'glsoperiods',
-        mode='before'
+        "player_level",
+        "pos_sorted",
+        "player_level_display",
+        "is_guest",
+        "player_dnf",
+        "team_id",
+        "team_side",
+        "opponent_team_id",
+        "opponent_score",
+        "score",
+        "toi",
+        "toi_seconds",
+        "skassists",
+        "skbs",
+        "skdeflections",
+        "skfol",
+        "skfow",
+        "skgiveaways",
+        "skgoals",
+        "skgwg",
+        "skhits",
+        "skinterceptions",
+        "skpassattempts",
+        "skpasses",
+        "skpenaltiesdrawn",
+        "skpim",
+        "skpkclearzone",
+        "skplusmin",
+        "skpossession",
+        "skppg",
+        "sksaucerpasses",
+        "skshg",
+        "skshotattempts",
+        "skshots",
+        "sktakeaways",
+        "glbrksaves",
+        "glbrkshots",
+        "gldsaves",
+        "glga",
+        "glpensaves",
+        "glpenshots",
+        "glpkclearzone",
+        "glpokechecks",
+        "glsaves",
+        "glshots",
+        "glsoperiods",
+        mode="before",
     )
     @classmethod
     def convert_to_int(cls, v):
@@ -121,10 +149,18 @@ class PlayerStats(BaseModel):
         return int(v) if isinstance(v, str) else v
 
     @field_validator(
-        'rating_defense', 'rating_offense', 'rating_teamplay',
-        'skfopct', 'skpasspct', 'skshotonnetpct', 'skshotpct',
-        'glbrksavepct', 'glgaa', 'glpensavepct', 'glsavepct',
-        mode='before'
+        "rating_defense",
+        "rating_offense",
+        "rating_teamplay",
+        "skfopct",
+        "skpasspct",
+        "skshotonnetpct",
+        "skshotpct",
+        "glbrksavepct",
+        "glgaa",
+        "glpensavepct",
+        "glsavepct",
+        mode="before",
     )
     @classmethod
     def convert_to_float(cls, v):
@@ -149,7 +185,7 @@ class PlayerStats(BaseModel):
     def faceoff_percentage(self) -> Optional[float]:
         """
         Faceoff win percentage.
-        
+
         Returns:
             float: Percentage of faceoffs won (0-100)
             None: If no faceoffs were taken
@@ -170,7 +206,7 @@ class PlayerStats(BaseModel):
     def shooting_percentage(self) -> Optional[float]:
         """
         Shooting percentage (goals/shots).
-        
+
         Returns:
             float: Percentage of shots that were goals (0-100)
             None: If no shots were taken
@@ -190,7 +226,7 @@ class PlayerStats(BaseModel):
     def passing_percentage(self) -> Optional[float]:
         """
         Pass completion percentage.
-        
+
         Returns:
             float: Percentage of passes completed (0-100)
             None: If no passes were attempted
@@ -204,7 +240,7 @@ class PlayerStats(BaseModel):
     def goals_saved(self) -> Optional[int]:
         """
         Total number of goals saved (goalie only).
-        
+
         Returns:
             int: Number of saves if player is a goalie
             None: If player is not a goalie
@@ -218,7 +254,7 @@ class PlayerStats(BaseModel):
     def save_percentage(self) -> Optional[float]:
         """
         Save percentage for goalies.
-        
+
         Returns:
             float: Percentage of shots saved (0-100)
             None: If not a goalie or no shots faced
@@ -263,7 +299,7 @@ class PlayerStats(BaseModel):
         """
         Shooting efficiency considering all shot attempts.
         More punishing than regular shooting percentage as it includes missed shots.
-        
+
         Returns:
             float: Percentage of shot attempts that were goals (0-100)
             None: If no shot attempts
@@ -277,7 +313,7 @@ class PlayerStats(BaseModel):
     def takeaway_giveaway_ratio(self) -> Optional[float]:
         """
         Ratio of takeaways to giveaways.
-        
+
         Returns:
             float: Ratio of takeaways to giveaways (> 1 is good)
             None: If no giveaways
@@ -327,4 +363,3 @@ class PlayerStats(BaseModel):
             return 0.0
         impact = (self.skhits + self.skbs + self.sktakeaways) - self.skgiveaways
         return round(impact / self.toi, 2)
-    
