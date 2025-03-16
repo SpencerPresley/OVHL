@@ -1,47 +1,33 @@
 # OVHL Stats Service API
 
-A FastAPI service for retrieving NHL club statistics.
+A FastAPI service for retrieving NHL club statistics from the EA NHL API.
 
-## Installation
+## API Overview
 
-1. Clone the repository
-2. Install dependencies:
+The Stats Service provides endpoints for retrieving club information from the EA NHL API (and coming soon match data). The service supports:
 
-```bash
-pip install -r requirements.txt
-```
+- Looking up club IDs by name
+- Retrieving full club data
+- Combined lookups for both ID and data
 
-## Running the API
+All endpoints default to the "common-gen5" platform but support other EA NHL platforms.
 
-Run the API server with:
-
-```bash
-python main.py
-```
-
-The API will be available at `http://localhost:8000`.
-
-## API Documentation
-
-Once the server is running, you can access the interactive API documentation at:
-
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## Endpoints
+## API Endpoints
 
 ### 1. Get Club ID
 
 ```bash
-GET /club/id?search_name={club_name}&platform={platform}
+GET /api/club/id?search_name={club_name}&platform={platform}
 ```
 
-Parameters:
+Returns the unique identifier for a club when provided with the club name.
+
+**Parameters:**
 
 - `search_name` (required): The name of the club to search for
 - `platform` (optional, default: "common-gen5"): The gaming platform identifier
 
-Returns:
+**Response:**
 
 ```json
 {
@@ -52,20 +38,27 @@ Returns:
 ### 2. Get Club Data
 
 ```bash
-GET /club/data?search_name={club_name}&platform={platform}
+GET /api/club/data?search_name={club_name}&platform={platform}
 ```
 
-Parameters:
+Returns the complete data for a club when provided with the club name.
+
+**Parameters:**
 
 - `search_name` (required): The name of the club to search for
 - `platform` (optional, default: "common-gen5"): The gaming platform identifier
 
-Returns:
+**Response:**
 
 ```json
 {
   "club_data": {
-    // Complete club data
+    "12345": {
+      "name": "Example Club",
+      "clubInfo": { ... },
+      "members": { ... },
+      // Additional club data
+    }
   }
 }
 ```
@@ -73,29 +66,53 @@ Returns:
 ### 3. Get Complete Club Info
 
 ```bash
-GET /club/full?search_name={club_name}&platform={platform}
+GET /api/club/full?search_name={club_name}&platform={platform}
 ```
 
-Parameters:
+Returns both the club ID and complete club data in a single request.
+
+**Parameters:**
 
 - `search_name` (required): The name of the club to search for
 - `platform` (optional, default: "common-gen5"): The gaming platform identifier
 
-Returns:
+**Response:**
 
 ```json
 {
   "club_id": 12345,
   "club_data": {
-    // Complete club data
+    "12345": {
+      "name": "Example Club",
+      "clubInfo": { ... },
+      "members": { ... },
+      // Additional club data
+    }
   }
 }
 ```
 
 ## Valid Platforms
 
-- ps5
-- ps4
-- xbox-series-xs
-- xboxone
-- common-gen5 (default)
+The following platforms are supported by the API:
+
+- `ps5` - PlayStation 5
+- `ps4` - PlayStation 4
+- `xbox-series-xs` - Xbox Series X/S
+- `xboxone` - Xbox One
+- `common-gen5` (default) - Generic platform
+
+## Error Handling
+
+All endpoints return appropriate HTTP status codes:
+
+- `200 OK` - Request successful
+- `500 Internal Server Error` - Error retrieving data from EA API
+
+Error responses include a detail message explaining the issue:
+
+```json
+{
+  "detail": "Error retrieving club ID: [error message]"
+}
+```
