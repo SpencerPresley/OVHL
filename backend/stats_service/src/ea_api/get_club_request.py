@@ -99,9 +99,7 @@ class GetClubsRequest:
 
     def _get_club_id(self) -> int:
         """Get the club ID from the club data."""
-        # In Pydantic v2, for a RootModel we need to access the root attribute
-        # or use model_dump() to get the underlying dictionary
-        for club_id, club_data in self._club_data.root.items():
+        for _, club_data in self._club_data.root.items():
             if club_data.name == self.search_name:
-                return int(club_id)
+                return club_data.club_id
         raise ValueError(f"Club not found: {self.search_name}")
