@@ -1,21 +1,27 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Path
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
 from functools import lru_cache
 
-from src.utils import WebRequest, PlatformValidator
-from src.ea_api import GetClubsRequest
+from src.utils import WebRequest, PlatformValidator, MatchTypeValidator
+print("imports successful")
+
+from src.ea_api import GetClubsRequest, GetGamesRequest
 from src.models import ClubResponse
+from src.models import Match
 
 # Create router with API prefix and tags for better documentation
 router = APIRouter(prefix="/api", tags=["clubs"])
 
 # Create instances of required dependencies
 web_request = WebRequest()
+print("web_request successful")
 platform_validator = PlatformValidator()
-
+print("platform_validator successful")
+match_type_validator = MatchTypeValidator()
+print("match_type_validator successful")
 
 # Create a cached version of the club request
 @lru_cache(maxsize=100)  # Cache up to 100 different club requests
@@ -38,7 +44,6 @@ def get_cached_club_request(search_name: str, platform: str) -> GetClubsRequest:
         platform_validator=platform_validator,
     )
 
-
 class ClubResponse(BaseModel):
     club_id: int
 
@@ -46,15 +51,16 @@ class ClubResponse(BaseModel):
 class ClubDataResponse(BaseModel):
     club_data: Dict[str, Any]
 
-
 class ClubFullResponse(BaseModel):
     club_id: int
     club_data: Dict[str, Any]
+    
+class MatchesResponse(BaseModel):
+    matches: List[Match]
 
-
-@router.get("/club/id", response_model=ClubResponse, summary="Get Club ID")
+@router.get("/club/{search_name}/id", response_model=ClubResponse, summary="Get Club ID")
 async def get_club_id(
-    search_name: str = Query(..., description="The name of the club to search for"),
+    search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
@@ -73,9 +79,9 @@ async def get_club_id(
         )
 
 
-@router.get("/club/data", response_model=ClubDataResponse, summary="Get Club Data")
+@router.get("/club/{search_name}/data", response_model=ClubDataResponse, summary="Get Club Data")
 async def get_club_data(
-    search_name: str = Query(..., description="The name of the club to search for"),
+    search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
@@ -96,10 +102,10 @@ async def get_club_data(
 
 
 @router.get(
-    "/club/full", response_model=ClubFullResponse, summary="Get Complete Club Info"
+    "/club/{search_name}/full", response_model=ClubFullResponse, summary="Get Complete Club Info"
 )
 async def get_club_full(
-    search_name: str = Query(..., description="The name of the club to search for"),
+    search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
     """
@@ -117,3 +123,43 @@ async def get_club_full(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving club information: {str(e)}"
         )
+
+@router.get("/club/{club_id}/matches", summary="Get Club Matches")
+async def get_club_matches(
+    club_id: int = Path(..., description="The ID of the club to get matches for"),
+    match_type: str | None = Query("club_private", description="The type of match to fetch"),
+    platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
+):
+    """
+    Get all matches for a given club.
+
+    This endpoint fetches the last 5 matches (max ea returns) for a specific club based on the provided club ID,
+    match type, and platform. 
+    
+    Args:
+        club_id (int): Required. The ID of the club to get matches for
+        match_type (str): Optional. The type of match to fetch. Default is "club_private".
+        platform (str): Optional. The gaming platform identifier. Default is "common-gen5".
+
+    Returns:
+        A list of matches
+    """
+    try:
+        games_request = GetGamesRequest(
+            club_id,
+            match_type or "club_private", # If None is explicitly passed, default to club_private
+            platform or "common-gen5", # If None is explicitly passed, default to common-gen5
+            web_request,
+            platform_validator,
+            match_type_validator,
+        )
+        matches = games_request.get_games()
+        return [match.model_dump() for match in matches]
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving club matches: {str(e)}"
+        )
+    
+@router.get("/test")
+async def test_endpoint():
+    return {"message": "Test endpoint working!"}

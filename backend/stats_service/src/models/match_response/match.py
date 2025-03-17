@@ -5,7 +5,7 @@ This module provides models for match-level data from the EA NHL API,
 including the relationships between clubs and players.
 """
 
-from typing import Dict
+from typing import Dict, Optional, Any
 from pydantic import BaseModel, Field
 
 from .club_match_stats import ClubMatchStats, ClubAggregateMatchStats
@@ -39,6 +39,14 @@ class Match(BaseModel):
     clubs: Dict[str, ClubMatchStats]  # club_id -> club stats
     players: Dict[str, Dict[str, PlayerStats]]  # club_id -> {player_id -> player stats}
     aggregate: Dict[str, ClubAggregateMatchStats]  # club_id -> aggregate stats
+    
+    # Analytics will be populated post-validation by the `get_analytics` method
+    analytics: Optional[Dict[str, Any]] = None
+    
+    def model_post_init(self, __context: Any) -> None:
+        """Runs post initialization and calculates and inserts analytics."""
+        if self.analytics is None:
+            self.analytics = self.get_analytics()
 
     @property
     def home_club_id(self) -> str:
@@ -128,3 +136,19 @@ class Match(BaseModel):
             AggregateStats if found, None otherwise
         """
         return self.aggregate.get(club_id)
+    
+    def get_analytics(self) -> Dict[str, Optional[object]]:
+        """
+        Calculate and return all analytics metrics for this match.
+        
+        Returns:
+            Dictionary containing all metrics categories
+        """
+        # Import here to avoid circular imports
+        from .match_analytics import MatchAnalytics
+        
+        # Create a MatchAnalytics instance with this match
+        analytics = MatchAnalytics(self)
+        
+        # Return all metrics
+        return analytics.get_all_metrics()

@@ -3,7 +3,7 @@
 from typing import Any, Dict, List, Union
 
 from ..utils import WebRequest, PlatformValidator, MatchTypeValidator
-
+from ..models import Match
 
 class GetGamesRequest:
     """Handles requests to fetch games data from the EA NHL API.
@@ -84,7 +84,11 @@ class GetGamesRequest:
     def url(self) -> str:
         """Get the formatted API URL."""
         return f"https://proclubs.ea.com/api/nhl/clubs/matches?clubIds={self.club_id}&platform={self.platform}&matchType={self.match_type}"
-
+    
+    def _fetch_raw_data(self) -> Dict[str, Any]:
+        """Fetch raw data from the API."""
+        return self._web_request.process(self.url)
+    
     def get_games(self) -> Union[Dict[str, Any], List[Any]]:
         """Fetch games data from the API.
 
@@ -94,4 +98,5 @@ class GetGamesRequest:
         Raises:
             requests.exceptions.RequestException: If the HTTP request fails.
         """
-        return self._web_request.process(self.url)
+        raw_data = self._fetch_raw_data()
+        return [Match.model_validate(match_data) for match_data in raw_data]

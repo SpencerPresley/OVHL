@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Dict
 
-if TYPE_CHECKING:
-    from ..utils import WebRequest, PlatformValidator
+from ..utils import WebRequest, PlatformValidator
 
 # Import the Pydantic models
 from ..models.club_response.club_data import ClubResponse
@@ -38,19 +37,26 @@ class GetClubsRequest:
         Raises:
             ValueError: If any of the validators are None or if platform is invalid.
         """
-        if not web_request:
-            raise ValueError("web_request cannot be None")
-        if not platform_validator:
-            raise ValueError("platform_validator cannot be None")
-        if not platform_validator.validate(platform):
-            raise ValueError(f"Provided value is not a valid platform: {platform}")
-
+        self._platform_validator = platform_validator
         self._search_name = search_name
         self._platform = platform
         self._web_request = web_request
+        self._check_args()
         self._club_data = self._parse_club_data(self._fetch_raw_club_data())
         self._club_id = self._get_club_id()
-
+        
+    def _check_args(self) -> None:
+        if not self._web_request:
+            raise ValueError("Argument `web_request` cannot be None")
+        if not isinstance(self._web_request, WebRequest):
+            raise ValueError("Argument `web_request` must be a `WebRequest` instance")
+        if not self._platform_validator:
+            raise ValueError("Argument `platform_validator` cannot be None")
+        if not isinstance(self._platform_validator, PlatformValidator):
+            raise ValueError("Argument `platform_validator` must be a `PlatformValidator` instance")
+        if not self._platform_validator.validate(self._platform):
+            raise ValueError(f"Provided value is not a valid platform: {self._platform}")
+        
     def get_club_id(self) -> int:
         """Get the club ID."""
         return self._club_id
