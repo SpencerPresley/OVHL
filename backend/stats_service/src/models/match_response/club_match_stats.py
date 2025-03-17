@@ -116,16 +116,16 @@ class ClubAggregateMatchStats(BaseModel):
 
     # Basic Information
     club_level: int = Field(alias="class")  # The club's level in the game
-    position: int  # TODO: Document purpose of this field
-    pos_sorted: int = Field(alias="posSorted")  # TODO: Document purpose of this field
+    position: int  # Always gives 0
+    pos_sorted: int = Field(alias="posSorted")  # Sum of (0, 1, 2, 3, 4, 5) = 15, this field doesn't do anything for us
 
     # Game Status
     is_guest: int = Field(alias="isGuest")
-    player_dnf: int = Field(alias="player_dnf")
+    player_dnf: int = Field(alias="player_dnf") # Number of players who did not finish the game
     player_level: int = Field(
         alias="playerLevel"
-    )  # TODO: Document why this is in aggregate stats
-
+    )  # Cumulative player level of all players on the team
+    
     # Team Information
     team_id: int = Field(alias="teamId")
     team_side: int = Field(alias="teamSide")

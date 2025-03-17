@@ -904,7 +904,7 @@ class PlayerStats(BaseModel):
     
     @computed_field
     @property
-    def posession_efficiency(self) -> float:
+    def possession_efficiency(self) -> float:
         """Points generated per minut of possesion time.
         
         Measures how effectively a player converts possession time into offensive output.
