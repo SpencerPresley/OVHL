@@ -1,5 +1,4 @@
-"""
-Models for EA NHL player statistics.
+"""Models for EA NHL player statistics.
 
 This module provides models for player-level game statistics from the EA NHL API,
 including both skater and goalie statistics.
