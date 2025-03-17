@@ -183,8 +183,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def faceoff_percentage(self) -> Optional[float]:
-        """
-        Faceoff win percentage.
+        """Faceoff win percentage.
 
         Returns:
             float: Percentage of faceoffs won (0-100)
@@ -204,8 +203,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def shooting_percentage(self) -> Optional[float]:
-        """
-        Shooting percentage (goals/shots).
+        """Shooting percentage (goals/shots).
 
         Returns:
             float: Percentage of shots that were goals (0-100)
@@ -224,8 +222,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def passing_percentage(self) -> Optional[float]:
-        """
-        Pass completion percentage.
+        """Pass completion percentage.
 
         Returns:
             float: Percentage of passes completed (0-100)
@@ -238,8 +235,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def goals_saved(self) -> Optional[int]:
-        """
-        Total number of goals saved (goalie only).
+        """Total number of goals saved (goalie only).
 
         Returns:
             int: Number of saves if player is a goalie
@@ -252,8 +248,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def save_percentage(self) -> Optional[float]:
-        """
-        Save percentage for goalies.
+        """Save percentage for goalies.
 
         Returns:
             float: Percentage of shots saved (0-100)
@@ -296,8 +291,8 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def shot_efficiency(self) -> Optional[float]:
-        """
-        Shooting efficiency considering all shot attempts.
+        """Shooting efficiency considering all shot attempts.
+        
         More punishing than regular shooting percentage as it includes missed shots.
 
         Returns:
@@ -311,8 +306,7 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def takeaway_giveaway_ratio(self) -> Optional[float]:
-        """
-        Ratio of takeaways to giveaways.
+        """Ratio of takeaways to giveaways.
 
         Returns:
             float: Ratio of takeaways to giveaways (> 1 is good)
@@ -331,8 +325,8 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def defensive_actions_per_minute(self) -> float:
-        """
-        Number of defensive actions (hits, blocks, takeaways) per minute.
+        """Number of defensive actions (hits, blocks, takeaways) per minute.
+        
         Useful for comparing defensive activity level regardless of TOI.
         """
         if self.toi == 0:
@@ -343,8 +337,8 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def offensive_impact(self) -> float:
-        """
-        Offensive impact per minute considering goals, assists, and shots.
+        """Offensive impact per minute considering goals, assists, and shots.
+        
         Useful for comparing offensive contribution regardless of TOI.
         """
         if self.toi == 0:
@@ -355,8 +349,8 @@ class PlayerStats(BaseModel):
     @computed_field
     @property
     def defensive_impact(self) -> float:
-        """
-        Defensive impact per minute.
+        """Defensive impact per minute.
+        
         Positive actions (hits, blocks, takeaways) minus negative (giveaways).
         """
         if self.toi == 0:
