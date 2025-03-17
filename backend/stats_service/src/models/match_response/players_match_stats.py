@@ -363,3 +363,30 @@ class PlayerStats(BaseModel):
             return 0.0
         impact = (self.skhits + self.skbs + self.sktakeaways) - self.skgiveaways
         return round(impact / self.toi, 2)
+
+    @computed_field
+    @property
+    def detailed_position(self) -> str:
+        """Normalized position names for easier frontend consumption
+        
+        Returns a more specific position description, especially for defensemen
+        where it differentiates between right and left defense based on pos_sorted.
+        """
+        if self.position == "defenseMen":
+            return "rightDefense" if self.pos_sorted == 1 else "leftDefense"
+        return self.position
+    
+    @computed_field
+    @property
+    def position_abbreviation(self) -> str:
+        """Returns the position abbreviation for the player"""
+        if self.position == "defenseMen":
+            return "RD" if self.pos_sorted == 1 else "LD"
+        elif self.position == "leftWing":
+            return "LW"
+        elif self.position == "rightWing":
+            return "RW"
+        elif self.position == "center":
+            return "C"
+        elif self.position == "goalie":
+            return "G"

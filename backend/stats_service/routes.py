@@ -12,7 +12,7 @@ from src.models import ClubResponse
 from src.models import Match
 
 # Create router with API prefix and tags for better documentation
-router = APIRouter(prefix="/api", tags=["clubs"])
+router = APIRouter(prefix="/api/stats", tags=["clubs"])
 
 # Create instances of required dependencies
 web_request = WebRequest()
