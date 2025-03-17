@@ -1,0 +1,26 @@
+services:
+  stats_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stats_service
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "8002:8000"  # Using 8002 for stats_service to avoid conflicts with psn_service (8001)
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      # Here other environment variables can be added
+    restart: unless-stopped
+    networks:
+      - ovhl_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  ovhl_network:
+    driver: bridge
