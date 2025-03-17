@@ -6,7 +6,6 @@ from typing import Dict, Any, List
 from functools import lru_cache
 
 from src.utils import WebRequest, PlatformValidator, MatchTypeValidator
-print("imports successful")
 
 from src.ea_api import GetClubsRequest, GetGamesRequest
 from src.models import ClubResponse
@@ -17,11 +16,8 @@ router = APIRouter(prefix="/api", tags=["clubs"])
 
 # Create instances of required dependencies
 web_request = WebRequest()
-print("web_request successful")
 platform_validator = PlatformValidator()
-print("platform_validator successful")
 match_type_validator = MatchTypeValidator()
-print("match_type_validator successful")
 
 # Create a cached version of the club request
 @lru_cache(maxsize=100)  # Cache up to 100 different club requests
@@ -63,10 +59,16 @@ async def get_club_id(
     search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
-    """
-    Get the club ID for a given club name.
+    """Get the club ID for a given club name.
 
     This endpoint searches for a club by name and returns its ID.
+    
+    Args:
+        search_name (str): Required. The name of the club to search for
+        platform (str): Optional. The gaming platform identifier. Default is "common-gen5".
+
+    Returns:
+        A dictionary containing the club ID
     """
     try:
         # Use cached request
@@ -84,10 +86,16 @@ async def get_club_data(
     search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
-    """
-    Get the club data for a given club name.
+    """Get the club data for a given club name.
 
     This endpoint searches for a club by name and returns all its data.
+    
+    Args:
+        search_name (str): Required. The name of the club to search for
+        platform (str): Optional. The gaming platform identifier. Default is "common-gen5".
+
+    Returns:
+        A dictionary containing the club data
     """
     try:
         # Use cached request
@@ -108,10 +116,16 @@ async def get_club_full(
     search_name: str = Path(..., description="The name of the club to search for"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
-    """
-    Get both the club ID and complete club data for a given club name.
+    """Get both the club ID and complete club data for a given club name.
 
     This endpoint combines the functionality of the /club/id and /club/data endpoints.
+    
+    Args:
+        search_name (str): Required. The name of the club to search for
+        platform (str): Optional. The gaming platform identifier. Default is "common-gen5".
+
+    Returns:
+        A dictionary containing the club ID and club data
     """
     try:
         # Use cached request
@@ -130,8 +144,7 @@ async def get_club_matches(
     match_type: str | None = Query("club_private", description="The type of match to fetch"),
     platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
 ):
-    """
-    Get all matches for a given club.
+    """Get all matches for a given club.
 
     This endpoint fetches the last 5 matches (max ea returns) for a specific club based on the provided club ID,
     match type, and platform. 
@@ -159,7 +172,3 @@ async def get_club_matches(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving club matches: {str(e)}"
         )
-    
-@router.get("/test")
-async def test_endpoint():
-    return {"message": "Test endpoint working!"}
