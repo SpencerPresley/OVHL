@@ -10,8 +10,7 @@ from pydantic import BaseModel, Field, field_validator, computed_field
 
 
 class PlayerStats(BaseModel):
-    """
-    Comprehensive player statistics for a single game.
+    """Comprehensive player statistics for a single game.
 
     Contains all stats for both skater and goalie positions, along with
     general player and game information.
