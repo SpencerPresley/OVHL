@@ -382,3 +382,414 @@ class PlayerStats(BaseModel):
             return "C"
         elif self.position == "goalie":
             return "G"
+        
+    @computed_field
+    @property
+    def game_impact_score(self) -> float:
+        """Player's overall game impact on a 0-10 scale.
+        
+        Evaluates player performance using position-specific metrics:
+        - 0-3: Below average performance
+        - 4-6: Average performance
+        - 7-8: Strong performance 
+        - 9-10: Elite/exceptional performance
+        
+        Each position is scored on metrics most relevant to their role.
+        """
+        # Determine which position-specific method to call
+        if self.position == "goalie":
+            return self.goalie_game_impact
+        elif self.position == "center":
+            return self.center_game_impact
+        elif self.position in ["leftWing", "rightWing"]:
+            return self.winger_game_impact
+        elif self.position == "defenseMen":
+            return self.defense_game_impact
+        else:
+            # Fallback for unknown positions
+            return 5.0
+
+    @property
+    def goalie_game_impact(self) -> float:
+        """Calculate goalie's game impact score (0-10 scale).
+        
+        Considers:
+        - Save percentage (primary factor)
+        - High-danger saves (breakaways, penalty shots)
+        - Shutout periods
+        - Shot volume faced
+        - Goals against (with context)
+        """
+        # Start with a base score of 5 (average)
+        base_score = 5.0
+        
+        # Save percentage component (most important factor)
+        # multiply by 100 to convert to percentage (0.xx to xx, 1.00 to 100)
+        save_pct = (self.glsavepct * 100) if self.glsavepct is not None else 0
+        
+        # Perfect game bonus - if saved all shots and faced at least 1
+        if save_pct == 100 and self.glshots > 0:
+            # Perfect games get a big bonus based on shot volume
+            if self.glshots >= 15:  # High volume perfect game
+                perfect_bonus = 5.0  # Takes them to 10
+            elif self.glshots >= 10:  # Medium-high volume perfect game
+                perfect_bonus = 4.5  # Takes them to 9.5
+            elif self.glshots >= 5:   # Medium volume perfect game
+                perfect_bonus = 4.0   # Takes them to 9.0
+            else:  # Low volume perfect game
+                perfect_bonus = 3.0   # Takes them to 8.0
+                
+            base_score += perfect_bonus
+        else:
+            # For non-perfect games, scale based on save percentage using game standards
+            if save_pct >= 90:
+                save_bonus = 4.0 + ((save_pct - 90) / 10)  # 90% -> +4, 100% -> +5 (crazy good)
+            elif save_pct >= 80:
+                save_bonus = 2.5 + ((save_pct - 80) / 10) * 1.5  # 80% -> +2.5, 90% -> +4 (very good)
+            elif save_pct >= 76:
+                save_bonus = 1.5 + ((save_pct - 76) / 4) * 1.0  # 76% -> +1.5, 80% -> +2.5 (good)
+            elif save_pct >= 70:
+                save_bonus = 0.5 + ((save_pct - 70) / 6) * 1.0  # 70% -> +0.5, 76% -> +1.5 (decent)
+            elif save_pct >= 60:
+                save_bonus = -1.0 + ((save_pct - 60) / 10) * 1.5  # 60% -> -1, 70% -> +0.5 (bad)
+            else:
+                save_bonus = -2.5  # Under 60% is horrible
+                
+            # Apply shot volume modifier to the save bonus
+            if self.glshots >= 20:  # High volume
+                volume_modifier = 1.2
+            elif self.glshots >= 10:  # Medium volume
+                volume_modifier = 1.0
+            elif self.glshots >= 5:  # Low-medium volume
+                volume_modifier = 0.8
+            else:  # Very low volume
+                volume_modifier = 0.6
+                
+            base_score += save_bonus * volume_modifier
+        
+        # Shutout bonus (important achievement)
+        if self.glga == 0 and self.glshots > 0:
+            if self.glshots >= 15:
+                shutout_bonus = 1.0
+            elif self.glshots >= 8:
+                shutout_bonus = 0.7
+            else:
+                shutout_bonus = 0.5
+            
+            base_score += shutout_bonus
+        
+        # Special saves bonus (breakaways, penalty shots, desperation saves)
+        special_saves = self.glbrksaves + self.glpensaves + self.gldsaves
+        if special_saves > 0:
+            # Each special save is worth up to 0.3 points, max 1.5 points
+            special_bonus = min(1.5, special_saves * 0.3)
+            base_score += special_bonus
+        
+        # Pokechecks bonus (active goaltending)
+        if self.glpokechecks > 0:
+            pokecheck_bonus = min(0.5, self.glpokechecks * 0.2)
+            base_score += pokecheck_bonus
+        
+        # Goals against penalty - be generous because it's already factored into save %
+        # Only apply for higher shot volumes to avoid double-penalizing
+        if self.glshots >= 10:
+            # Expected goals based on shot volume (roughly 15-20% in this game)
+            expected_goals = self.glshots * 0.175
+            excess_goals = max(0, self.glga - expected_goals)
+            
+            # Penalty is up to -1.5 for significantly exceeding expected goals
+            goals_penalty = min(1.5, excess_goals * 0.4)
+            base_score -= goals_penalty
+        
+        # Make sure score is between 0-10
+        final_score = max(0, min(10, base_score))
+        
+        # Return rounded score to one decimal place
+        return round(final_score, 1)
+
+    @property
+    def center_game_impact(self) -> float:
+        """Calculate center's game impact score (0-10 scale).
+        
+        Emphasizes:
+        - Faceoff performance
+        - Two-way play
+        - Playmaking
+        - Scoring
+        """
+        # Faceoff component (0-2 points)
+        if self.faceoffs_total > 5:  # Only relevant if took enough faceoffs
+            faceoff_pct = self.faceoff_percentage if self.faceoff_percentage else 0
+            faceoff_component = min(2.0, (faceoff_pct / 100) * 4)
+        else:
+            faceoff_component = 1.0  # Neutral if not enough faceoffs
+        
+        # Offensive component (0-3 points)
+        # Goals are worth more, assists secondary
+        goal_value = self.skgoals * 1.0
+        assist_value = self.skassists * 0.5
+        shot_value = self.skshots * 0.1
+        
+        # Heavier adjustment for TOI to compare fairly
+        offense_per_20 = (goal_value + assist_value + shot_value) * (20 / max(1, self.toi))
+        offensive_component = min(3.0, offense_per_20)
+        
+        # Defensive component (0-2.5 points)
+        defensive_value = (
+            (self.skbs * 0.3) + 
+            (self.sktakeaways * 0.4) + 
+            (self.skinterceptions * 0.3) - 
+            (self.skgiveaways * 0.3)
+        )
+        defensive_per_20 = defensive_value * (20 / max(1, self.toi))
+        defensive_component = min(2.5, max(0, 1.0 + (defensive_per_20 / 4)))
+        
+        # Playmaking component (0-1.5 points)
+        if self.skpassattempts > 5:  # Only relevant if attempted enough passes
+            passing_component = min(1.5, (self.skpasses / max(1, self.skpassattempts)) * 1.5)
+        else:
+            passing_component = 0.75  # Neutral if not enough passes
+        
+        # Special teams contribution (0-1 point)
+        special_teams = min(1.0, (self.skppg * 0.5) + (self.skshg * 0.7) + (self.skpkclearzone * 0.2))
+        
+        # Final score calculation with baseline of 4 for an average performance
+        base_score = faceoff_component + offensive_component + defensive_component + passing_component + special_teams
+        
+        # Normalize to 0-10 scale
+        normalized_score = min(10, base_score)
+        
+        return round(normalized_score, 1)
+
+    @property
+    def winger_game_impact(self) -> float:
+        """Calculate winger's game impact score (0-10 scale).
+        
+        Emphasizes:
+        - Scoring
+        - Zone time/possession
+        - Physical play
+        - Plus/minus
+        - Special teams
+        """
+        # Scoring component (0-4.5 points) - main job of wingers
+        goal_value = self.skgoals * 1.5  # Increase goal weight
+        assist_value = self.skassists * 0.8  # Increase assist weight
+        shot_value = self.skshots * 0.1
+        
+        # For exceptional performances, reduce TOI adjustment factor
+        # This prevents high-production games from being undervalued
+        production_factor = goal_value + assist_value
+        toi_factor = 20 / max(1, min(self.toi, 50))  # Cap TOI factor for high-minute games
+        
+        # Scale TOI adjustment down for high-production games
+        if production_factor > 4:
+            toi_factor = min(toi_factor, 1.2)  # Don't overly adjust high-production games
+        
+        scoring_per_20 = (goal_value + assist_value + shot_value) * toi_factor
+        scoring_component = min(4.5, scoring_per_20)  # Higher cap for exceptional performances
+        
+        # Possession component (0-2 points)
+        possession_per_minute = self.skpossession / max(1, self.toi)
+        possession_component = min(2.0, possession_per_minute / 10)  # Adjust divisor to be more generous
+        
+        # Physical play component (0-1.5 points)
+        physical_value = (self.skhits * 0.2) + (self.skbs * 0.1)
+        physical_per_20 = physical_value * toi_factor
+        physical_component = min(1.5, physical_per_20)
+        
+        # Defensive component (0-1.5 points) - normalize giveaways by possession time
+        # Expected giveaway rate: about 1 per 30 seconds of possession
+        expected_giveaways = max(1, self.skpossession / 30)
+        
+        # Only penalize for excessive giveaways relative to possession time
+        excess_giveaways = max(0, self.skgiveaways - expected_giveaways)
+        
+        defensive_value = (
+            (self.sktakeaways * 0.4) + 
+            (self.skinterceptions * 0.3) - 
+            (excess_giveaways * 0.2)  # Reduced penalty for giveaways
+        )
+        defensive_per_20 = defensive_value * toi_factor
+        defensive_component = min(1.5, max(0, defensive_per_20 + 0.5))  # Higher baseline
+        
+        # Plus/minus component (0-1 point) - wingers should be judged on this
+        if self.toi >= 5:  # Only relevant with enough ice time
+            plusminus_per_20 = self.skplusmin * toi_factor
+            plusminus_component = min(1.0, max(0, 0.5 + (plusminus_per_20 / 4)))
+        else:
+            plusminus_component = 0.5  # Neutral with low ice time
+        
+        # Special teams contribution (0-1 point)
+        special_teams = min(1.0, (self.skppg * 0.5) + (self.skshg * 0.7) + (self.skpkclearzone * 0.1))
+        
+        # Final score calculation
+        base_score = (
+            scoring_component + 
+            possession_component + 
+            physical_component + 
+            defensive_component + 
+            plusminus_component +
+            special_teams
+        )
+        
+        # Normalize to 0-10 scale
+        normalized_score = min(10, base_score)
+        
+        return round(normalized_score, 1)
+
+    @property
+    def defense_game_impact(self) -> float:
+        """Calculate defenseman's game impact score (0-10 scale).
+        
+        Emphasizes:
+        - Defensive metrics
+        - Outlet passing
+        - Plus/minus
+        - Physical presence
+        """
+        # Defensive component (0-4 points) - main job
+        blocks_value = self.skbs * 0.4
+        takeaways_value = self.sktakeaways * 0.3
+        interceptions_value = self.skinterceptions * 0.2
+        giveaways_penalty = self.skgiveaways * 0.3
+        
+        defensive_value = blocks_value + takeaways_value + interceptions_value - giveaways_penalty
+        defensive_per_20 = defensive_value * (20 / max(1, self.toi))
+        defensive_component = min(4.0, max(0, 2.0 + (defensive_per_20 / 4)))
+        
+        # Outlet passing component (0-2 points)
+        if self.skpassattempts > 5:
+            passing_component = min(2.0, (self.skpasses / max(1, self.skpassattempts)) * 2.0)
+        else:
+            passing_component = 1.0  # Neutral if not enough passes
+        
+        # Plus/minus component (0-1.5 points)
+        if self.toi >= 5:  # Only relevant with enough ice time
+            plusminus_per_20 = self.skplusmin * (20 / max(5, self.toi))
+            plusminus_component = min(1.5, max(0, 0.75 + (plusminus_per_20 / 4)))
+        else:
+            plusminus_component = 0.75  # Neutral with low ice time
+        
+        # Physical component (0-1.5 points)
+        hits_per_20 = self.skhits * (20 / max(1, self.toi))
+        physical_component = min(1.5, hits_per_20 / 3)
+        
+        # Offensive contribution (0-1 point) - bonus, not primary job
+        offensive_value = (self.skgoals * 0.7) + (self.skassists * 0.3) + (self.skshots * 0.05)
+        offensive_per_20 = offensive_value * (20 / max(1, self.toi))
+        offensive_component = min(1.0, offensive_per_20)
+        
+        # Final score calculation
+        base_score = defensive_component + passing_component + plusminus_component + physical_component + offensive_component
+        
+        # Normalize to 0-10 scale
+        normalized_score = min(10, base_score)
+        
+        return round(normalized_score, 1)
+        
+    @computed_field
+    @property
+    def puck_management_rating(self) -> float:
+        """Rating of player's puck management ability (0-10 scale)
+        
+        Considers passing accuracy, takeaway/giveaway ratio, and interceptions.
+        Higher values indicate better puck management.
+        """
+        pass_factor = self.passing_percentage or 0
+        tg_ratio = 5 # Default value if no giveaways
+        if self.skgiveaways > 0:
+            tg_ratio = min(10, (self.sktakeaways / self.skgiveaways) * 5)
+        
+        interception_factor = min(5, self.skinterceptions * 0.5)
+
+        # Average the factors and scale to 0-10
+        raw_score = (pass_factor/10 + tg_ratio + interception_factor) / 3
+        return round(min(10, raw_score), 1)
+    
+    @computed_field
+    @property
+    def posession_efficiency(self) -> float:
+        """Points generated per minut of possesion time.
+        
+        Measures how effectively a player converts possession time into offensive output.
+        """
+        if self.skpossession == 0:
+            return None
+        return round((self.points * 60) / self.skpossession, 2)
+    
+    @computed_field
+    @property
+    def net_defensive_contribution(self) -> int:
+       """Net defensive plays (blocks + takeaways + interceptions - giveaways).
+       
+       Positive values indicate strong defensive contribution.
+       """
+       return (
+           self.skbs +
+           self.sktakeaways +
+           self.skinterceptions -
+           self.skgiveaways
+       )
+       
+    @computed_field
+    @property
+    def time_adjusted_rating(self) -> float:
+       """Player rating adjusted for time on ice.
+       
+       Averages the player's rating categories and adjusts for TOI to compare
+       players with different ice time more fairly.
+       """
+       avg_rating = (
+           self.rating_defense +
+           self.rating_offense +
+           self.rating_teamplay
+       ) / 3
+       toi_factor = min(1.5, max(0.5, self.toi / 20))
+       return round(avg_rating * toi_factor, 1)
+   
+    @computed_field
+    @property
+    def shot_generation_rate(self) -> float:
+        """Shot attempts generated per minute of ice time"""
+        if self.toi_seconds > 0:
+            return round(self.skshotattempts * 60 / self.toi_seconds, 2)
+        return 0.0
+        
+    @computed_field
+    @property
+    def offensive_zone_presence(self) -> float:
+        """Offensive zone presence score based on shots, passes, and possession time
+        
+        Higher values indicate more offensive zone time and activity.
+        """
+        shot_factor = min(5, self.skshotattempts * 0.2)
+        pass_factor = min(3, self.skpassattempts * 0.05)
+        poss_factor = min(5, self.skpossession / 60)
+        
+        return round(shot_factor + pass_factor + poss_factor, 1)
+    
+    @computed_field
+    @property
+    def two_way_rating(self) -> float:
+        """Combines offensive and defensive rating on a 0-10 scale
+        
+        Balances offensive production with defensive contributions.
+        """
+        off_value = (
+            (self.points * 2) +
+            (self.skshots * 0.3) +
+            (self.skshotattempts * 0.1)
+        )
+        def_value = (
+            (self.skbs * 0.7) +
+            (self.sktakeaways * 0.8) +
+            (self.skinterceptions * 0.6) -
+            (self.skgiveaways * 0.5)
+        )
+        
+        # Scale 0-10
+        scaled_off = min(10, off_value / 2)
+        scaled_def = min(10, (def_value + 5) / 2)
+        
+        return round((scaled_off + scaled_def) / 2, 1)
