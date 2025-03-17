@@ -22,8 +22,8 @@ match_type_validator = MatchTypeValidator()
 # Create a cached version of the club request
 @lru_cache(maxsize=100)  # Cache up to 100 different club requests
 def get_cached_club_request(search_name: str, platform: str) -> GetClubsRequest:
-    """
-    Get a cached GetClubsRequest instance to avoid repetitive API calls.
+    """Get a cached GetClubsRequest instance to avoid repetitive API calls. 
+    
     Club data will be cached for the lifetime of the application or until cache is full.
 
     Args:
@@ -42,7 +42,6 @@ def get_cached_club_request(search_name: str, platform: str) -> GetClubsRequest:
 
 class ClubResponse(BaseModel):
     club_id: int
-
 
 class ClubDataResponse(BaseModel):
     club_data: Dict[str, Any]
