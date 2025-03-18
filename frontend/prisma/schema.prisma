@@ -1,7 +1,5 @@
 // ! REFERENCE ONLY WILL BE DELETED SOON
 
-
-
 // @file schema.prisma
 // @author Spencer Presley
 // @version 1.0.0
@@ -31,12 +29,10 @@ generator client {
 }
 
 generator python {
-  provider = "prisma-client-py"
-  output = "../../backend/database_service/prisma/"
+  provider             = "prisma-client-py"
+  output               = "../../backend/database_service/prisma/"
   recursive_type_depth = -1
 }
-
-
 
 // PostgreSQL Database Connection Configuration
 // Defines secure connection parameters for the application's primary database
@@ -55,10 +51,10 @@ enum System {
 
 // Enum representing verification status for platform connections
 enum VerificationStatus {
-  PENDING    // Code generated but not yet verified
-  VERIFIED   // Successfully verified
-  EXPIRED    // Code has expired
-  FAILED     // Verification attempt failed
+  PENDING // Code generated but not yet verified
+  VERIFIED // Successfully verified
+  EXPIRED // Code has expired
+  FAILED // Verification attempt failed
 }
 
 // --------- Authentication & Base User Models ---------
@@ -84,7 +80,7 @@ model User {
   forumFollowing      ForumFollower[]
   forumSubscriptions  ForumPostSubscription[]
   teamManagement      TeamManager[]
-  psnProfile          PSNProfile?             // Add relation to PSN profile
+  psnProfile          PSNProfile? // Add relation to PSN profile
 
   @@map("User")
 }
@@ -106,22 +102,22 @@ model Player {
 // GamertagHistory tracks player's gaming identities across different systems
 // Enables historical tracking of player gamertags and platform transitions
 model GamertagHistory {
-  playerId            String              @map("player_id")
-  system              System
-  gamertag            String
-  createdAt           DateTime            @default(now()) @map("created_at")
-  updatedAt           DateTime            @default(now()) @map("updated_at")
+  playerId             String              @map("player_id")
+  system               System
+  gamertag             String
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @default(now()) @map("updated_at")
   // Verification related fields
-  verificationCode    String?             @map("verification_code")
-  codeGeneratedAt     DateTime?           @map("code_generated_at")
-  verificationStatus  VerificationStatus? @map("verification_status")
-  verifiedAt          DateTime?           @map("verified_at")
-  verificationAttempts Int?               @default(0) @map("verification_attempts")
-  lastAttemptAt       DateTime?           @map("last_attempt_at")
-  codeExpiresAt       DateTime?           @map("code_expires_at") // When the code will expire
-  isVerified          Boolean             @default(false) @map("is_verified") // Quick check field
-  verificationMetadata Json?              @map("verification_metadata") // Flexible field for additional data
-  player              Player              @relation(fields: [playerId], references: [id])
+  verificationCode     String?             @map("verification_code")
+  codeGeneratedAt      DateTime?           @map("code_generated_at")
+  verificationStatus   VerificationStatus? @map("verification_status")
+  verifiedAt           DateTime?           @map("verified_at")
+  verificationAttempts Int?                @default(0) @map("verification_attempts")
+  lastAttemptAt        DateTime?           @map("last_attempt_at")
+  codeExpiresAt        DateTime?           @map("code_expires_at") // When the code will expire
+  isVerified           Boolean             @default(false) @map("is_verified") // Quick check field
+  verificationMetadata Json?               @map("verification_metadata") // Flexible field for additional data
+  player               Player              @relation(fields: [playerId], references: [id])
 
   @@id([playerId, system])
   @@index([gamertag, system])
@@ -147,7 +143,7 @@ model Tier {
   id            String              @id @default(uuid())
   seasonId      String              @map("season_id")
   leagueLevel   Int                 @map("league_level")
-  name          String              // NHL, AHL, CHL, etc.
+  name          String // NHL, AHL, CHL, etc.
   salaryCap     Int                 @default(0) @map("salary_cap") // Added salary cap at tier level
   createdAt     DateTime            @default(now()) @map("created_at")
   updatedAt     DateTime            @updatedAt @map("updated_at")
@@ -162,13 +158,13 @@ model Tier {
 // Team model represents a sports team with comprehensive tracking capabilities
 // Supports team affiliations, historical data, and cross-league relationships
 model Team {
-  id             String       @id @default(uuid())
-  eaClubId       String       @map("ea_club_id")
-  eaClubName     String       @map("ea_club_name")
-  officialName   String       @map("official_name")
-  teamIdentifier String       @unique @map("team_identifier") @db.VarChar(14)
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id             String        @id @default(uuid())
+  eaClubId       String        @map("ea_club_id")
+  eaClubName     String        @map("ea_club_name")
+  officialName   String        @map("official_name")
+  teamIdentifier String        @unique @map("team_identifier") @db.VarChar(14)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
   seasons        TeamSeason[]
   managers       TeamManager[]
 
@@ -193,9 +189,9 @@ model TeamSeason {
   teamId                   String @map("team_id")
   tierId                   String @map("tier_id")
   // Roster counts
-  forwardCount            Int    @default(0) @map("forward_count")
-  defenseCount            Int    @default(0) @map("defense_count")
-  goalieCount             Int    @default(0) @map("goalie_count")
+  forwardCount             Int    @default(0) @map("forward_count")
+  defenseCount             Int    @default(0) @map("defense_count")
+  goalieCount              Int    @default(0) @map("goalie_count")
   // Team stats
   wins                     Int    @default(0)
   losses                   Int    @default(0)
@@ -292,26 +288,26 @@ model PlayerTeamSeason {
 
 // New models for contracts and bidding
 model Contract {
-  id             String       @id @default(uuid())
-  amount         Int // Contract amount in dollars, required
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  playerSeason   PlayerSeason?
-  bids           Bid[] // One-to-many relation with Bid
+  id           String        @id @default(uuid())
+  amount       Int // Contract amount in dollars, required
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  playerSeason PlayerSeason?
+  bids         Bid[] // One-to-many relation with Bid
 
   @@map("contracts")
 }
 
 model Bid {
-  id            String      @id @default(uuid())
-  contract      Contract    @relation(fields: [contractId], references: [id])
-  contractId    String      @map("contract_id")
-  teamSeason    TeamSeason  @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
-  teamSeasonId  String      @map("team_season_id")
-  amount        Int         // Bid amount in dollars
-  status        BidStatus   @default(PENDING)
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id           String     @id @default(uuid())
+  contract     Contract   @relation(fields: [contractId], references: [id])
+  contractId   String     @map("contract_id")
+  teamSeason   TeamSeason @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
+  teamSeasonId String     @map("team_season_id")
+  amount       Int // Bid amount in dollars
+  status       BidStatus  @default(PENDING)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   @@index([contractId])
   @@index([teamSeasonId])
@@ -326,46 +322,314 @@ enum BidStatus {
 
 // --------- Match Stats ---------
 model Match {
-  id                       String        @id @default(uuid())
-  teamSeasonId             String        @map("team_season_id")
-  eaMatchId                String        @map("ea_match_id")
-  goalsAgainst             Int           @map("goals_against")
-  goalsFor                 Int           @map("goals_for")
-  opponentClubId           String        @map("opponent_club_id")
-  opponentTeamId           String        @map("opponent_team_id")
-  penaltyKillGoalsAgainst  Int           @map("penalty_kill_goals_against")
-  penaltyKillOpportunities Int           @map("penalty_kill_opportunities")
-  powerplayGoals           Int           @map("powerplay_goals")
-  powerplayOpportunities   Int           @map("powerplay_opportunities")
-  shots                    Int
-  shotsAgainst             Int           @map("shots_against")
-  timeOnAttack             Int           @map("time_on_attack")
-  createdAt                DateTime      @default(now()) @map("created_at")
-  updatedAt                DateTime      @updatedAt @map("updated_at")
-  teamSeason               TeamSeason    @relation(fields: [teamSeasonId], references: [id])
-  playerStats              PlayerMatch[]
+  id                      String                    @id @default(uuid())
+  teamSeasonId            String                    @map("team_season_id")
+  eaMatchId               String                    @map("ea_match_id")
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  teamSeason              TeamSeason                @relation(fields: [teamSeasonId], references: [id])
+  clubMatchStats          ClubMatchStats[]
+  playerStats             PlayerMatch[]
+  clubAggregateMatchStats ClubAggregateMatchStats[]
+  matchAnalytics          MatchAnalytics[]
+}
+
+model ClubMatchStats {
+  id      String @id @default(uuid())
+  matchId String @map("match_id")
+
+  // Basic Info
+  clubDivision       Int    @map("club_division")
+  cNhlOnlineGameType String @map("cNhlOnlineGameType")
+
+  // Game Results
+  goalsAgainstRaw   Int    @map("goals_against_raw")
+  goalsForRaw       Int    @map("goals_for_raw")
+  losses            Int    @map("losses")
+  result            Int    @map("result")
+  score             Int    @map("score")
+  scoreString       String @map("score_string")
+  winnerByDnf       Int    @map("winner_by_dnf") // 0 = no, 1 = yes
+  winnerByGoalieDnf Int    @map("winner_by_goalie_dnf") // 0 = no, 1 = yes
+
+  // Team Stats
+  memberString           String @map("member_string")
+  passesAttempted        Int    @map("passes_attempted")
+  passesCompleted        Int    @map("passes_completed")
+  powerplayGoals         Int    @map("powerplay_goals")
+  powerplayOpportunities Int    @map("powerplay_opportunities")
+  shots                  Int    @map("shots")
+  teamArtAbbr            String @map("team_art_abbr")
+  teamSide               Int    @map("team_side") // 0 = away, 1 = home
+  timeOnAttack           Int    @map("time_on_attack")
+
+  // Opponent Info
+  opponentClubId      String @map("opponent_club_id")
+  opponentScore       Int    @map("opponent_score")
+  opponentTeamArtAbbr String @map("opponent_team_art_abbr")
+
+  // Club Details
+  goals        Int @map("goals")
+  goalsAgainst Int @map("goals_against")
+
+  details ClubMatchStatsDetails?
+  match   Match                  @relation(fields: [matchId], references: [id])
+}
+
+model ClubMatchStatsDetails {
+  id               String @id @default(uuid())
+  clubMatchStatsId String @unique @map("club_match_stats_id")
+  name             String @map("name")
+  eaClubId         Int    @map("ea_club_id")
+  regionId         Int    @map("region_id")
+  teamId           Int    @map("team_id")
+
+  // CustomKit is related to details, not directly to ClubMatchStats
+  customKit CustomKit?
+
+  // Relationship
+  clubMatchStats ClubMatchStats? @relation(fields: [clubMatchStatsId], references: [id])
+}
+
+model CustomKit {
+  id           String @id @default(uuid())
+  detailsId    String @unique @map("details_id") // Changed from clubMatchStatsId
+  isCustomTeam Int    @map("is_custom_team")
+  crestAssetId Int    @map("crest_asset_id")
+  useBaseAsset Int    @map("use_base_asset")
+
+  // Relationship - now references details, not ClubMatchStats
+  details ClubMatchStatsDetails? @relation(fields: [detailsId], references: [id])
+}
+
+model ClubAggregateMatchStats {
+  id      String @id @default(uuid())
+  matchId String @map("match_id")
+
+  // Basic Info
+  clubLevel Int @map("club_level")
+  position  Int @map("position") // Always gives 0
+  posSorted Int @map("pos_sorted") // Sum of (0, 1, 2, 3, 4, 5) = 15, this field doesn't do anything for us
+
+  // Game Status
+  isGuest     Int @map("is_guest") // If the team was the away team
+  playerDnf   Int @map("player_dnf") // Number of players who did not finish the game
+  playerLevel Int @map("player_level") // Cumulative player level of all players on the team
+
+  // Team Info
+  eaTeamId         Int @map("ea_team_id")
+  teamSide         Int @map("team_side") // This sums the 1 or 0 on each of the players, where 1 means home so 6 players means = 6, away will always be 0. This isn't really a useful field but it's in the api so.
+  opponentEaClubId Int @map("opponent_ea_club_id")
+  opponentEaTeamId Int @map("opponent_ea_team_id")
+  opponentScore    Int @map("opponent_score")
+
+  // Game Results
+  score Int @map("score")
+
+  // Team Ratings
+  // Cumulative ratings for all players on the team
+  ratingDefense  Float @map("rating_defense")
+  ratingOffense  Float @map("rating_offense")
+  ratingTeamplay Float @map("rating_teamplay")
+
+  // Time Stats
+  toi        Int @map("toi") // Cumulative toi for all players on the team
+  toiSeconds Int @map("toi_seconds") // Cumulative toi in seconds for all players on the team
+
+  // Skater Stats
+  // ALL CUMULATIVE
+  assists           Int   @map("assists")
+  blockedShots      Int   @map("blocked_shots")
+  deflections       Int   @map("deflections")
+  faceoffsLost      Int   @map("faceoffs_lost")
+  faceoffPct        Float @map("faceoff_pct")
+  faceoffsWon       Int   @map("faceoffs_won")
+  giveaways         Int   @map("giveaways")
+  goals             Int   @map("goals")
+  hits              Int   @map("hits")
+  interceptions     Int   @map("interceptions")
+  passAttempts      Int   @map("pass_attempts")
+  passes            Int   @map("passes")
+  passPct           Float @map("pass_pct")
+  penaltiesDrawn    Int   @map("penalties_drawn")
+  penaltyMinutes    Int   @map("penalty_minutes") // PIM
+  skaterPkClearZone Int   @map("skater_pk_clear_zone")
+  plusMinus         Int   @map("plus_minus")
+  possession        Int   @map("possession_seconds")
+  powerPlayGoals    Int   @map("power_play_goals")
+  saucerPasses      Int   @map("saucer_passes")
+  shortHandedGoals  Int   @map("short_handed_goals")
+  shotAttempts      Int   @map("shot_attempts")
+  shotOnNetPct      Float @map("shot_on_net_pct")
+  shots             Int   @map("shots")
+  takeaways         Int   @map("takeaways")
+
+  // Goalie Stats CUMULATIVE
+  // While these are cumulative teams usually only have 1 goalie so these are the same as the player stats
+  breakawaySavePct    Float @map("breakaway_save_pct")
+  breakawaySaves      Int   @map("breakaway_saves")
+  breakawayShots      Int   @map("breakaway_shots")
+  desperationSaves    Int   @map("desperation_saves")
+  goalsAgainst        Int   @map("goals_against")
+  goalsAgainstAverage Float @map("goals_against_average")
+  penaltyShotSavePct  Float @map("penalty_shot_save_pct")
+  penaltyShotSaves    Int   @map("penalty_shot_saves")
+  goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
+  pokeChecks          Int   @map("poke_checks")
+  savePct             Float @map("save_pct")
+  totalSaves          Int   @map("total_saves")
+  totalShotsFaced     Int   @map("total_shots_faced")
+  shutoutPeriods      Int   @map("shutout_periods")
+
+  match Match @relation(fields: [matchId], references: [id])
+}
+
+model MatchAnalytics {
+  id      String @id @default(uuid())
+  matchId String @map("match_id")
+
+  // Possession Metrics
+  possessionDifferential   Int   @map("possession_differential")
+  possessionPercentageHome Float @map("possession_percentage_home")
+  possessionPercentageAway Float @map("possession_percentage_away")
+
+  // Efficiency Metrics
+  homeShootingEfficiency   Float @map("home_shooting_efficiency")
+  awayShootingEfficiency   Float @map("away_shooting_efficiency")
+  homePassingEfficiency    Float @map("home_passing_efficiency")
+  awayPassingEfficiency    Float @map("away_passing_efficiency")
+  homePossessionEfficiency Float @map("home_possession_efficiency")
+  awayPossessionEfficiency Float @map("away_possession_efficiency")
+
+  // Special Teams Metrics
+  homePowerPlayPct   Float @map("home_power_play_pct")
+  awayPowerPlayPct   Float @map("away_power_play_pct")
+  homePenaltyKillPct Float @map("home_penalty_kill_pct")
+  awayPenaltyKillPct Float @map("away_penalty_kill_pct")
+
+  // Momentum and Control Metrics
+  homeScore                  Float @map("home_score")
+  awayScore                  Float @map("away_score")
+  shotDifferential           Int   @map("shot_differential")
+  hitDifferential            Int   @map("hit_differential")
+  takeawayDifferential       Int   @map("takeaway_differential")
+  scoringChancesDifferential Int   @map("scoring_chances_differential")
+
+  match Match @relation(fields: [matchId], references: [id])
 }
 
 model PlayerMatch {
-  id                 String           @id @default(uuid())
-  matchId            String           @map("match_id")
-  playerTeamSeasonId String           @map("player_team_season_id")
-  assists            Int
-  giveaways          Int
-  goals              Int
-  hits               Int
-  penaltyMinutes     Int              @map("penalty_minutes")
-  plusMinus          Int              @map("plus_minus")
-  ratingDefense      Float            @map("rating_defense")
-  ratingOffense      Float            @map("rating_offense")
-  ratingTeamplay     Float            @map("rating_teamplay")
-  shots              Int
-  takeaways          Int
-  timeOnIce          Int              @map("time_on_ice")
-  createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  match              Match            @relation(fields: [matchId], references: [id])
-  playerTeamSeason   PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id])
+  id                 String @id @default(uuid())
+  matchId            String @map("match_id")
+  playerTeamSeasonId String @map("player_team_season_id")
+
+  // Basic Info
+  playerLevel        Int    @map("player_level")
+  position           String @map("position")
+  posSorted          Int    @map("pos_sorted")
+  playerName         String @map("player_name")
+  clientPlatform     String @map("client_platform")
+  playerLevelDisplay Int    @map("player_level_display")
+
+  // Game Status
+  isGuest            Boolean @map("is_guest")
+  playerDnf          Boolean @map("player_dnf") // did not finish (quit)
+  pNhlOnlineGameType String  @map("pNhlOnlineGameType") // Should likely be "5"
+
+  // Team Information
+  eaTeamId         String @map("ea_team_id")
+  teamSide         Int    @map("team_side") // 0 = home, 1 = away
+  opponentClubId   String @map("opponent_club_id")
+  opponentEaTeamId String @map("opponent_ea_team_id")
+  opponentScore    Int    @map("opponent_score")
+  score            Int    @map("score")
+
+  // Player Ratings
+  ratingDefense  Float @map("rating_defense")
+  ratingOffense  Float @map("rating_offense")
+  ratingTeamplay Float @map("rating_teamplay")
+
+  // Time Stats
+  toi        Int @map("toi") // time on ice
+  toiSeconds Int @map("toi_seconds") // time on ice in seconds
+
+  // Skater Stats
+  assists              Int    @map("assists")
+  blockedShots         Int    @map("blocked_shots")
+  deflections          Int    @map("deflections")
+  faceoffsLost         Int    @map("faceoffs_lost")
+  faceoffPct           Float  @map("faceoff_pct")
+  faceoffsWon          Int    @map("faceoffs_won")
+  giveaways            Int    @map("giveaways")
+  goals                Int    @map("goals")
+  gameWinningGoals     Int    @map("game_winning_goals")
+  hits                 Int    @map("hits")
+  interceptions        Int    @map("interceptions")
+  passAttempts         Int    @map("pass_attempts")
+  passes               Int    @map("passes")
+  passPct              Float  @map("pass_pct")
+  penaltiesDrawn       Int    @map("penalties_drawn")
+  penaltyMinutes       Int    @map("penalty_minutes") // PIM
+  skaterPkClearZone    Int    @map("skater_pk_clear_zone")
+  plusMinus            Int    @map("plus_minus")
+  possessionSeconds    Int    @map("possession_seconds")
+  powerPlayGoals       Int    @map("power_play_goals")
+  saucerPasses         Int    @map("saucer_passes")
+  shortHandedGoals     Int    @map("short_handed_goals")
+  shotAttempts         Int    @map("shot_attempts")
+  shotsOnNetPct        Float  @map("shots_on_net_pct")
+  shootingPct          Float  @map("shooting_pct")
+  shotsOnGoal          Int    @map("shots_on_goal")
+  takeaways            Int    @map("takeaways")
+  points               Int    @map("points")
+  faceoffsTotal        Int    @map("faceoffs_total")
+  shotsMissed          Int    @map("shots_missed")
+  passesMissed         Int    @map("passes_missed")
+  passingPct           Float  @map("passing_pct")
+  majorPenalties       Int    @map("major_penalties")
+  minorPenalties       Int    @map("minor_penalties")
+  totalPenalties       Int    @map("total_penalties")
+  pointsPer60          Float  @map("points_per_60")
+  possessionPerMinute  Float  @map("possession_per_minute")
+  shotEfficiency       Float  @map("shot_efficiency")
+  tkawayGvawayRatio    Float  @map("tkaway_gvaway_ratio")
+  penaltyDifferential  Int    @map("penalty_differential")
+  defActionsPerMinute  Float  @map("def_actions_per_minute")
+  offImpact            Float  @map("off_impact")
+  defImpact            Float  @map("def_impact")
+  detailedPosition     String @map("detailed_position")
+  positionAbbreviation String @map("position_abbreviation")
+  gameImpactScore      Float  @map("game_impact_score")
+  puckManagementRating Float  @map("puck_management_rating")
+  possessionEfficiency Float  @map("possession_efficiency")
+  netDefContribution   Float  @map("net_def_contribution")
+  timeAdjustedRating   Float  @map("time_adjusted_rating")
+  shotGenerationRate   Float  @map("shot_generation_rate")
+  offZonePresence      Float  @map("off_zone_presence")
+  twoWayRating         Float  @map("two_way_rating")
+
+  // Goalie Stats
+  breakawaySavePct    Float @map("breakaway_save_pct")
+  breakawaySaves      Int   @map("breakaway_saves")
+  breakawayShots      Int   @map("breakaway_shots_faced")
+  desperationSaves    Int   @map("desperation_saves")
+  goalsAgainst        Int   @map("goals_against")
+  goalsAgainstAverage Float @map("goals_against_average")
+  penaltyShotSavePct  Float @map("penalty_shot_save_pct")
+  penaltyShotSaves    Int   @map("penalty_shot_saves")
+  penaltyShotsFaced   Int   @map("penalty_shots_faced")
+  goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
+  pokeChecks          Int   @map("poke_checks")
+  savePct             Float @map("save_pct")
+  totalSaves          Int   @map("total_saves")
+  totalShotsFaced     Int   @map("total_shots_faced")
+  shutoutPeriods      Int   @map("shutout_periods")
+  goalsSaved          Int   @map("goals_saved")
+
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  match            Match            @relation(fields: [matchId], references: [id])
+  playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id])
 }
 
 // --------- Notification System ---------
@@ -514,7 +778,7 @@ enum TeamManagementRole {
 }
 
 model TeamManager {
-  id        String              @id @default(cuid())
+  id        String             @id @default(cuid())
   userId    String             @map("user_id")
   teamId    String             @map("team_id")
   role      TeamManagementRole
@@ -551,35 +815,35 @@ enum PSNSyncStatus {
 // PSNProfile stores basic PSN account information
 // Links PSN accounts to application users
 model PSNProfile {
-  id                  String             @id @default(cuid())
-  userId              String             @unique @map("user_id")
-  onlineId            String             @unique @map("online_id")
-  accountId           String?            @map("account_id")
-  aboutMe             String?            @map("about_me")
-  languages           String[]
-  isPlus              Boolean?           @default(false) @map("is_plus")
+  id                   String            @id @default(cuid())
+  userId               String            @unique @map("user_id")
+  onlineId             String            @unique @map("online_id")
+  accountId            String?           @map("account_id")
+  aboutMe              String?           @map("about_me")
+  languages            String[]
+  isPlus               Boolean?          @default(false) @map("is_plus")
   isOfficiallyVerified Boolean?          @default(false) @map("is_officially_verified")
-  friendsCount        Int?               @map("friends_count")
-  mutualFriendsCount  Int?               @map("mutual_friends_count")
-  friendRelation      String?            @map("friend_relation")
-  isBlocking          Boolean?           @default(false) @map("is_blocking")
-  onlineStatus        String?            @map("online_status")
-  platform            String?
-  lastOnline          DateTime?          @map("last_online")
-  availability        String?
-  lastProfileSync     DateTime?          @map("last_profile_sync")
-  lastTrophySync      DateTime?          @map("last_trophy_sync") 
-  lastGameSync        DateTime?          @map("last_game_sync")
-  syncEnabled         Boolean            @default(true) @map("sync_enabled")
-  lastUpdated         DateTime           @default(now()) @map("last_updated")
-  createdAt           DateTime           @default(now()) @map("created_at")
-  updatedAt           DateTime           @updatedAt @map("updated_at")
-  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  avatars             PSNAvatar[]
-  trophySummary       PSNTrophy?
-  games               PSNGame[]
-  syncLogs            PSNSyncLog[]
-  gameTrophies        PSNGameTrophies[]
+  friendsCount         Int?              @map("friends_count")
+  mutualFriendsCount   Int?              @map("mutual_friends_count")
+  friendRelation       String?           @map("friend_relation")
+  isBlocking           Boolean?          @default(false) @map("is_blocking")
+  onlineStatus         String?           @map("online_status")
+  platform             String?
+  lastOnline           DateTime?         @map("last_online")
+  availability         String?
+  lastProfileSync      DateTime?         @map("last_profile_sync")
+  lastTrophySync       DateTime?         @map("last_trophy_sync")
+  lastGameSync         DateTime?         @map("last_game_sync")
+  syncEnabled          Boolean           @default(true) @map("sync_enabled")
+  lastUpdated          DateTime          @default(now()) @map("last_updated")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatars              PSNAvatar[]
+  trophySummary        PSNTrophy?
+  games                PSNGame[]
+  syncLogs             PSNSyncLog[]
+  gameTrophies         PSNGameTrophies[]
 
   @@index([onlineId])
   @@map("psn_profiles")
@@ -588,13 +852,13 @@ model PSNProfile {
 // PSNAvatar stores avatar images for the PSN profile
 // PSN provides multiple sizes of the same avatar
 model PSNAvatar {
-  id          String     @id @default(cuid())
-  profileId   String     @map("profile_id")
-  size        String     // 's', 'm', 'l', 'xl'
-  url         String
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  profile     PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        String     @id @default(cuid())
+  profileId String     @map("profile_id")
+  size      String // 's', 'm', 'l', 'xl'
+  url       String
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  profile   PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@unique([profileId, size])
   @@index([profileId])
@@ -604,20 +868,20 @@ model PSNAvatar {
 // PSNTrophy stores trophy information
 // Represents a user's trophy level, progress, and counts
 model PSNTrophy {
-  id            String      @id @default(cuid())
-  profileId     String      @unique @map("profile_id")
-  trophyLevel   Int?        @map("trophy_level")
+  id            String     @id @default(cuid())
+  profileId     String     @unique @map("profile_id")
+  trophyLevel   Int?       @map("trophy_level")
   progress      Int?
   tier          Int?
   // Earned trophies counts stored as separate fields
-  platinumCount Int?        @map("platinum_count")
-  goldCount     Int?        @map("gold_count")
-  silverCount   Int?        @map("silver_count")
-  bronzeCount   Int?        @map("bronze_count")
-  totalTrophies Int?        @map("total_trophies") // Optional sum of all trophies
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  profile       PSNProfile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  platinumCount Int?       @map("platinum_count")
+  goldCount     Int?       @map("gold_count")
+  silverCount   Int?       @map("silver_count")
+  bronzeCount   Int?       @map("bronze_count")
+  totalTrophies Int?       @map("total_trophies") // Optional sum of all trophies
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  profile       PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@map("psn_trophies")
@@ -626,23 +890,23 @@ model PSNTrophy {
 // PSNGame stores information about games played by the user
 // Includes play history, platform, and other game metadata
 model PSNGame {
-  id                String            @id @default(cuid())
-  profileId         String            @map("profile_id")
-  name              String
-  titleId           String            @map("title_id")
-  platform          String            // "ps4_game", "ps5_native_game", "unknown", etc.
-  imageUrl          String?           @map("image_url")
-  playCount         Int?              @map("play_count")
-  firstPlayed       DateTime?         @map("first_played")
-  lastPlayed        DateTime?         @map("last_played")
-  playDuration      String?           @map("play_duration") // Stored as string like "1 day, 23:13:03"
+  id                 String           @id @default(cuid())
+  profileId          String           @map("profile_id")
+  name               String
+  titleId            String           @map("title_id")
+  platform           String // "ps4_game", "ps5_native_game", "unknown", etc.
+  imageUrl           String?          @map("image_url")
+  playCount          Int?             @map("play_count")
+  firstPlayed        DateTime?        @map("first_played")
+  lastPlayed         DateTime?        @map("last_played")
+  playDuration       String?          @map("play_duration") // Stored as string like "1 day, 23:13:03"
   // Additional game metadata we might want to capture
-  playTimeMinutes   Int?              @map("play_time_minutes") // Duration in minutes (calculated)
+  playTimeMinutes    Int?             @map("play_time_minutes") // Duration in minutes (calculated)
   isCurrentlyPlaying Boolean?         @default(false) @map("is_currently_playing")
-  createdAt         DateTime          @default(now()) @map("created_at")
-  updatedAt         DateTime          @updatedAt @map("updated_at")
-  profile           PSNProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  trophyInfo        PSNGameTrophies?  // Changed to trophyInfo to avoid name conflict
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  profile            PSNProfile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  trophyInfo         PSNGameTrophies? // Changed to trophyInfo to avoid name conflict
 
   @@unique([profileId, titleId, platform])
   @@index([profileId])
@@ -653,15 +917,15 @@ model PSNGame {
 // PSNSyncLog tracks the synchronization status of PSN data
 // Helps with incremental updates and synchronization scheduling
 model PSNSyncLog {
-  id             String         @id @default(cuid())
-  profileId      String         @map("profile_id")
-  syncType       PSNSyncType    @map("sync_type")
-  status         PSNSyncStatus  @default(PENDING)
-  startedAt      DateTime       @default(now()) @map("started_at")
-  completedAt    DateTime?      @map("completed_at")
-  errorMessage   String?        @map("error_message")
-  recordsUpdated Int?           @default(0) @map("records_updated")
-  profile        PSNProfile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  profileId      String        @map("profile_id")
+  syncType       PSNSyncType   @map("sync_type")
+  status         PSNSyncStatus @default(PENDING)
+  startedAt      DateTime      @default(now()) @map("started_at")
+  completedAt    DateTime?     @map("completed_at")
+  errorMessage   String?       @map("error_message")
+  recordsUpdated Int?          @default(0) @map("records_updated")
+  profile        PSNProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@index([syncType])
@@ -672,21 +936,21 @@ model PSNSyncLog {
 // PSNGameTrophies stores trophy information for a specific game
 // Links to the PSNGame and provides trophy counts for that game
 model PSNGameTrophies {
-  id              String     @id @default(cuid())
-  profileId       String     @map("profile_id")
-  gameId          String     @unique @map("game_id") // Add unique constraint for one-to-one relation
-  trophiesEarned  Int        @default(0) @map("trophies_earned")
-  trophiesTotal   Int        @default(0) @map("trophies_total")
-  progress        Int?       // percentage completed
-  platinumEarned  Int?       @default(0) @map("platinum_earned")
-  goldEarned      Int?       @default(0) @map("gold_earned")
-  silverEarned    Int?       @default(0) @map("silver_earned")
-  bronzeEarned    Int?       @default(0) @map("bronze_earned")
-  lastUpdated     DateTime   @default(now()) @map("last_updated")
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
-  profile         PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  game            PSNGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  id             String     @id @default(cuid())
+  profileId      String     @map("profile_id")
+  gameId         String     @unique @map("game_id") // Add unique constraint for one-to-one relation
+  trophiesEarned Int        @default(0) @map("trophies_earned")
+  trophiesTotal  Int        @default(0) @map("trophies_total")
+  progress       Int? // percentage completed
+  platinumEarned Int?       @default(0) @map("platinum_earned")
+  goldEarned     Int?       @default(0) @map("gold_earned")
+  silverEarned   Int?       @default(0) @map("silver_earned")
+  bronzeEarned   Int?       @default(0) @map("bronze_earned")
+  lastUpdated    DateTime   @default(now()) @map("last_updated")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  profile        PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  game           PSNGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@map("psn_game_trophies")
