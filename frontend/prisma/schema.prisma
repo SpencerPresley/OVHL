@@ -146,20 +146,20 @@ model SystemHistory {
 }
 
 
-
+// REMOVED: Player model extends user information with gaming-specific details
 // Player model extends user information with gaming-specific details
 // Tracks player profiles across different gaming platforms and seasons
-model Player {
-  id           String            @id // This IS the user's ID
-  ea_id        String            @map("ea_id")
-  name         String
-  activeSystem System            @map("active_system")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @updatedAt @map("updated_at")
-  user         User              @relation(fields: [id], references: [id])
-  gamertags    GamertagHistory[]
-  seasons      PlayerSeason[]
-}
+// model Player {
+//   id           String            @id // This IS the user's ID
+//   ea_id        String            @map("ea_id")
+//   name         String
+//   activeSystem System            @map("active_system")
+//   createdAt    DateTime          @default(now()) @map("created_at")
+//   updatedAt    DateTime          @updatedAt @map("updated_at")
+//   user         User              @relation(fields: [id], references: [id])
+//   gamertags    GamertagHistory[]
+//   seasons      PlayerSeason[]
+// }
 
 // GamertagHistory tracks player's gaming identities across different systems
 // Enables historical tracking of player gamertags and platform transitions
@@ -228,7 +228,7 @@ model Team {
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   seasons        TeamSeason[]
-  managers       TeamManager[]
+  // REMOVED: managers relation (moved to TeamSeason)
 
   // Affiliation relationships
   nhlAffiliateId String? @map("nhl_affiliate_id")
@@ -250,24 +250,27 @@ model TeamSeason {
   id                       String @id @default(uuid())
   teamId                   String @map("team_id")
   tierId                   String @map("tier_id")
+
   // Roster counts
   forwardCount             Int    @default(0) @map("forward_count")
   defenseCount             Int    @default(0) @map("defense_count")
   goalieCount              Int    @default(0) @map("goalie_count")
+
   // Team stats
-  wins                     Int    @default(0)
-  losses                   Int    @default(0)
-  otLosses                 Int    @default(0)
-  goalsAgainst             Int    @default(0) @map("goals_against")
-  goalsFor                 Int    @default(0) @map("goals_for")
-  matchesPlayed            Int    @default(0) @map("matches_played")
-  penaltyKillGoalsAgainst  Int    @default(0) @map("penalty_kill_goals_against")
-  penaltyKillOpportunities Int    @default(0) @map("penalty_kill_opportunities")
-  powerplayGoals           Int    @default(0) @map("powerplay_goals")
-  powerplayOpportunities   Int    @default(0) @map("powerplay_opportunities")
-  shots                    Int    @default(0)
-  shotsAgainst             Int    @default(0) @map("shots_against")
-  timeOnAttack             Int    @default(0) @map("time_on_attack")
+  // REMOVED: All stats fields - they'll be calculated from Matches
+  // wins                     Int    @default(0)
+  // losses                   Int    @default(0)
+  // otLosses                 Int    @default(0)
+  // goalsAgainst             Int    @default(0) @map("goals_against")
+  // goalsFor                 Int    @default(0) @map("goals_for")
+  // matchesPlayed            Int    @default(0) @map("matches_played")
+  // penaltyKillGoalsAgainst  Int    @default(0) @map("penalty_kill_goals_against")
+  // penaltyKillOpportunities Int    @default(0) @map("penalty_kill_opportunities")
+  // powerplayGoals           Int    @default(0) @map("powerplay_goals")
+  // powerplayOpportunities   Int    @default(0) @map("powerplay_opportunities")
+  // shots                    Int    @default(0)
+  // shotsAgainst             Int    @default(0) @map("shots_against")
+  // timeOnAttack             Int    @default(0) @map("time_on_attack")
 
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime           @updatedAt @map("updated_at")
@@ -276,6 +279,7 @@ model TeamSeason {
   matches   Match[]
   players   PlayerTeamSeason[]
   bids      Bid[]              @relation("TeamSeasonBids")
+  managers  TeamManager[]    // NEW: Relation to TeamManager (makes more sense as managers can change per season)
 
   @@index([teamId])
   @@index([tierId])
@@ -288,17 +292,20 @@ model PlayerSeason {
   seasonId       String              @map("season_id")
   contractId     String              @unique @map("contract_id")
   position       String
-  gamesPlayed    Int?                @map("games_played")
-  goals          Int?
-  assists        Int?
-  plusMinus      Int?                @map("plus_minus")
-  shots          Int?
-  hits           Int?
-  takeaways      Int?
-  giveaways      Int?
-  penaltyMinutes Int?                @map("penalty_minutes")
-  saves          Int?
-  goalsAgainst   Int?                @map("goals_against")
+
+  // REMOVED: All these stats field - they'll be calculated from matches
+  // gamesPlayed    Int?                @map("games_played")
+  // goals          Int?
+  // assists        Int?
+  // plusMinus      Int?                @map("plus_minus")
+  // shots          Int?
+  // hits           Int?
+  // takeaways      Int?
+  // giveaways      Int?
+  // penaltyMinutes Int?                @map("penalty_minutes")
+  // saves          Int?
+  // goalsAgainst   Int?                @map("goals_against")
+
   isInBidding    Boolean             @default(true) @map("is_in_bidding")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
@@ -307,6 +314,10 @@ model PlayerSeason {
   contract       Contract            @relation(fields: [contractId], references: [id])
   teamSeasons    PlayerTeamSeason[]
   tierHistory    PlayerTierHistory[]
+
+  // NEW: Direct relations to matches
+  playerMatches PlayerMatch[] // Detailed player stats for each match this player was in
+  matches       Match[] // All matches this player was in
 
   @@map("player_seasons")
 }
@@ -323,27 +334,31 @@ model PlayerTierHistory {
   tier           Tier         @relation(fields: [tierId], references: [id])
 }
 
+// Update PlayerTeamSeason - keep this model for team-specific tracking
+// but make the stats optional since we'll calculate from matches
 model PlayerTeamSeason {
   id             String        @id @default(uuid())
   playerSeasonId String        @map("player_season_id")
   teamSeasonId   String        @map("team_season_id")
-  // Stats for this specific team
-  assists        Int           @default(0)
-  gamesPlayed    Int           @default(0) @map("games_played")
-  giveaways      Int           @default(0)
-  goals          Int           @default(0)
-  hits           Int           @default(0)
-  penaltyMinutes Int           @default(0) @map("penalty_minutes")
-  plusMinus      Int           @default(0) @map("plus_minus")
-  shots          Int           @default(0)
-  takeaways      Int           @default(0)
-  saves          Int?
-  goalsAgainst   Int?          @map("goals_against")
+  
+  // REMOVED: All stats fields - they'll be calculated from Player Matches
+  // assists        Int           @default(0)
+  // gamesPlayed    Int           @default(0) @map("games_played")
+  // giveaways      Int           @default(0)
+  // goals          Int           @default(0)
+  // hits           Int           @default(0)
+  // penaltyMinutes Int           @default(0) @map("penalty_minutes")
+  // plusMinus      Int           @default(0) @map("plus_minus")
+  // shots          Int           @default(0)
+  // takeaways      Int           @default(0)
+  // saves          Int?
+  // goalsAgainst   Int?          @map("goals_against")
+  
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   playerSeason   PlayerSeason  @relation(fields: [playerSeasonId], references: [id])
   teamSeason     TeamSeason    @relation(fields: [teamSeasonId], references: [id])
-  matches        PlayerMatch[]
+  playerMatches  PlayerMatch[]
 
   @@map("player_team_seasons")
 }
@@ -394,6 +409,11 @@ model Match {
   playerStats             PlayerMatch[]
   clubAggregateMatchStats ClubAggregateMatchStats[]
   matchAnalytics          MatchAnalytics[]
+
+  // NEW: Many-to-many relation with PlayerSeason
+  playerSeasons           PlayerSeason[]            // Players who participated in this match
+
+  @@map("matches")
 }
 
 model ClubMatchStats {
@@ -584,6 +604,7 @@ model PlayerMatch {
   id                 String @id @default(uuid())
   matchId            String @map("match_id")
   playerTeamSeasonId String @map("player_team_season_id")
+  playerSeasonId     String @map("player_season_id")
 
   // Basic Info
   playerLevel        Int    @map("player_level")
@@ -688,10 +709,17 @@ model PlayerMatch {
   shutoutPeriods      Int   @map("shutout_periods")
   goalsSaved          Int   @map("goals_saved")
 
+  // LOGS
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  // RELATIONS
   match            Match            @relation(fields: [matchId], references: [id])
   playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id])
+  playerSeason     PlayerSeason     @relation(fields: [playerSeasonId], references: [id]) // NEW relation
+
+  @@index([playerSeasonId]) // NEW: index for performance
+  @@map("player_matches")
 }
 
 // --------- Notification System ---------
@@ -839,19 +867,20 @@ enum TeamManagementRole {
   PAGM
 }
 
+// TeamManager with relation to TeamSeason
 model TeamManager {
-  id        String             @id @default(cuid())
-  userId    String             @map("user_id")
-  teamId    String             @map("team_id")
-  role      TeamManagementRole
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
-  user      User               @relation(fields: [userId], references: [id])
-  team      Team               @relation(fields: [teamId], references: [id])
+  id           String             @id @default(cuid())
+  userId       String             @map("user_id")
+  teamSeasonId String             @map("team_season_id") // Changed from teamId
+  role         TeamManagementRole
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  user         User               @relation(fields: [userId], references: [id])
+  teamSeason   TeamSeason         @relation(fields: [teamSeasonId], references: [id]) // Change relation
 
-  @@unique([userId, teamId, role])
+  @@unique([userId, teamSeasonId, role])
   @@index([userId])
-  @@index([teamId])
+  @@index([teamSeasonId])
   @@map("team_managers")
 }
 
