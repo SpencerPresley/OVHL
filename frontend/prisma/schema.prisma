@@ -57,33 +57,95 @@ enum VerificationStatus {
   FAILED // Verification attempt failed
 }
 
+enum UserRole {
+  USER
+  BOG
+  ADMIN
+}
+
 // --------- Authentication & Base User Models ---------
 // User model represents the core authentication and profile information
 // Serves as the primary identity management model for the application
 model User {
+  // AUTHENTICATION
   id                  String                  @id @default(cuid())
   email               String                  @unique
   username            String                  @unique
   password            String
   name                String?
+
+  // GLOBAL PERMISSIONS
+  role                UserRole                @default(USER)
+
+  // AVATAR
   avatarUrl           String?                 @map("avatar_url")
+
+  // PRIVELEDGES
   isAdmin             Boolean                 @default(false) @map("is_admin")
-  resetToken          String?                 @unique
-  resetTokenExpiresAt DateTime?
+  isBog               Boolean                 @default(false) @map("is_bog")
+
+  // PASSWORD RESET
+  passwordResetToken  String?                 @unique
+  passwordResetTokenExpiresAt DateTime?
+
+  // LOGS
   createdAt           DateTime                @default(now())
   updatedAt           DateTime                @updatedAt
-  player              Player?
+
+  // NOTIFICATIONS 
   notifications       Notification[]
+
+  // FORUM
   forumPosts          ForumPost[]
   forumComments       ForumComment[]
   forumReactions      ForumReaction[]
   forumFollowing      ForumFollower[]
   forumSubscriptions  ForumPostSubscription[]
+
+  // PLAYER RELATED INFO (moved from Player model)
+  currentEaId         String?                 @map("current_ea_id")
+  activeSystem        System?                 @map("active_system")
+
+  // HISTORY TRACKING
+  eaIdHistory         EaIdHistory[]
+  systemHistory       SystemHistory[]
+  gamertags           GamertagHistory[]
+
+  // SEASONS & MANAGEMENT
+  activeSeasons       PlayerSeason[]
   teamManagement      TeamManager[]
   psnProfile          PSNProfile? // Add relation to PSN profile
 
-  @@map("User")
+  @@map("users")
 }
+
+
+// New history tables for tracking changes
+model EaIdHistory {
+  id String @id @default(cuid())
+  userId String @map("user_id")
+  eaId String @map("ea_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("ea_id_history")
+}
+
+model SystemHistory {
+  id String @id @default(cuid())
+  userId String @map("user_id")
+  system System
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("system_history")
+}
+
+
 
 // Player model extends user information with gaming-specific details
 // Tracks player profiles across different gaming platforms and seasons
@@ -102,7 +164,7 @@ model Player {
 // GamertagHistory tracks player's gaming identities across different systems
 // Enables historical tracking of player gamertags and platform transitions
 model GamertagHistory {
-  playerId             String              @map("player_id")
+  userId               String              @map("user_id")
   system               System
   gamertag             String
   createdAt            DateTime            @default(now()) @map("created_at")
@@ -114,14 +176,14 @@ model GamertagHistory {
   verifiedAt           DateTime?           @map("verified_at")
   verificationAttempts Int?                @default(0) @map("verification_attempts")
   lastAttemptAt        DateTime?           @map("last_attempt_at")
-  codeExpiresAt        DateTime?           @map("code_expires_at") // When the code will expire
-  isVerified           Boolean             @default(false) @map("is_verified") // Quick check field
-  verificationMetadata Json?               @map("verification_metadata") // Flexible field for additional data
-  player               Player              @relation(fields: [playerId], references: [id])
+  codeExpiresAt        DateTime?           @map("code_expires_at") 
+  isVerified           Boolean             @default(false) @map("is_verified")
+  verificationMetadata Json?               @map("verification_metadata")
+  user                 User                @relation(fields: [userId], references: [id])
 
-  @@id([playerId, system])
+  @@id([userId, system])
   @@index([gamertag, system])
-  @@index([verificationCode]) // Index for quick lookup by code
+  @@index([verificationCode])
 }
 
 // --------- Season & League Structure ---------
@@ -222,7 +284,7 @@ model TeamSeason {
 // --------- Player Season & Stats ---------
 model PlayerSeason {
   id             String              @id @default(uuid())
-  playerId       String              @map("player_id")
+  userId       String              @map("user_id")
   seasonId       String              @map("season_id")
   contractId     String              @unique @map("contract_id")
   position       String
@@ -240,7 +302,7 @@ model PlayerSeason {
   isInBidding    Boolean             @default(true) @map("is_in_bidding")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
-  player         Player              @relation(fields: [playerId], references: [id])
+  user           User                @relation(fields: [userId], references: [id]) // Changed from player relation
   season         Season              @relation(fields: [seasonId], references: [id])
   contract       Contract            @relation(fields: [contractId], references: [id])
   teamSeasons    PlayerTeamSeason[]
