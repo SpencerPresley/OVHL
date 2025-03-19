@@ -6,7 +6,7 @@ individual club stats and aggregate team stats from the EA NHL API.
 """
 
 from pydantic import BaseModel, Field, field_validator
-
+from typing import Optional
 
 class CustomKit(BaseModel):
     """Custom team kit configuration data."""
@@ -76,7 +76,7 @@ class ClubMatchStats(BaseModel):
     opponent_team_art_abbr: str = Field(alias="opponentTeamArtAbbr")
 
     # Club Details
-    details: ClubDetails
+    details: Optional[ClubDetails] = None
     goals: int
     goals_against: int = Field(alias="goalsAgainst")
 

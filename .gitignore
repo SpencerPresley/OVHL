@@ -144,3 +144,10 @@ __pycache__/
 *.pyw
 *.pyz
 **/__pycache__/
+
+backend/stats_service/src/in_progress/outputs/*.json
+backend/stats_service/src/in_progress/outputs/*.png
+backend/stats_service/src/in_progress/*.png
+backend/stats_service/src/in_progress/player_reports/*
+backend/stats_service/src/in_progress/ml_outputs/*
+backend/stats_service/src/in_progress/pytorch/*

@@ -171,3 +171,31 @@ async def get_club_matches(
         raise HTTPException(
             status_code=500, detail=f"Error retrieving club matches: {str(e)}"
         )
+        
+@router.get("/club/{club_id}/matches/pydantic", summary="Get Club Matches")
+async def get_club_matches_pydantic(
+    club_id: int = Path(..., description="The ID of the club to get matches for"),
+    match_type: str | None = Query("club_private", description="The type of match to fetch"),
+    platform: str | None = Query("common-gen5", description="The gaming platform identifier"),
+):
+    """Get all matches for a given club using Pydantic models.
+
+    This endpoint fetches the last 5 matches (max ea returns) for a specific club based on the provided club ID,
+    match type, and platform. 
+    
+    """
+    try:
+        games_request = GetGamesRequest(
+            club_id,
+            match_type or "club_private", # If None is explicitly passed, default to club_private
+            platform or "common-gen5", # If None is explicitly passed, default to common-gen5
+            web_request,
+            platform_validator,
+            match_type_validator,
+        )
+        matches = games_request.get_games()
+        return matches
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving club matches: {str(e)}"
+        )
