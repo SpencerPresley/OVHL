@@ -2,129 +2,128 @@
 // User model represents the core authentication and profile information
 // Serves as the primary identity management model for the application
 model User {
-  // AUTHENTICATION
-  id       String  @id @default(cuid())
-  email    String  @unique
-  username String  @unique
-  password String
-  name     String?
+    // AUTHENTICATION
+    id       String  @id @default(cuid())
+    email    String  @unique
+    username String  @unique
+    password String
+    name     String?
 
-  // GLOBAL PERMISSIONS
-  role UserRole @default(USER)
+    // GLOBAL PERMISSIONS
+    role UserRole @default(USER)
 
-  // AVATAR
-  avatarUrl String? @map("avatar_url")
+    // AVATAR
+    avatarUrl String? @map("avatar_url")
 
-  // PRIVELEDGES AND QUICK FILTERS
-  isSuperAdmin   Boolean @default(false) @map("is_super_admin")
-  isAdmin        Boolean @default(false) @map("is_admin")
-  isCommissioner Boolean @default(false) @map("is_commissioner")
-  isBog          Boolean @default(false) @map("is_bog")
-  isTeamManager  Boolean @default(false) @map("is_team_manager")
+    // PRIVELEDGES AND QUICK FILTERS
+    isSuperAdmin   Boolean @default(false) @map("is_super_admin")
+    isAdmin        Boolean @default(false) @map("is_admin")
+    isCommissioner Boolean @default(false) @map("is_commissioner")
+    isBog          Boolean @default(false) @map("is_bog")
+    isTeamManager  Boolean @default(false) @map("is_team_manager")
 
-  // PASSWORD RESET
-  passwordResetToken          String?   @unique
-  passwordResetTokenExpiresAt DateTime?
+    // PASSWORD RESET
+    passwordResetToken          String?   @unique
+    passwordResetTokenExpiresAt DateTime?
 
-  // LOGS
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    // LOGS
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  // NOTIFICATIONS 
-  notifications Notification[]
+    // NOTIFICATIONS 
+    notifications Notification[]
 
-  // FORUM
-  forumPosts         ForumPost[]
-  forumComments      ForumComment[]
-  forumReactions     ForumReaction[]
-  forumFollowing     ForumFollower[]
-  forumSubscriptions ForumPostSubscription[]
+    // FORUM
+    forumPosts         ForumPost[]
+    forumComments      ForumComment[]
+    forumReactions     ForumReaction[]
+    forumFollowing     ForumFollower[]
+    forumSubscriptions ForumPostSubscription[]
 
-  // PLAYER RELATED INFO (moved from Player model)
-  currentEaId  String? @map("current_ea_id")
-  activeSystem System? @map("active_system")
+    // PLAYER RELATED INFO (moved from Player model)
+    currentEaId  String? @map("current_ea_id")
+    activeSystem System? @map("active_system")
 
-  // HISTORY TRACKING
-  eaIdHistory   EaIdHistory[]
-  systemHistory SystemHistory[]
-  gamertags     GamertagHistory[]
+    // HISTORY TRACKING
+    eaIdHistory   EaIdHistory[]
+    systemHistory SystemHistory[]
+    gamertags     GamertagHistory[]
 
-  // LEAGUE MANAGEMENT
-  leagueCommissioners LeagueCommissioner[]
-  leagueBogs          LeagueBOG[]
+    // LEAGUE MANAGEMENT
+    leagueCommissioners LeagueCommissioner[]
+    leagueBogs          LeagueBOG[]
 
-  // SEASONS & TEAM MANAGEMENT
-  activeSeasons  PlayerSeason[]
-  teamManagement TeamManager[]
-  psnProfile     PSNProfile? // Add relation to PSN profile
+    // SEASONS & TEAM MANAGEMENT
+    activeSeasons  PlayerSeason[]
+    teamManagement TeamManager[]
+    psnProfile     PSNProfile? // Add relation to PSN profile
 
-  @@map("users")
+    @@map("users")
 }
 
 model EaIdHistory {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  eaId      String   @map("ea_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    eaId      String   @map("ea_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("ea_id_history")
+    @@index([userId])
+    @@map("ea_id_history")
 }
 
 model SystemHistory {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  system    System
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id        String   @id @default(cuid())
+    userId    String   @map("user_id")
+    system    System
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("system_history")
+    @@index([userId])
+    @@map("system_history")
 }
 
 // GamertagHistory tracks player's gaming identities across different systems
 // Enables historical tracking of player gamertags and platform transitions
 model GamertagHistory {
-  userId               String              @map("user_id")
-  system               System
-  gamertag             String
-  createdAt            DateTime            @default(now()) @map("created_at")
-  updatedAt            DateTime            @default(now()) @map("updated_at")
-  // Verification related fields
-  verificationCode     String?             @map("verification_code")
-  codeGeneratedAt      DateTime?           @map("code_generated_at")
-  verificationStatus   VerificationStatus? @map("verification_status")
-  verifiedAt           DateTime?           @map("verified_at")
-  verificationAttempts Int?                @default(0) @map("verification_attempts")
-  lastAttemptAt        DateTime?           @map("last_attempt_at")
-  codeExpiresAt        DateTime?           @map("code_expires_at")
-  isVerified           Boolean             @default(false) @map("is_verified")
-  verificationMetadata Json?               @map("verification_metadata")
-  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId               String              @map("user_id")
+    system               System
+    gamertag             String
+    createdAt            DateTime            @default(now()) @map("created_at")
+    updatedAt            DateTime            @default(now()) @map("updated_at")
+    // Verification related fields
+    verificationCode     String?             @map("verification_code")
+    codeGeneratedAt      DateTime?           @map("code_generated_at")
+    verificationStatus   VerificationStatus? @map("verification_status")
+    verifiedAt           DateTime?           @map("verified_at")
+    verificationAttempts Int?                @default(0) @map("verification_attempts")
+    lastAttemptAt        DateTime?           @map("last_attempt_at")
+    codeExpiresAt        DateTime?           @map("code_expires_at")
+    isVerified           Boolean             @default(false) @map("is_verified")
+    verificationMetadata Json?               @map("verification_metadata")
+    user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, system])
-  @@index([gamertag, system])
-  @@index([verificationCode])
+    @@id([userId, system])
+    @@index([gamertag, system])
+    @@index([verificationCode])
 }
 
 model Notification {
-  id        String             @id @default(cuid())
-  userId    String             @map("user_id")
-  type      NotificationType
-  title     String
-  message   String
-  status    NotificationStatus @default(UNREAD)
-  link      String? // Optional link to related content
-  metadata  Json? // Flexible metadata for different notification types
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
-  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id        String             @id @default(cuid())
+    userId    String             @map("user_id")
+    type      NotificationType
+    title     String
+    message   String
+    status    NotificationStatus @default(UNREAD)
+    link      String? // Optional link to related content
+    metadata  Json? // Flexible metadata for different notification types
+    createdAt DateTime           @default(now()) @map("created_at")
+    updatedAt DateTime           @updatedAt @map("updated_at")
+    user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([status])
-  @@index([type])
+    @@index([userId])
+    @@index([status])
+    @@index([type])
 }
-

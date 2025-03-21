@@ -2,114 +2,114 @@
 // Enum representing gaming platforms/systems
 // Provides standardized tracking of player gaming environments
 enum System {
-  PS
-  XBOX
+    PS
+    XBOX
 }
 
 // Enum representing verification status for platform connections
 enum VerificationStatus {
-  PENDING // Code generated but not yet verified
-  VERIFIED // Successfully verified
-  EXPIRED // Code has expired
-  FAILED // Verification attempt failed
-  UNKNOWN // Fallback if verification status is not known
+    PENDING // Code generated but not yet verified
+    VERIFIED // Successfully verified
+    EXPIRED // Code has expired
+    FAILED // Verification attempt failed
+    UNKNOWN // Fallback if verification status is not known
 }
 
 enum UserRole {
-  SUPER_ADMIN
-  ADMIN
-  COMMISSIONER
-  BOG
-  USER
+    SUPER_ADMIN
+    ADMIN
+    COMMISSIONER
+    BOG
+    USER
 }
 
 enum LeagueType {
-  NHL
-  AHL
-  ECHL
-  CHL
+    NHL
+    AHL
+    ECHL
+    CHL
 }
 
 enum CHLSubLeague {
-  OHL
-  QMJHL
-  WHL
-  NAJHL
+    OHL
+    QMJHL
+    WHL
+    NAJHL
 }
 
 enum PositionGroup {
-  FORWARD // LW, C, RW
-  DEFENSE // LD, RD
-  GOALIE // G
+    FORWARD // LW, C, RW
+    DEFENSE // LD, RD
+    GOALIE // G
 }
 
 enum PlayerPosition {
-  LW // Left Wing
-  C // Center
-  RW // Right Wing
-  LD // Left Defense
-  RD // Right Defense
-  G // Goalie
+    LW // Left Wing
+    C // Center
+    RW // Right Wing
+    LD // Left Defense
+    RD // Right Defense
+    G // Goalie
 
-  ECU // Emergency Call-Up (can play any position)
+    ECU // Emergency Call-Up (can play any position)
 }
 
 enum BidStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+    PENDING
+    ACCEPTED
+    REJECTED
 }
 
 // --------- Notification System ---------
 enum NotificationType {
-  SYSTEM
-  FORUM
-  TEAM
-  LEAGUE
-  MATCH
-  CUSTOM
+    SYSTEM
+    FORUM
+    TEAM
+    LEAGUE
+    MATCH
+    CUSTOM
 }
 
 enum NotificationStatus {
-  UNREAD
-  READ
-  ARCHIVED
+    UNREAD
+    READ
+    ARCHIVED
 }
 
 // --------- Forum System ---------
 enum ForumPostStatus {
-  PUBLISHED
-  HIDDEN
-  DELETED
+    PUBLISHED
+    HIDDEN
+    DELETED
 }
 
 enum ReactionType {
-  LIKE
-  DISLIKE
-  LAUGH
-  THINKING
-  HEART
+    LIKE
+    DISLIKE
+    LAUGH
+    THINKING
+    HEART
 }
 
 enum TeamManagementRole {
-  OWNER
-  GM
-  AGM
-  PAGM
+    OWNER
+    GM
+    AGM
+    PAGM
 }
 
 // Enums for PSN integration
 
 enum PSNSyncType {
-  PROFILE
-  TROPHIES
-  GAMES
-  ALL
+    PROFILE
+    TROPHIES
+    GAMES
+    ALL
 }
 
 enum PSNSyncStatus {
-  PENDING
-  IN_PROGRESS
-  SUCCESS
-  FAILED
+    PENDING
+    IN_PROGRESS
+    SUCCESS
+    FAILED
 }

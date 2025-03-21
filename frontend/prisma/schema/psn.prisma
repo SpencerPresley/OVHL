@@ -1,148 +1,146 @@
 // --------- PSN Integration Models ---------
 // Models for PlayStation Network data integration
 
-
-
 // PSNProfile stores basic PSN account information
 // Links PSN accounts to application users
 model PSNProfile {
-  id                   String            @id @default(cuid())
-  userId               String            @unique @map("user_id")
-  onlineId             String            @unique @map("online_id")
-  accountId            String?           @map("account_id")
-  aboutMe              String?           @map("about_me")
-  languages            String[]
-  isPlus               Boolean?          @default(false) @map("is_plus")
-  isOfficiallyVerified Boolean?          @default(false) @map("is_officially_verified")
-  friendsCount         Int?              @map("friends_count")
-  mutualFriendsCount   Int?              @map("mutual_friends_count")
-  friendRelation       String?           @map("friend_relation")
-  isBlocking           Boolean?          @default(false) @map("is_blocking")
-  onlineStatus         String?           @map("online_status")
-  platform             String?
-  lastOnline           DateTime?         @map("last_online")
-  availability         String?
-  lastProfileSync      DateTime?         @map("last_profile_sync")
-  lastTrophySync       DateTime?         @map("last_trophy_sync")
-  lastGameSync         DateTime?         @map("last_game_sync")
-  syncEnabled          Boolean           @default(true) @map("sync_enabled")
-  lastUpdated          DateTime          @default(now()) @map("last_updated")
-  createdAt            DateTime          @default(now()) @map("created_at")
-  updatedAt            DateTime          @updatedAt @map("updated_at")
-  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  avatars              PSNAvatar[]
-  trophySummary        PSNTrophy?
-  games                PSNGame[]
-  syncLogs             PSNSyncLog[]
-  gameTrophies         PSNGameTrophies[]
+    id                   String            @id @default(cuid())
+    userId               String            @unique @map("user_id")
+    onlineId             String            @unique @map("online_id")
+    accountId            String?           @map("account_id")
+    aboutMe              String?           @map("about_me")
+    languages            String[]
+    isPlus               Boolean?          @default(false) @map("is_plus")
+    isOfficiallyVerified Boolean?          @default(false) @map("is_officially_verified")
+    friendsCount         Int?              @map("friends_count")
+    mutualFriendsCount   Int?              @map("mutual_friends_count")
+    friendRelation       String?           @map("friend_relation")
+    isBlocking           Boolean?          @default(false) @map("is_blocking")
+    onlineStatus         String?           @map("online_status")
+    platform             String?
+    lastOnline           DateTime?         @map("last_online")
+    availability         String?
+    lastProfileSync      DateTime?         @map("last_profile_sync")
+    lastTrophySync       DateTime?         @map("last_trophy_sync")
+    lastGameSync         DateTime?         @map("last_game_sync")
+    syncEnabled          Boolean           @default(true) @map("sync_enabled")
+    lastUpdated          DateTime          @default(now()) @map("last_updated")
+    createdAt            DateTime          @default(now()) @map("created_at")
+    updatedAt            DateTime          @updatedAt @map("updated_at")
+    user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+    avatars              PSNAvatar[]
+    trophySummary        PSNTrophy?
+    games                PSNGame[]
+    syncLogs             PSNSyncLog[]
+    gameTrophies         PSNGameTrophies[]
 
-  @@index([onlineId])
-  @@map("psn_profiles")
+    @@index([onlineId])
+    @@map("psn_profiles")
 }
 
 // PSNAvatar stores avatar images for the PSN profile
 // PSN provides multiple sizes of the same avatar
 model PSNAvatar {
-  id        String     @id @default(cuid())
-  profileId String     @map("profile_id")
-  size      String // 's', 'm', 'l', 'xl'
-  url       String
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  profile   PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    id        String     @id @default(cuid())
+    profileId String     @map("profile_id")
+    size      String // 's', 'm', 'l', 'xl'
+    url       String
+    createdAt DateTime   @default(now()) @map("created_at")
+    updatedAt DateTime   @updatedAt @map("updated_at")
+    profile   PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@unique([profileId, size])
-  @@index([profileId])
-  @@map("psn_avatars")
+    @@unique([profileId, size])
+    @@index([profileId])
+    @@map("psn_avatars")
 }
 
 // PSNTrophy stores trophy information
 // Represents a user's trophy level, progress, and counts
 model PSNTrophy {
-  id            String     @id @default(cuid())
-  profileId     String     @unique @map("profile_id")
-  trophyLevel   Int?       @map("trophy_level")
-  progress      Int?
-  tier          Int?
-  // Earned trophies counts stored as separate fields
-  platinumCount Int?       @map("platinum_count")
-  goldCount     Int?       @map("gold_count")
-  silverCount   Int?       @map("silver_count")
-  bronzeCount   Int?       @map("bronze_count")
-  totalTrophies Int?       @map("total_trophies") // Optional sum of all trophies
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  profile       PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    id            String     @id @default(cuid())
+    profileId     String     @unique @map("profile_id")
+    trophyLevel   Int?       @map("trophy_level")
+    progress      Int?
+    tier          Int?
+    // Earned trophies counts stored as separate fields
+    platinumCount Int?       @map("platinum_count")
+    goldCount     Int?       @map("gold_count")
+    silverCount   Int?       @map("silver_count")
+    bronzeCount   Int?       @map("bronze_count")
+    totalTrophies Int?       @map("total_trophies") // Optional sum of all trophies
+    createdAt     DateTime   @default(now()) @map("created_at")
+    updatedAt     DateTime   @updatedAt @map("updated_at")
+    profile       PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
-  @@map("psn_trophies")
+    @@index([profileId])
+    @@map("psn_trophies")
 }
 
 // PSNGame stores information about games played by the user
 // Includes play history, platform, and other game metadata
 model PSNGame {
-  id                 String           @id @default(cuid())
-  profileId          String           @map("profile_id")
-  name               String
-  titleId            String           @map("title_id")
-  platform           String // "ps4_game", "ps5_native_game", "unknown", etc.
-  imageUrl           String?          @map("image_url")
-  playCount          Int?             @map("play_count")
-  firstPlayed        DateTime?        @map("first_played")
-  lastPlayed         DateTime?        @map("last_played")
-  playDuration       String?          @map("play_duration") // Stored as string like "1 day, 23:13:03"
-  // Additional game metadata we might want to capture
-  playTimeMinutes    Int?             @map("play_time_minutes") // Duration in minutes (calculated)
-  isCurrentlyPlaying Boolean?         @default(false) @map("is_currently_playing")
-  createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  profile            PSNProfile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  trophyInfo         PSNGameTrophies? // Changed to trophyInfo to avoid name conflict
+    id                 String           @id @default(cuid())
+    profileId          String           @map("profile_id")
+    name               String
+    titleId            String           @map("title_id")
+    platform           String // "ps4_game", "ps5_native_game", "unknown", etc.
+    imageUrl           String?          @map("image_url")
+    playCount          Int?             @map("play_count")
+    firstPlayed        DateTime?        @map("first_played")
+    lastPlayed         DateTime?        @map("last_played")
+    playDuration       String?          @map("play_duration") // Stored as string like "1 day, 23:13:03"
+    // Additional game metadata we might want to capture
+    playTimeMinutes    Int?             @map("play_time_minutes") // Duration in minutes (calculated)
+    isCurrentlyPlaying Boolean?         @default(false) @map("is_currently_playing")
+    createdAt          DateTime         @default(now()) @map("created_at")
+    updatedAt          DateTime         @updatedAt @map("updated_at")
+    profile            PSNProfile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    trophyInfo         PSNGameTrophies? // Changed to trophyInfo to avoid name conflict
 
-  @@unique([profileId, titleId, platform])
-  @@index([profileId])
-  @@index([titleId])
-  @@map("psn_games")
+    @@unique([profileId, titleId, platform])
+    @@index([profileId])
+    @@index([titleId])
+    @@map("psn_games")
 }
 
 // PSNSyncLog tracks the synchronization status of PSN data
 // Helps with incremental updates and synchronization scheduling
 model PSNSyncLog {
-  id             String        @id @default(cuid())
-  profileId      String        @map("profile_id")
-  syncType       PSNSyncType   @map("sync_type")
-  status         PSNSyncStatus @default(PENDING)
-  startedAt      DateTime      @default(now()) @map("started_at")
-  completedAt    DateTime?     @map("completed_at")
-  errorMessage   String?       @map("error_message")
-  recordsUpdated Int?          @default(0) @map("records_updated")
-  profile        PSNProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    id             String        @id @default(cuid())
+    profileId      String        @map("profile_id")
+    syncType       PSNSyncType   @map("sync_type")
+    status         PSNSyncStatus @default(PENDING)
+    startedAt      DateTime      @default(now()) @map("started_at")
+    completedAt    DateTime?     @map("completed_at")
+    errorMessage   String?       @map("error_message")
+    recordsUpdated Int?          @default(0) @map("records_updated")
+    profile        PSNProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
-  @@index([syncType])
-  @@index([status])
-  @@map("psn_sync_logs")
+    @@index([profileId])
+    @@index([syncType])
+    @@index([status])
+    @@map("psn_sync_logs")
 }
 
 // PSNGameTrophies stores trophy information for a specific game
 // Links to the PSNGame and provides trophy counts for that game
 model PSNGameTrophies {
-  id             String     @id @default(cuid())
-  profileId      String     @map("profile_id")
-  gameId         String     @unique @map("game_id") // Add unique constraint for one-to-one relation
-  trophiesEarned Int        @default(0) @map("trophies_earned")
-  trophiesTotal  Int        @default(0) @map("trophies_total")
-  progress       Int? // percentage completed
-  platinumEarned Int?       @default(0) @map("platinum_earned")
-  goldEarned     Int?       @default(0) @map("gold_earned")
-  silverEarned   Int?       @default(0) @map("silver_earned")
-  bronzeEarned   Int?       @default(0) @map("bronze_earned")
-  lastUpdated    DateTime   @default(now()) @map("last_updated")
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-  profile        PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  game           PSNGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    id             String     @id @default(cuid())
+    profileId      String     @map("profile_id")
+    gameId         String     @unique @map("game_id") // Add unique constraint for one-to-one relation
+    trophiesEarned Int        @default(0) @map("trophies_earned")
+    trophiesTotal  Int        @default(0) @map("trophies_total")
+    progress       Int? // percentage completed
+    platinumEarned Int?       @default(0) @map("platinum_earned")
+    goldEarned     Int?       @default(0) @map("gold_earned")
+    silverEarned   Int?       @default(0) @map("silver_earned")
+    bronzeEarned   Int?       @default(0) @map("bronze_earned")
+    lastUpdated    DateTime   @default(now()) @map("last_updated")
+    createdAt      DateTime   @default(now()) @map("created_at")
+    updatedAt      DateTime   @updatedAt @map("updated_at")
+    profile        PSNProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    game           PSNGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
-  @@map("psn_game_trophies")
+    @@index([profileId])
+    @@map("psn_game_trophies")
 }

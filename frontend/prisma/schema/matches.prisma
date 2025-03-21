@@ -1,202 +1,324 @@
 // --------- Match Stats ---------
 model Match {
-  id                      String                    @id @default(uuid())
-  teamSeasonId            String                    @map("team_season_id")
-  eaMatchId               String                    @map("ea_match_id")
-  createdAt               DateTime                  @default(now()) @map("created_at")
-  updatedAt               DateTime                  @updatedAt @map("updated_at")
-  teamSeason              TeamSeason                @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
-  clubMatchStats          ClubMatchStats[]
-  playerStats             PlayerMatch[]
-  clubAggregateMatchStats ClubAggregateMatchStats[]
-  matchAnalytics          MatchAnalytics[]
+    id                      String                    @id @default(uuid())
+    teamSeasonId            String                    @map("team_season_id")
+    eaMatchId               String                    @map("ea_match_id")
+    createdAt               DateTime                  @default(now()) @map("created_at")
+    updatedAt               DateTime                  @updatedAt @map("updated_at")
+    teamSeason              TeamSeason                @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+    clubMatchStats          ClubMatchStats[]
+    playerStats             PlayerMatch[]
+    clubAggregateMatchStats ClubAggregateMatchStats[]
+    matchAnalytics          MatchAnalytics[]
 
-  // NEW: Many-to-many relation with PlayerSeason
-  playerSeasons PlayerSeason[] // Players who participated in this match
+    // NEW: Many-to-many relation with PlayerSeason
+    playerSeasons PlayerSeason[] // Players who participated in this match
 
-  @@map("matches")
+    @@map("matches")
 }
 
 model ClubMatchStats {
-  id      String @id @default(uuid())
-  matchId String @map("match_id")
+    id      String @id @default(uuid())
+    matchId String @map("match_id")
 
-  // Basic Info
-  clubDivision       Int    @map("club_division")
-  cNhlOnlineGameType String @map("cNhlOnlineGameType")
+    // Basic Info
+    clubDivision       Int    @map("club_division")
+    cNhlOnlineGameType String @map("cNhlOnlineGameType")
 
-  // Game Results
-  goalsAgainstRaw   Int    @map("goals_against_raw")
-  goalsForRaw       Int    @map("goals_for_raw")
-  losses            Int    @map("losses")
-  result            Int    @map("result")
-  score             Int    @map("score")
-  scoreString       String @map("score_string")
-  winnerByDnf       Int    @map("winner_by_dnf") // 0 = no, 1 = yes
-  winnerByGoalieDnf Int    @map("winner_by_goalie_dnf") // 0 = no, 1 = yes
+    // Game Results
+    goalsAgainstRaw   Int    @map("goals_against_raw")
+    goalsForRaw       Int    @map("goals_for_raw")
+    losses            Int    @map("losses")
+    result            Int    @map("result")
+    score             Int    @map("score")
+    scoreString       String @map("score_string")
+    winnerByDnf       Int    @map("winner_by_dnf") // 0 = no, 1 = yes
+    winnerByGoalieDnf Int    @map("winner_by_goalie_dnf") // 0 = no, 1 = yes
 
-  // Team Stats
-  memberString           String @map("member_string")
-  passesAttempted        Int    @map("passes_attempted")
-  passesCompleted        Int    @map("passes_completed")
-  powerplayGoals         Int    @map("powerplay_goals")
-  powerplayOpportunities Int    @map("powerplay_opportunities")
-  shots                  Int    @map("shots")
-  teamArtAbbr            String @map("team_art_abbr")
-  teamSide               Int    @map("team_side") // 0 = away, 1 = home
-  timeOnAttack           Int    @map("time_on_attack")
+    // Team Stats
+    memberString           String @map("member_string")
+    passesAttempted        Int    @map("passes_attempted")
+    passesCompleted        Int    @map("passes_completed")
+    powerplayGoals         Int    @map("powerplay_goals")
+    powerplayOpportunities Int    @map("powerplay_opportunities")
+    shots                  Int    @map("shots")
+    teamArtAbbr            String @map("team_art_abbr")
+    teamSide               Int    @map("team_side") // 0 = away, 1 = home
+    timeOnAttack           Int    @map("time_on_attack")
 
-  // Opponent Info
-  opponentClubId      String @map("opponent_club_id")
-  opponentScore       Int    @map("opponent_score")
-  opponentTeamArtAbbr String @map("opponent_team_art_abbr")
+    // Opponent Info
+    opponentClubId      String @map("opponent_club_id")
+    opponentScore       Int    @map("opponent_score")
+    opponentTeamArtAbbr String @map("opponent_team_art_abbr")
 
-  // Club Details
-  goals        Int @map("goals")
-  goalsAgainst Int @map("goals_against")
+    // Club Details
+    goals        Int @map("goals")
+    goalsAgainst Int @map("goals_against")
 
-  details ClubMatchStatsDetails?
-  match   Match                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+    details ClubMatchStatsDetails?
+    match   Match                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model ClubMatchStatsDetails {
-  id               String @id @default(uuid())
-  clubMatchStatsId String @unique @map("club_match_stats_id")
-  name             String @map("name")
-  eaClubId         Int    @map("ea_club_id")
-  regionId         Int    @map("region_id")
-  teamId           Int    @map("team_id")
+    id               String @id @default(uuid())
+    clubMatchStatsId String @unique @map("club_match_stats_id")
+    name             String @map("name")
+    eaClubId         Int    @map("ea_club_id")
+    regionId         Int    @map("region_id")
+    teamId           Int    @map("team_id")
 
-  // CustomKit is related to details, not directly to ClubMatchStats
-  customKit CustomKit?
+    // CustomKit is related to details, not directly to ClubMatchStats
+    customKit CustomKit?
 
-  // Relationship
-  clubMatchStats ClubMatchStats? @relation(fields: [clubMatchStatsId], references: [id], onDelete: Cascade)
+    // Relationship
+    clubMatchStats ClubMatchStats? @relation(fields: [clubMatchStatsId], references: [id], onDelete: Cascade)
 }
 
 model CustomKit {
-  id           String @id @default(uuid())
-  detailsId    String @unique @map("details_id") // Changed from clubMatchStatsId
-  isCustomTeam Int    @map("is_custom_team")
-  crestAssetId Int    @map("crest_asset_id")
-  useBaseAsset Int    @map("use_base_asset")
+    id           String @id @default(uuid())
+    detailsId    String @unique @map("details_id") // Changed from clubMatchStatsId
+    isCustomTeam Int    @map("is_custom_team")
+    crestAssetId Int    @map("crest_asset_id")
+    useBaseAsset Int    @map("use_base_asset")
 
-  // Relationship - now references details, not ClubMatchStats
-  details ClubMatchStatsDetails? @relation(fields: [detailsId], references: [id], onDelete: Cascade)
+    // Relationship - now references details, not ClubMatchStats
+    details ClubMatchStatsDetails? @relation(fields: [detailsId], references: [id], onDelete: Cascade)
 }
 
 model ClubAggregateMatchStats {
-  id      String @id @default(uuid())
-  matchId String @map("match_id")
+    id      String @id @default(uuid())
+    matchId String @map("match_id")
 
-  // Basic Info
-  clubLevel Int @map("club_level")
-  position  Int @map("position") // Always gives 0
-  posSorted Int @map("pos_sorted") // Sum of (0, 1, 2, 3, 4, 5) = 15, this field doesn't do anything for us
+    // Basic Info
+    clubLevel Int @map("club_level")
+    position  Int @map("position") // Always gives 0
+    posSorted Int @map("pos_sorted") // Sum of (0, 1, 2, 3, 4, 5) = 15, this field doesn't do anything for us
 
-  // Game Status
-  isGuest     Int @map("is_guest") // If the team was the away team
-  playerDnf   Int @map("player_dnf") // Number of players who did not finish the game
-  playerLevel Int @map("player_level") // Cumulative player level of all players on the team
+    // Game Status
+    isGuest     Int @map("is_guest") // If the team was the away team
+    playerDnf   Int @map("player_dnf") // Number of players who did not finish the game
+    playerLevel Int @map("player_level") // Cumulative player level of all players on the team
 
-  // Team Info
-  eaTeamId         Int @map("ea_team_id")
-  teamSide         Int @map("team_side") // This sums the 1 or 0 on each of the players, where 1 means home so 6 players means = 6, away will always be 0. This isn't really a useful field but it's in the api so.
-  opponentEaClubId Int @map("opponent_ea_club_id")
-  opponentEaTeamId Int @map("opponent_ea_team_id")
-  opponentScore    Int @map("opponent_score")
+    // Team Info
+    eaTeamId         Int @map("ea_team_id")
+    teamSide         Int @map("team_side") // This sums the 1 or 0 on each of the players, where 1 means home so 6 players means = 6, away will always be 0. This isn't really a useful field but it's in the api so.
+    opponentEaClubId Int @map("opponent_ea_club_id")
+    opponentEaTeamId Int @map("opponent_ea_team_id")
+    opponentScore    Int @map("opponent_score")
 
-  // Game Results
-  score Int @map("score")
+    // Game Results
+    score Int @map("score")
 
-  // Team Ratings
-  // Cumulative ratings for all players on the team
-  ratingDefense  Float @map("rating_defense")
-  ratingOffense  Float @map("rating_offense")
-  ratingTeamplay Float @map("rating_teamplay")
+    // Team Ratings
+    // Cumulative ratings for all players on the team
+    ratingDefense  Float @map("rating_defense")
+    ratingOffense  Float @map("rating_offense")
+    ratingTeamplay Float @map("rating_teamplay")
 
-  // Time Stats
-  toi        Int @map("toi") // Cumulative toi for all players on the team
-  toiSeconds Int @map("toi_seconds") // Cumulative toi in seconds for all players on the team
+    // Time Stats
+    toi        Int @map("toi") // Cumulative toi for all players on the team
+    toiSeconds Int @map("toi_seconds") // Cumulative toi in seconds for all players on the team
 
-  // Skater Stats
-  // ALL CUMULATIVE
-  assists           Int   @map("assists")
-  blockedShots      Int   @map("blocked_shots")
-  deflections       Int   @map("deflections")
-  faceoffsLost      Int   @map("faceoffs_lost")
-  faceoffPct        Float @map("faceoff_pct")
-  faceoffsWon       Int   @map("faceoffs_won")
-  giveaways         Int   @map("giveaways")
-  goals             Int   @map("goals")
-  hits              Int   @map("hits")
-  interceptions     Int   @map("interceptions")
-  passAttempts      Int   @map("pass_attempts")
-  passes            Int   @map("passes")
-  passPct           Float @map("pass_pct")
-  penaltiesDrawn    Int   @map("penalties_drawn")
-  penaltyMinutes    Int   @map("penalty_minutes") // PIM
-  skaterPkClearZone Int   @map("skater_pk_clear_zone")
-  plusMinus         Int   @map("plus_minus")
-  possession        Int   @map("possession_seconds")
-  powerPlayGoals    Int   @map("power_play_goals")
-  saucerPasses      Int   @map("saucer_passes")
-  shortHandedGoals  Int   @map("short_handed_goals")
-  shotAttempts      Int   @map("shot_attempts")
-  shotOnNetPct      Float @map("shot_on_net_pct")
-  shots             Int   @map("shots")
-  takeaways         Int   @map("takeaways")
+    // Skater Stats
+    // ALL CUMULATIVE
+    assists           Int   @map("assists")
+    blockedShots      Int   @map("blocked_shots")
+    deflections       Int   @map("deflections")
+    faceoffsLost      Int   @map("faceoffs_lost")
+    faceoffPct        Float @map("faceoff_pct")
+    faceoffsWon       Int   @map("faceoffs_won")
+    giveaways         Int   @map("giveaways")
+    goals             Int   @map("goals")
+    hits              Int   @map("hits")
+    interceptions     Int   @map("interceptions")
+    passAttempts      Int   @map("pass_attempts")
+    passes            Int   @map("passes")
+    passPct           Float @map("pass_pct")
+    penaltiesDrawn    Int   @map("penalties_drawn")
+    penaltyMinutes    Int   @map("penalty_minutes") // PIM
+    skaterPkClearZone Int   @map("skater_pk_clear_zone")
+    plusMinus         Int   @map("plus_minus")
+    possession        Int   @map("possession_seconds")
+    powerPlayGoals    Int   @map("power_play_goals")
+    saucerPasses      Int   @map("saucer_passes")
+    shortHandedGoals  Int   @map("short_handed_goals")
+    shotAttempts      Int   @map("shot_attempts")
+    shotOnNetPct      Float @map("shot_on_net_pct")
+    shots             Int   @map("shots")
+    takeaways         Int   @map("takeaways")
 
-  // Goalie Stats CUMULATIVE
-  // While these are cumulative teams usually only have 1 goalie so these are the same as the player stats
-  breakawaySavePct    Float @map("breakaway_save_pct")
-  breakawaySaves      Int   @map("breakaway_saves")
-  breakawayShots      Int   @map("breakaway_shots")
-  desperationSaves    Int   @map("desperation_saves")
-  goalsAgainst        Int   @map("goals_against")
-  goalsAgainstAverage Float @map("goals_against_average")
-  penaltyShotSavePct  Float @map("penalty_shot_save_pct")
-  penaltyShotSaves    Int   @map("penalty_shot_saves")
-  goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
-  pokeChecks          Int   @map("poke_checks")
-  savePct             Float @map("save_pct")
-  totalSaves          Int   @map("total_saves")
-  totalShotsFaced     Int   @map("total_shots_faced")
-  shutoutPeriods      Int   @map("shutout_periods")
+    // Goalie Stats CUMULATIVE
+    // While these are cumulative teams usually only have 1 goalie so these are the same as the player stats
+    breakawaySavePct    Float @map("breakaway_save_pct")
+    breakawaySaves      Int   @map("breakaway_saves")
+    breakawayShots      Int   @map("breakaway_shots")
+    desperationSaves    Int   @map("desperation_saves")
+    goalsAgainst        Int   @map("goals_against")
+    goalsAgainstAverage Float @map("goals_against_average")
+    penaltyShotSavePct  Float @map("penalty_shot_save_pct")
+    penaltyShotSaves    Int   @map("penalty_shot_saves")
+    goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
+    pokeChecks          Int   @map("poke_checks")
+    savePct             Float @map("save_pct")
+    totalSaves          Int   @map("total_saves")
+    totalShotsFaced     Int   @map("total_shots_faced")
+    shutoutPeriods      Int   @map("shutout_periods")
 
-  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+    match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model MatchAnalytics {
-  id      String @id @default(uuid())
-  matchId String @map("match_id")
+    id      String @id @default(uuid())
+    matchId String @map("match_id")
 
-  // Possession Metrics
-  possessionDifferential   Int   @map("possession_differential")
-  possessionPercentageHome Float @map("possession_percentage_home")
-  possessionPercentageAway Float @map("possession_percentage_away")
+    // Possession Metrics
+    possessionDifferential   Int   @map("possession_differential")
+    possessionPercentageHome Float @map("possession_percentage_home")
+    possessionPercentageAway Float @map("possession_percentage_away")
 
-  // Efficiency Metrics
-  homeShootingEfficiency   Float @map("home_shooting_efficiency")
-  awayShootingEfficiency   Float @map("away_shooting_efficiency")
-  homePassingEfficiency    Float @map("home_passing_efficiency")
-  awayPassingEfficiency    Float @map("away_passing_efficiency")
-  homePossessionEfficiency Float @map("home_possession_efficiency")
-  awayPossessionEfficiency Float @map("away_possession_efficiency")
+    // Efficiency Metrics
+    homeShootingEfficiency   Float @map("home_shooting_efficiency")
+    awayShootingEfficiency   Float @map("away_shooting_efficiency")
+    homePassingEfficiency    Float @map("home_passing_efficiency")
+    awayPassingEfficiency    Float @map("away_passing_efficiency")
+    homePossessionEfficiency Float @map("home_possession_efficiency")
+    awayPossessionEfficiency Float @map("away_possession_efficiency")
 
-  // Special Teams Metrics
-  homePowerPlayPct   Float @map("home_power_play_pct")
-  awayPowerPlayPct   Float @map("away_power_play_pct")
-  homePenaltyKillPct Float @map("home_penalty_kill_pct")
-  awayPenaltyKillPct Float @map("away_penalty_kill_pct")
+    // Special Teams Metrics
+    homePowerPlayPct   Float @map("home_power_play_pct")
+    awayPowerPlayPct   Float @map("away_power_play_pct")
+    homePenaltyKillPct Float @map("home_penalty_kill_pct")
+    awayPenaltyKillPct Float @map("away_penalty_kill_pct")
 
-  // Momentum and Control Metrics
-  homeScore                  Float @map("home_score")
-  awayScore                  Float @map("away_score")
-  shotDifferential           Int   @map("shot_differential")
-  hitDifferential            Int   @map("hit_differential")
-  takeawayDifferential       Int   @map("takeaway_differential")
-  scoringChancesDifferential Int   @map("scoring_chances_differential")
+    // Momentum and Control Metrics
+    homeScore                  Float @map("home_score")
+    awayScore                  Float @map("away_score")
+    shotDifferential           Int   @map("shot_differential")
+    hitDifferential            Int   @map("hit_differential")
+    takeawayDifferential       Int   @map("takeaway_differential")
+    scoringChancesDifferential Int   @map("scoring_chances_differential")
 
-  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+    match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model PlayerMatch {
+    id                 String @id @default(uuid())
+    matchId            String @map("match_id")
+    playerTeamSeasonId String @map("player_team_season_id")
+    playerSeasonId     String @map("player_season_id")
+
+    // Basic Info
+    playerLevel        Int    @map("player_level")
+    position           String @map("position")
+    posSorted          Int    @map("pos_sorted")
+    playerName         String @map("player_name")
+    clientPlatform     String @map("client_platform")
+    playerLevelDisplay Int    @map("player_level_display")
+
+    // Game Status
+    isGuest            Boolean @map("is_guest")
+    playerDnf          Boolean @map("player_dnf") // did not finish (quit)
+    pNhlOnlineGameType String  @map("pNhlOnlineGameType") // Should likely be "5"
+
+    // Team Information
+    eaTeamId         String @map("ea_team_id")
+    teamSide         Int    @map("team_side") // 0 = home, 1 = away
+    opponentClubId   String @map("opponent_club_id")
+    opponentEaTeamId String @map("opponent_ea_team_id")
+    opponentScore    Int    @map("opponent_score")
+    score            Int    @map("score")
+
+    // Player Ratings
+    ratingDefense  Float @map("rating_defense")
+    ratingOffense  Float @map("rating_offense")
+    ratingTeamplay Float @map("rating_teamplay")
+
+    // Time Stats
+    toi        Int @map("toi") // time on ice
+    toiSeconds Int @map("toi_seconds") // time on ice in seconds
+
+    // Skater Stats
+    assists              Int    @map("assists")
+    blockedShots         Int    @map("blocked_shots")
+    deflections          Int    @map("deflections")
+    faceoffsLost         Int    @map("faceoffs_lost")
+    faceoffPct           Float  @map("faceoff_pct")
+    faceoffsWon          Int    @map("faceoffs_won")
+    giveaways            Int    @map("giveaways")
+    goals                Int    @map("goals")
+    gameWinningGoals     Int    @map("game_winning_goals")
+    hits                 Int    @map("hits")
+    interceptions        Int    @map("interceptions")
+    passAttempts         Int    @map("pass_attempts")
+    passes               Int    @map("passes")
+    passPct              Float  @map("pass_pct")
+    penaltiesDrawn       Int    @map("penalties_drawn")
+    penaltyMinutes       Int    @map("penalty_minutes") // PIM
+    skaterPkClearZone    Int    @map("skater_pk_clear_zone")
+    plusMinus            Int    @map("plus_minus")
+    possessionSeconds    Int    @map("possession_seconds")
+    powerPlayGoals       Int    @map("power_play_goals")
+    saucerPasses         Int    @map("saucer_passes")
+    shortHandedGoals     Int    @map("short_handed_goals")
+    shotAttempts         Int    @map("shot_attempts")
+    shotsOnNetPct        Float  @map("shots_on_net_pct")
+    shootingPct          Float  @map("shooting_pct")
+    shotsOnGoal          Int    @map("shots_on_goal")
+    takeaways            Int    @map("takeaways")
+    points               Int    @map("points")
+    faceoffsTotal        Int    @map("faceoffs_total")
+    shotsMissed          Int    @map("shots_missed")
+    passesMissed         Int    @map("passes_missed")
+    passingPct           Float  @map("passing_pct")
+    majorPenalties       Int    @map("major_penalties")
+    minorPenalties       Int    @map("minor_penalties")
+    totalPenalties       Int    @map("total_penalties")
+    pointsPer60          Float  @map("points_per_60")
+    possessionPerMinute  Float  @map("possession_per_minute")
+    shotEfficiency       Float  @map("shot_efficiency")
+    tkawayGvawayRatio    Float  @map("tkaway_gvaway_ratio")
+    penaltyDifferential  Int    @map("penalty_differential")
+    defActionsPerMinute  Float  @map("def_actions_per_minute")
+    offImpact            Float  @map("off_impact")
+    defImpact            Float  @map("def_impact")
+    detailedPosition     String @map("detailed_position")
+    positionAbbreviation String @map("position_abbreviation")
+    gameImpactScore      Float  @map("game_impact_score")
+    puckManagementRating Float  @map("puck_management_rating")
+    possessionEfficiency Float  @map("possession_efficiency")
+    netDefContribution   Float  @map("net_def_contribution")
+    timeAdjustedRating   Float  @map("time_adjusted_rating")
+    shotGenerationRate   Float  @map("shot_generation_rate")
+    offZonePresence      Float  @map("off_zone_presence")
+    twoWayRating         Float  @map("two_way_rating")
+
+    // Goalie Stats
+    breakawaySavePct    Float @map("breakaway_save_pct")
+    breakawaySaves      Int   @map("breakaway_saves")
+    breakawayShots      Int   @map("breakaway_shots_faced")
+    desperationSaves    Int   @map("desperation_saves")
+    goalsAgainst        Int   @map("goals_against")
+    goalsAgainstAverage Float @map("goals_against_average")
+    penaltyShotSavePct  Float @map("penalty_shot_save_pct")
+    penaltyShotSaves    Int   @map("penalty_shot_saves")
+    penaltyShotsFaced   Int   @map("penalty_shots_faced")
+    goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
+    pokeChecks          Int   @map("poke_checks")
+    savePct             Float @map("save_pct")
+    totalSaves          Int   @map("total_saves")
+    totalShotsFaced     Int   @map("total_shots_faced")
+    shutoutPeriods      Int   @map("shutout_periods")
+    goalsSaved          Int   @map("goals_saved")
+
+    // LOGS
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // RELATIONS
+    match            Match            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+    playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id], onDelete: Cascade)
+    playerSeason     PlayerSeason     @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade) // NEW relation
+
+    @@index([playerSeasonId]) // NEW: index for performance
+    @@map("player_matches")
 }
