@@ -1,5 +1,3 @@
-// ! REFERENCE ONLY WILL BE DELETED SOON
-
 // @file schema.prisma
 // @author Spencer Presley
 // @version 1.0.0
@@ -28,11 +26,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator python {
-  provider             = "prisma-client-py"
-  output               = "../../backend/database_service/prisma/"
-  recursive_type_depth = -1
-}
+// generator python {
+//   provider             = "prisma-client-py"
+//   output               = "../../backend/database_service/prisma/"
+//   recursive_type_depth = -1
+// }
 
 // PostgreSQL Database Connection Configuration
 // Defines secure connection parameters for the application's primary database
@@ -55,12 +53,29 @@ enum VerificationStatus {
   VERIFIED // Successfully verified
   EXPIRED // Code has expired
   FAILED // Verification attempt failed
+  UNKNOWN // Fallback if verification status is not known
 }
 
 enum UserRole {
-  USER
-  BOG
+  SUPER_ADMIN
   ADMIN
+  COMMISIONER
+  BOG
+  USER
+}
+
+enum LeagueType {
+  NHL
+  AHL
+  ECHL
+  CHL
+}
+
+enum CHLSubLeague {
+  OHL
+  QMJHL
+  WHL
+  NAJHL
 }
 
 // --------- Authentication & Base User Models ---------
@@ -80,9 +95,12 @@ model User {
   // AVATAR
   avatarUrl String? @map("avatar_url")
 
-  // PRIVELEDGES
-  isAdmin Boolean @default(false) @map("is_admin")
-  isBog   Boolean @default(false) @map("is_bog")
+  // PRIVELEDGES AND QUICK FILTERS
+  isSuperAdmin   Boolean @default(false) @map("is_super_admin")
+  isAdmin        Boolean @default(false) @map("is_admin")
+  isCommissioner Boolean @default(false) @map("is_commissioner")
+  isBog          Boolean @default(false) @map("is_bog")
+  isTeamManager  Boolean @default(false) @map("is_team_manager")
 
   // PASSWORD RESET
   passwordResetToken          String?   @unique
@@ -111,7 +129,11 @@ model User {
   systemHistory SystemHistory[]
   gamertags     GamertagHistory[]
 
-  // SEASONS & MANAGEMENT
+  // LEAGUE MANAGEMENT
+  leagueCommissioners LeagueCommissioner[]
+  leagueBogs          LeagueBOG[]
+
+  // SEASONS & TEAM MANAGEMENT
   activeSeasons  PlayerSeason[]
   teamManagement TeamManager[]
   psnProfile     PSNProfile? // Add relation to PSN profile
@@ -126,7 +148,7 @@ model EaIdHistory {
   eaId      String   @map("ea_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("ea_id_history")
@@ -138,7 +160,7 @@ model SystemHistory {
   system    System
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("system_history")
@@ -177,67 +199,169 @@ model GamertagHistory {
   codeExpiresAt        DateTime?           @map("code_expires_at")
   isVerified           Boolean             @default(false) @map("is_verified")
   verificationMetadata Json?               @map("verification_metadata")
-  user                 User                @relation(fields: [userId], references: [id])
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, system])
   @@index([gamertag, system])
   @@index([verificationCode])
 }
 
+// League model to represent both top-level and sub-leagues
+model League {
+  id             String    @id @default(uuid())
+  name           String // Full name: "National Hockey League", "Ontario Hockey League", etc.
+  shortName      String // Abbreviation: "NHL", "OHL", etc.
+  leagueType     LeagueType // Top-level categorization
+  isSubLeague    Boolean   @default(false)
+  parentLeagueId String?   @map("parent_league_id")
+  parentLeague   League?   @relation("SubLeagues", fields: [parentLeagueId], references: [id])
+  subLeagues     League[]  @relation("SubLeagues")
+
+  conferences Conference[]
+  divisions   Division[]
+  teams       Team[]
+
+  seasons LeagueSeason[]
+
+  @@unique([shortName])
+}
+
+model LeagueSeason {
+  id       String @id @default(uuid())
+  leagueId String @map("league_id")
+  seasonId String @map("season_id")
+
+  // Season-specific configurations
+  salaryCap Int @default(0) @map("salary_cap")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  // Commissioner and BOG relationships
+  commissioners LeagueCommissioner[]
+  bogs          LeagueBOG[]
+
+  // Team relationships
+  teams TeamSeason[]
+
+  // Player history
+  playerHistory PlayerLeagueHistory[]
+
+  @@unique([leagueId, seasonId])
+  @@index([leagueId])
+  @@index([seasonId])
+}
+
+model Conference {
+  id        String     @id @default(uuid())
+  name      String // "Eastern", "Western", etc.
+  leagueId  String     @map("league_id")
+  league    League     @relation(fields: [leagueId], references: [id])
+  divisions Division[]
+
+  @@unique([name, leagueId])
+}
+
+model Division {
+  id           String      @id @default(uuid())
+  name         String // "Atlantic", "Metropolitan", etc.
+  conferenceId String      @map("conference_id")
+  leagueId     String      @map("league_id")
+  conference   Conference? @relation(fields: [conferenceId], references: [id])
+  league       League      @relation(fields: [leagueId], references: [id])
+  teams        Team[]
+
+  @@unique([name, leagueId])
+}
+
 // --------- Season & League Structure ---------
 // Season model represents a specific competitive period
 // Supports tracking of multi-tier league seasons and player participation
 model Season {
-  id        String         @id @default(uuid())
-  seasonId  String         @map("season_id")
-  isLatest  Boolean        @default(false) @map("is_latest")
-  createdAt DateTime       @default(now()) @map("created_at")
-  updatedAt DateTime       @updatedAt @map("updated_at")
-  tiers     Tier[]
-  players   PlayerSeason[]
+  id            String         @id @default(uuid())
+  seasonId      String         @map("season_id")
+  isLatest      Boolean        @default(false) @map("is_latest")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  leagueSeasons LeagueSeason[]
+  players       PlayerSeason[]
 }
 
-// Tier model represents different competitive levels within a season
-// Enables hierarchical league structure (e.g., NHL, AHL, CHL)
-model Tier {
-  id            String              @id @default(uuid())
-  seasonId      String              @map("season_id")
-  leagueLevel   Int                 @map("league_level")
-  name          String // NHL, AHL, CHL, etc.
-  salaryCap     Int                 @default(0) @map("salary_cap") // Added salary cap at tier level
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt @map("updated_at")
-  season        Season              @relation(fields: [seasonId], references: [id])
-  teams         TeamSeason[]
-  playerHistory PlayerTierHistory[]
+// TIER COMMISIONERS/BOGS
+model LeagueCommissioner {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  leagueSeasonId String   @map("league_season_id") // Changed from tierId
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  @@index([seasonId])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueSeasonId])
+  @@index([userId])
+  @@index([leagueSeasonId])
+  @@map("league_commissioners")
+}
+
+model LeagueBOG {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  leagueSeasonId String   @map("league_season_id") // Changed from tierId
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueSeasonId])
+  @@index([userId])
+  @@index([leagueSeasonId])
+  @@map("league_bogs")
 }
 
 // --------- Team Structure ---------
 // Team model represents a sports team with comprehensive tracking capabilities
 // Supports team affiliations, historical data, and cross-league relationships
 model Team {
-  id             String       @id @default(uuid())
-  eaClubId       String       @map("ea_club_id")
-  eaClubName     String       @map("ea_club_name")
-  officialName   String       @map("official_name")
-  teamIdentifier String       @unique @map("team_identifier") @db.VarChar(14)
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  seasons        TeamSeason[]
-  // REMOVED: managers relation (moved to TeamSeason)
+  id             String @id @default(uuid())
+  eaClubId       String @map("ea_club_id")
+  eaClubName     String @map("ea_club_name")
+  officialName   String @map("official_name")
+  teamIdentifier String @map("team_identifier") @db.VarChar(14)
+
+  // League relationships
+  leagueId String @map("league_id")
+  league   League @relation(fields: [leagueId], references: [id])
+
+  // Division Relationships
+  divisionId String?   @map("division_id")
+  division   Division? @relation(fields: [divisionId], references: [id])
+
+  // Colors
+  primaryColor   String? @map("primary_color")
+  secondaryColor String? @map("secondary_color")
+
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  seasons   TeamSeason[]
 
   // Affiliation relationships
   nhlAffiliateId String? @map("nhl_affiliate_id")
   ahlAffiliateId String? @map("ahl_affiliate_id")
-  nhlAffiliate   Team?   @relation("NHLAffiliation", fields: [nhlAffiliateId], references: [id])
-  ahlAffiliate   Team?   @relation("AHLAffiliation", fields: [ahlAffiliateId], references: [id])
+  nhlAffiliate   Team?   @relation("NHLAffiliation", fields: [nhlAffiliateId], references: [id], onDelete: Cascade)
+  ahlAffiliate   Team?   @relation("AHLAffiliation", fields: [ahlAffiliateId], references: [id], onDelete: Cascade)
 
   // Reverse relationships
   ahlAffiliates  Team[] @relation("NHLAffiliation")
   echlAffiliates Team[] @relation("AHLAffiliation")
 
+  @@unique([teamIdentifier, leagueId])
   @@index([nhlAffiliateId])
   @@index([ahlAffiliateId])
 }
@@ -245,42 +369,28 @@ model Team {
 // TeamSeason model captures a team's performance and statistics for a specific season
 // Provides granular tracking of team performance metrics
 model TeamSeason {
-  id     String @id @default(uuid())
-  teamId String @map("team_id")
-  tierId String @map("tier_id")
+  id             String @id @default(uuid())
+  teamId         String @map("team_id")
+  leagueSeasonId String @map("league_season_id")
 
   // Roster counts
   forwardCount Int @default(0) @map("forward_count")
   defenseCount Int @default(0) @map("defense_count")
   goalieCount  Int @default(0) @map("goalie_count")
 
-  // Team stats
-  // REMOVED: All stats fields - they'll be calculated from Matches
-  // wins                     Int    @default(0)
-  // losses                   Int    @default(0)
-  // otLosses                 Int    @default(0)
-  // goalsAgainst             Int    @default(0) @map("goals_against")
-  // goalsFor                 Int    @default(0) @map("goals_for")
-  // matchesPlayed            Int    @default(0) @map("matches_played")
-  // penaltyKillGoalsAgainst  Int    @default(0) @map("penalty_kill_goals_against")
-  // penaltyKillOpportunities Int    @default(0) @map("penalty_kill_opportunities")
-  // powerplayGoals           Int    @default(0) @map("powerplay_goals")
-  // powerplayOpportunities   Int    @default(0) @map("powerplay_opportunities")
-  // shots                    Int    @default(0)
-  // shotsAgainst             Int    @default(0) @map("shots_against")
-  // timeOnAttack             Int    @default(0) @map("time_on_attack")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
-  team      Team               @relation(fields: [teamId], references: [id])
-  tier      Tier               @relation(fields: [tierId], references: [id])
-  matches   Match[]
-  players   PlayerTeamSeason[]
-  bids      Bid[]              @relation("TeamSeasonBids")
-  managers  TeamManager[] // NEW: Relation to TeamManager (makes more sense as managers can change per season)
+  team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  matches  Match[]
+  players  PlayerTeamSeason[]
+  bids     Bid[]              @relation("TeamSeasonBids")
+  managers TeamManager[] // NEW: Relation to TeamManager (makes more sense as managers can change per season)
 
   @@index([teamId])
-  @@index([tierId])
+  @@index([leagueSeasonId])
 }
 
 // --------- Player Season & Stats ---------
@@ -291,45 +401,39 @@ model PlayerSeason {
   contractId String @unique @map("contract_id")
   position   String
 
-  // REMOVED: All these stats field - they'll be calculated from matches
-  // gamesPlayed    Int?                @map("games_played")
-  // goals          Int?
-  // assists        Int?
-  // plusMinus      Int?                @map("plus_minus")
-  // shots          Int?
-  // hits           Int?
-  // takeaways      Int?
-  // giveaways      Int?
-  // penaltyMinutes Int?                @map("penalty_minutes")
-  // saves          Int?
-  // goalsAgainst   Int?                @map("goals_against")
+  isInBidding Boolean  @default(true) @map("is_in_bidding")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  isInBidding Boolean             @default(true) @map("is_in_bidding")
-  createdAt   DateTime            @default(now()) @map("created_at")
-  updatedAt   DateTime            @updatedAt @map("updated_at")
-  user        User                @relation(fields: [userId], references: [id]) // Changed from player relation
-  season      Season              @relation(fields: [seasonId], references: [id])
-  contract    Contract            @relation(fields: [contractId], references: [id])
-  teamSeasons PlayerTeamSeason[]
-  tierHistory PlayerTierHistory[]
+  // Relations
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  season        Season                @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  contract      Contract              @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  teamSeasons   PlayerTeamSeason[]
+  leagueHistory PlayerLeagueHistory[] // Changed from tierHistory
 
-  // NEW: Direct relations to matches
-  playerMatches PlayerMatch[] // Detailed player stats for each match this player was in
-  matches       Match[] // All matches this player was in
+  // Match-related relations
+  playerMatches PlayerMatch[]
+  matches       Match[]
 
   @@map("player_seasons")
 }
 
-model PlayerTierHistory {
-  id             String       @id @default(uuid())
-  playerSeasonId String       @map("player_season_id")
-  tierId         String       @map("tier_id")
-  startDate      DateTime     @default(now()) @map("start_date")
-  endDate        DateTime?    @map("end_date")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id])
-  tier           Tier         @relation(fields: [tierId], references: [id])
+model PlayerLeagueHistory {
+  id             String    @id @default(uuid())
+  playerSeasonId String    @map("player_season_id")
+  leagueSeasonId String    @map("league_season_id") // Changed from tierId
+  startDate      DateTime  @default(now()) @map("start_date")
+  endDate        DateTime? @map("end_date")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  playerSeason PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@index([playerSeasonId])
+  @@index([leagueSeasonId])
+  @@map("player_league_history")
 }
 
 // Update PlayerTeamSeason - keep this model for team-specific tracking
@@ -354,8 +458,8 @@ model PlayerTeamSeason {
 
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
-  playerSeason  PlayerSeason  @relation(fields: [playerSeasonId], references: [id])
-  teamSeason    TeamSeason    @relation(fields: [teamSeasonId], references: [id])
+  playerSeason  PlayerSeason  @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  teamSeason    TeamSeason    @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
   playerMatches PlayerMatch[]
 
   @@map("player_team_seasons")
@@ -375,9 +479,9 @@ model Contract {
 
 model Bid {
   id           String     @id @default(uuid())
-  contract     Contract   @relation(fields: [contractId], references: [id])
+  contract     Contract   @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId   String     @map("contract_id")
-  teamSeason   TeamSeason @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id])
+  teamSeason   TeamSeason @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id], onDelete: Cascade)
   teamSeasonId String     @map("team_season_id")
   amount       Int // Bid amount in dollars
   status       BidStatus  @default(PENDING)
@@ -402,7 +506,7 @@ model Match {
   eaMatchId               String                    @map("ea_match_id")
   createdAt               DateTime                  @default(now()) @map("created_at")
   updatedAt               DateTime                  @updatedAt @map("updated_at")
-  teamSeason              TeamSeason                @relation(fields: [teamSeasonId], references: [id])
+  teamSeason              TeamSeason                @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
   clubMatchStats          ClubMatchStats[]
   playerStats             PlayerMatch[]
   clubAggregateMatchStats ClubAggregateMatchStats[]
@@ -453,7 +557,7 @@ model ClubMatchStats {
   goalsAgainst Int @map("goals_against")
 
   details ClubMatchStatsDetails?
-  match   Match                  @relation(fields: [matchId], references: [id])
+  match   Match                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model ClubMatchStatsDetails {
@@ -468,7 +572,7 @@ model ClubMatchStatsDetails {
   customKit CustomKit?
 
   // Relationship
-  clubMatchStats ClubMatchStats? @relation(fields: [clubMatchStatsId], references: [id])
+  clubMatchStats ClubMatchStats? @relation(fields: [clubMatchStatsId], references: [id], onDelete: Cascade)
 }
 
 model CustomKit {
@@ -479,7 +583,7 @@ model CustomKit {
   useBaseAsset Int    @map("use_base_asset")
 
   // Relationship - now references details, not ClubMatchStats
-  details ClubMatchStatsDetails? @relation(fields: [detailsId], references: [id])
+  details ClubMatchStatsDetails? @relation(fields: [detailsId], references: [id], onDelete: Cascade)
 }
 
 model ClubAggregateMatchStats {
@@ -561,7 +665,7 @@ model ClubAggregateMatchStats {
   totalShotsFaced     Int   @map("total_shots_faced")
   shutoutPeriods      Int   @map("shutout_periods")
 
-  match Match @relation(fields: [matchId], references: [id])
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model MatchAnalytics {
@@ -595,7 +699,7 @@ model MatchAnalytics {
   takeawayDifferential       Int   @map("takeaway_differential")
   scoringChancesDifferential Int   @map("scoring_chances_differential")
 
-  match Match @relation(fields: [matchId], references: [id])
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model PlayerMatch {
@@ -712,9 +816,9 @@ model PlayerMatch {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // RELATIONS
-  match            Match            @relation(fields: [matchId], references: [id])
-  playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id])
-  playerSeason     PlayerSeason     @relation(fields: [playerSeasonId], references: [id]) // NEW relation
+  match            Match            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id], onDelete: Cascade)
+  playerSeason     PlayerSeason     @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade) // NEW relation
 
   @@index([playerSeasonId]) // NEW: index for performance
   @@map("player_matches")
@@ -778,7 +882,7 @@ model ForumPost {
   leagueId    String                  @map("league_id")
   createdAt   DateTime                @default(now()) @map("created_at")
   updatedAt   DateTime                @updatedAt @map("updated_at")
-  author      User                    @relation(fields: [authorId], references: [id])
+  author      User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments    ForumComment[]
   reactions   ForumReaction[]
   followers   ForumFollower[]
@@ -798,9 +902,9 @@ model ForumReaction {
   postId    String?       @map("post_id")
   commentId String?       @map("comment_id")
   createdAt DateTime      @default(now()) @map("created_at")
-  user      User          @relation(fields: [userId], references: [id])
-  post      ForumPost?    @relation(fields: [postId], references: [id])
-  comment   ForumComment? @relation(fields: [commentId], references: [id])
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   ForumComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId, commentId, type])
   @@index([userId])
@@ -814,8 +918,8 @@ model ForumFollower {
   userId    String    @map("user_id")
   postId    String    @map("post_id")
   createdAt DateTime  @default(now()) @map("created_at")
-  user      User      @relation(fields: [userId], references: [id])
-  post      ForumPost @relation(fields: [postId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
   @@index([userId])
@@ -825,9 +929,9 @@ model ForumFollower {
 
 model ForumPostSubscription {
   id        String    @id @default(cuid())
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  post      ForumPost @relation(fields: [postId], references: [id])
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
   createdAt DateTime  @default(now())
 
@@ -843,11 +947,11 @@ model ForumComment {
   status          ForumPostStatus @default(PUBLISHED)
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
-  author          User            @relation(fields: [authorId], references: [id])
+  author          User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId        String          @map("author_id")
-  post            ForumPost       @relation(fields: [postId], references: [id])
+  post            ForumPost       @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String          @map("post_id")
-  quotedComment   ForumComment?   @relation("QuotedComment", fields: [quotedCommentId], references: [id])
+  quotedComment   ForumComment?   @relation("QuotedComment", fields: [quotedCommentId], references: [id], onDelete: Cascade)
   quotedCommentId String?         @map("quoted_comment_id")
   quotedBy        ForumComment[]  @relation("QuotedComment")
   reactions       ForumReaction[]
@@ -873,8 +977,8 @@ model TeamManager {
   role         TeamManagementRole
   createdAt    DateTime           @default(now()) @map("created_at")
   updatedAt    DateTime           @updatedAt @map("updated_at")
-  user         User               @relation(fields: [userId], references: [id])
-  teamSeason   TeamSeason         @relation(fields: [teamSeasonId], references: [id]) // Change relation
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamSeason   TeamSeason         @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade) // Change relation
 
   @@unique([userId, teamSeasonId, role])
   @@index([userId])

@@ -10,7 +10,11 @@ type User = {
   email: string;
   name: string | null;
   username: string;
+  isSuperAdmin: boolean;
   isAdmin: boolean;
+  isCommissioner: boolean;
+  isBog: boolean;
+  isTeamManager: boolean;
   password: string;
 };
 
@@ -19,7 +23,11 @@ type AuthUser = {
   email: string;
   name: string;
   username: string;
+  isSuperAdmin: boolean;
   isAdmin: boolean;
+  isCommissioner: boolean;
+  isBog: boolean;
+  isTeamManager: boolean;
 };
 
 const providers: Provider[] = [
@@ -53,7 +61,11 @@ const providers: Provider[] = [
         email: user.email,
         name: user.name || '',
         username: user.username,
+        isSuperAdmin: user.isSuperAdmin,
         isAdmin: user.isAdmin,
+        isCommissioner: user.isCommissioner,
+        isBog: user.isBog,
+        isTeamManager: user.isTeamManager,
       };
     },
   }),
@@ -79,7 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET || 'dev-secret-123',
+  secret: process.env.AUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -87,7 +99,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.email = user.email;
         token.name = user.name;
         token.username = (user as AuthUser).username;
+        token.isSuperAdmin = (user as AuthUser).isSuperAdmin;
         token.isAdmin = (user as AuthUser).isAdmin;
+        token.isCommissioner = (user as AuthUser).isCommissioner;
+        token.isBog = (user as AuthUser).isBog;
+        token.isTeamManager = (user as AuthUser).isTeamManager;
       }
       return token;
     },
@@ -98,7 +114,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: token.email as string,
           name: (token.name as string) || '',
           username: token.username as string,
+          isSuperAdmin: token.isSuperAdmin as boolean,
           isAdmin: token.isAdmin as boolean,
+          isCommissioner: token.isCommissioner as boolean,
+          isBog: token.isBog as boolean,
+          isTeamManager: token.isTeamManager as boolean,
         };
       }
       return session;
