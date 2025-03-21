@@ -1,0 +1,203 @@
+// --------- Player Season & Stats ---------
+model PlayerSeason {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+
+  // Season reference
+  seasonId String @map("season_id")
+
+  // Contract
+  contractId String @unique @map("contract_id")
+
+  // Position
+  primaryPosition PlayerPosition @map("primary_position")
+  positionGroup   PositionGroup  @map("position_group")
+
+  isInBidding Boolean @default(true) @map("is_in_bidding")
+
+  // Relations
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  season        Season                @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  contract      Contract              @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  teamSeasons   PlayerTeamSeason[]
+  leagueHistory PlayerLeagueHistory[] // Changed from tierHistory
+
+  // Match-related relations
+  playerMatches PlayerMatch[]
+  matches       Match[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("player_seasons")
+}
+
+model PlayerTeamSeason {
+  id             String @id @default(uuid())
+  playerSeasonId String @map("player_season_id")
+  teamSeasonId   String @map("team_season_id")
+
+  leagueType LeagueType @map("league_type")
+
+  // Relationship references
+  rosterTeamId       String? @map("roster_team_id")
+  trainingCampTeamId String? @map("training_camp_team_id")
+  inactiveTeamId     String? @map("inactive_team_id")
+
+  // Status flags
+  isRosterPlayer       Boolean @default(false) @map("is_roster_player")
+  isTrainingCampPlayer Boolean @default(false) @map("is_training_camp_player")
+  isInactivePlayer     Boolean @default(false) @map("is_inactive_player")
+
+  // Relationships
+  playerSeason     PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  rosterTeam       TeamSeason?  @relation("RosterPlayers", fields: [rosterTeamId], references: [id])
+  trainingCampTeam TeamSeason?  @relation("TrainingCampPlayers", fields: [trainingCampTeamId], references: [id])
+  inactiveTeam     TeamSeason?  @relation("InactivePlayers", fields: [inactiveTeamId], references: [id])
+
+  playerMatches PlayerMatch[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("player_team_seasons")
+}
+
+model PlayerLeagueHistory {
+  id             String    @id @default(uuid())
+  playerSeasonId String    @map("player_season_id")
+  leagueSeasonId String    @map("league_season_id") // Changed from tierId
+  startDate      DateTime  @default(now()) @map("start_date")
+  endDate        DateTime? @map("end_date")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  playerSeason PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@index([playerSeasonId])
+  @@index([leagueSeasonId])
+  @@map("player_league_history")
+}
+
+model PlayerMatch {
+  id                 String @id @default(uuid())
+  matchId            String @map("match_id")
+  playerTeamSeasonId String @map("player_team_season_id")
+  playerSeasonId     String @map("player_season_id")
+
+  // Basic Info
+  playerLevel        Int    @map("player_level")
+  position           String @map("position")
+  posSorted          Int    @map("pos_sorted")
+  playerName         String @map("player_name")
+  clientPlatform     String @map("client_platform")
+  playerLevelDisplay Int    @map("player_level_display")
+
+  // Game Status
+  isGuest            Boolean @map("is_guest")
+  playerDnf          Boolean @map("player_dnf") // did not finish (quit)
+  pNhlOnlineGameType String  @map("pNhlOnlineGameType") // Should likely be "5"
+
+  // Team Information
+  eaTeamId         String @map("ea_team_id")
+  teamSide         Int    @map("team_side") // 0 = home, 1 = away
+  opponentClubId   String @map("opponent_club_id")
+  opponentEaTeamId String @map("opponent_ea_team_id")
+  opponentScore    Int    @map("opponent_score")
+  score            Int    @map("score")
+
+  // Player Ratings
+  ratingDefense  Float @map("rating_defense")
+  ratingOffense  Float @map("rating_offense")
+  ratingTeamplay Float @map("rating_teamplay")
+
+  // Time Stats
+  toi        Int @map("toi") // time on ice
+  toiSeconds Int @map("toi_seconds") // time on ice in seconds
+
+  // Skater Stats
+  assists              Int    @map("assists")
+  blockedShots         Int    @map("blocked_shots")
+  deflections          Int    @map("deflections")
+  faceoffsLost         Int    @map("faceoffs_lost")
+  faceoffPct           Float  @map("faceoff_pct")
+  faceoffsWon          Int    @map("faceoffs_won")
+  giveaways            Int    @map("giveaways")
+  goals                Int    @map("goals")
+  gameWinningGoals     Int    @map("game_winning_goals")
+  hits                 Int    @map("hits")
+  interceptions        Int    @map("interceptions")
+  passAttempts         Int    @map("pass_attempts")
+  passes               Int    @map("passes")
+  passPct              Float  @map("pass_pct")
+  penaltiesDrawn       Int    @map("penalties_drawn")
+  penaltyMinutes       Int    @map("penalty_minutes") // PIM
+  skaterPkClearZone    Int    @map("skater_pk_clear_zone")
+  plusMinus            Int    @map("plus_minus")
+  possessionSeconds    Int    @map("possession_seconds")
+  powerPlayGoals       Int    @map("power_play_goals")
+  saucerPasses         Int    @map("saucer_passes")
+  shortHandedGoals     Int    @map("short_handed_goals")
+  shotAttempts         Int    @map("shot_attempts")
+  shotsOnNetPct        Float  @map("shots_on_net_pct")
+  shootingPct          Float  @map("shooting_pct")
+  shotsOnGoal          Int    @map("shots_on_goal")
+  takeaways            Int    @map("takeaways")
+  points               Int    @map("points")
+  faceoffsTotal        Int    @map("faceoffs_total")
+  shotsMissed          Int    @map("shots_missed")
+  passesMissed         Int    @map("passes_missed")
+  passingPct           Float  @map("passing_pct")
+  majorPenalties       Int    @map("major_penalties")
+  minorPenalties       Int    @map("minor_penalties")
+  totalPenalties       Int    @map("total_penalties")
+  pointsPer60          Float  @map("points_per_60")
+  possessionPerMinute  Float  @map("possession_per_minute")
+  shotEfficiency       Float  @map("shot_efficiency")
+  tkawayGvawayRatio    Float  @map("tkaway_gvaway_ratio")
+  penaltyDifferential  Int    @map("penalty_differential")
+  defActionsPerMinute  Float  @map("def_actions_per_minute")
+  offImpact            Float  @map("off_impact")
+  defImpact            Float  @map("def_impact")
+  detailedPosition     String @map("detailed_position")
+  positionAbbreviation String @map("position_abbreviation")
+  gameImpactScore      Float  @map("game_impact_score")
+  puckManagementRating Float  @map("puck_management_rating")
+  possessionEfficiency Float  @map("possession_efficiency")
+  netDefContribution   Float  @map("net_def_contribution")
+  timeAdjustedRating   Float  @map("time_adjusted_rating")
+  shotGenerationRate   Float  @map("shot_generation_rate")
+  offZonePresence      Float  @map("off_zone_presence")
+  twoWayRating         Float  @map("two_way_rating")
+
+  // Goalie Stats
+  breakawaySavePct    Float @map("breakaway_save_pct")
+  breakawaySaves      Int   @map("breakaway_saves")
+  breakawayShots      Int   @map("breakaway_shots_faced")
+  desperationSaves    Int   @map("desperation_saves")
+  goalsAgainst        Int   @map("goals_against")
+  goalsAgainstAverage Float @map("goals_against_average")
+  penaltyShotSavePct  Float @map("penalty_shot_save_pct")
+  penaltyShotSaves    Int   @map("penalty_shot_saves")
+  penaltyShotsFaced   Int   @map("penalty_shots_faced")
+  goaliePkClearZone   Int   @map("goalie_pk_clear_zone")
+  pokeChecks          Int   @map("poke_checks")
+  savePct             Float @map("save_pct")
+  totalSaves          Int   @map("total_saves")
+  totalShotsFaced     Int   @map("total_shots_faced")
+  shutoutPeriods      Int   @map("shutout_periods")
+  goalsSaved          Int   @map("goals_saved")
+
+  // LOGS
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // RELATIONS
+  match            Match            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  playerTeamSeason PlayerTeamSeason @relation(fields: [playerTeamSeasonId], references: [id], onDelete: Cascade)
+  playerSeason     PlayerSeason     @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade) // NEW relation
+
+  @@index([playerSeasonId]) // NEW: index for performance
+  @@map("player_matches")
+}

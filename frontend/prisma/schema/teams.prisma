@@ -1,0 +1,120 @@
+// --------- Team Structure ---------
+// Team model represents a sports team with comprehensive tracking capabilities
+// Supports team affiliations, historical data, and cross-league relationships
+model Team {
+  id         String @id @default(uuid())
+  eaClubId   String @map("ea_club_id")
+  eaClubName String @map("ea_club_name")
+
+  // Full name and abbreviation
+  fullTeamName     String @map("full_team_name") // "Toronto Maple Leafs"
+  teamAbbreviation String @map("team_abbreviation") @db.VarChar(14) // "TOR"
+
+  logoPath String? @map("logo_path")
+
+  // League relationships
+  leagueId String @map("league_id")
+  league   League @relation(fields: [leagueId], references: [id])
+
+  // Division Relationships
+  divisionId String?   @map("division_id")
+  division   Division? @relation(fields: [divisionId], references: [id])
+
+  // Colors
+  primaryColor   String? @map("primary_color")
+  secondaryColor String? @map("secondary_color")
+
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  seasons   TeamSeason[]
+
+  // Affiliation relationships
+  nhlAffiliateId String? @map("nhl_affiliate_id")
+  ahlAffiliateId String? @map("ahl_affiliate_id")
+  nhlAffiliate   Team?   @relation("NHLAffiliation", fields: [nhlAffiliateId], references: [id], onDelete: Cascade)
+  ahlAffiliate   Team?   @relation("AHLAffiliation", fields: [ahlAffiliateId], references: [id], onDelete: Cascade)
+
+  // Reverse relationships
+  ahlAffiliates  Team[] @relation("NHLAffiliation")
+  echlAffiliates Team[] @relation("AHLAffiliation")
+
+  @@unique([teamAbbreviation, leagueId])
+  @@index([nhlAffiliateId])
+  @@index([ahlAffiliateId])
+}
+
+// TeamSeason model captures a team's performance and statistics for a specific season
+// Provides granular tracking of team performance metrics
+model TeamSeason {
+  id             String @id @default(uuid())
+  teamId         String @map("team_id")
+  leagueSeasonId String @map("league_season_id")
+
+  // Roster counts
+  forwardCount Int @default(0) @map("forward_count")
+  defenseCount Int @default(0) @map("defense_count")
+  goalieCount  Int @default(0) @map("goalie_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  matches Match[]
+
+  rosterPlayers       PlayerTeamSeason[] @relation("RosterPlayers")
+  trainingCampPlayers PlayerTeamSeason[] @relation("TrainingCampPlayers")
+  inactivePlayers     PlayerTeamSeason[] @relation("InactivePlayers")
+
+  bids     Bid[]         @relation("TeamSeasonBids")
+  managers TeamManager[] // Manager here as managers can change per season
+
+  @@index([teamId])
+  @@index([leagueSeasonId])
+}
+
+// TeamManager with relation to TeamSeason
+model TeamManager {
+  id           String             @id @default(cuid())
+  userId       String             @map("user_id")
+  teamSeasonId String             @map("team_season_id") // Changed from teamId
+  role         TeamManagementRole
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamSeason   TeamSeason         @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade) // Change relation
+
+  @@unique([userId, teamSeasonId, role])
+  @@index([userId])
+  @@index([teamSeasonId])
+  @@map("team_managers")
+}
+
+model Bid {
+  id           String     @id @default(uuid())
+  contract     Contract   @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contractId   String     @map("contract_id")
+  teamSeason   TeamSeason @relation("TeamSeasonBids", fields: [teamSeasonId], references: [id], onDelete: Cascade)
+  teamSeasonId String     @map("team_season_id")
+  amount       Int // Bid amount in dollars
+  status       BidStatus  @default(PENDING)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@index([contractId])
+  @@index([teamSeasonId])
+  @@map("bids")
+}
+
+// New models for contracts and bidding
+model Contract {
+  id           String        @id @default(uuid())
+  amount       Int // Contract amount in dollars, required
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  playerSeason PlayerSeason?
+  bids         Bid[] // One-to-many relation with Bid
+
+  @@map("contracts")
+}

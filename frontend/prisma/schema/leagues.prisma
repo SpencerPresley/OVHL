@@ -1,0 +1,118 @@
+// League model to represent both top-level and sub-leagues
+model League {
+  id             String     @id @default(uuid())
+  name           String // Full name: "National Hockey League", "Ontario Hockey League", etc.
+  shortName      String // Abbreviation: "NHL", "OHL", etc.
+  leagueType     LeagueType // Top-level categorization
+  isSubLeague    Boolean    @default(false)
+  parentLeagueId String?    @map("parent_league_id")
+  parentLeague   League?    @relation("SubLeagues", fields: [parentLeagueId], references: [id])
+  subLeagues     League[]   @relation("SubLeagues")
+
+  conferences Conference[]
+  divisions   Division[]
+  teams       Team[]
+
+  seasons LeagueSeason[]
+
+  @@unique([shortName])
+}
+
+model LeagueSeason {
+  id       String @id @default(uuid())
+  leagueId String @map("league_id")
+  seasonId String @map("season_id")
+
+  // Season-specific configurations
+  salaryCap Int @default(0) @map("salary_cap")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  // Commissioner and BOG relationships
+  commissioners LeagueCommissioner[]
+  bogs          LeagueBOG[]
+
+  // Team relationships
+  teams TeamSeason[]
+
+  // Player history
+  playerHistory PlayerLeagueHistory[]
+
+  @@unique([leagueId, seasonId])
+  @@index([leagueId])
+  @@index([seasonId])
+}
+
+model Conference {
+  id        String     @id @default(uuid())
+  name      String // "Eastern", "Western", etc.
+  leagueId  String     @map("league_id")
+  league    League     @relation(fields: [leagueId], references: [id])
+  divisions Division[]
+
+  @@unique([name, leagueId])
+}
+
+model Division {
+  id           String      @id @default(uuid())
+  name         String // "Atlantic", "Metropolitan", etc.
+  conferenceId String      @map("conference_id")
+  leagueId     String      @map("league_id")
+  conference   Conference? @relation(fields: [conferenceId], references: [id])
+  league       League      @relation(fields: [leagueId], references: [id])
+  teams        Team[]
+
+  @@unique([name, leagueId])
+}
+
+// --------- Season & League Structure ---------
+// Season model represents a specific competitive period
+// Supports tracking of multi-tier league seasons and player participation
+model Season {
+  id            String         @id @default(uuid())
+  seasonNumber  Int            @map("season_number") // 1, 2, 3, etc.
+  isLatest      Boolean        @default(false) @map("is_latest")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  leagueSeasons LeagueSeason[]
+  players       PlayerSeason[]
+}
+
+// TIER COMMISSIONERS/BOGS
+model LeagueCommissioner {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  leagueSeasonId String   @map("league_season_id") // Changed from tierId
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueSeasonId])
+  @@index([userId])
+  @@index([leagueSeasonId])
+  @@map("league_commissioners")
+}
+
+model LeagueBOG {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  leagueSeasonId String   @map("league_season_id") // Changed from tierId
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, leagueSeasonId])
+  @@index([userId])
+  @@index([leagueSeasonId])
+  @@map("league_bogs")
+}

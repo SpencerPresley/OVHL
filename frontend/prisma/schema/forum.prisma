@@ -1,0 +1,88 @@
+model ForumPost {
+  id          String                  @id @default(cuid())
+  title       String
+  content     String
+  status      ForumPostStatus         @default(PUBLISHED)
+  authorId    String                  @map("author_id")
+  leagueId    String                  @map("league_id")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  author      User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    ForumComment[]
+  reactions   ForumReaction[]
+  followers   ForumFollower[]
+  subscribers ForumPostSubscription[]
+  gif         Json? // { id: string, url: string, title: string, width: string, height: string }
+
+  @@index([authorId])
+  @@index([leagueId])
+  @@index([status])
+  @@map("forum_posts")
+}
+
+model ForumReaction {
+  id        String        @id @default(cuid())
+  type      ReactionType
+  userId    String        @map("user_id")
+  postId    String?       @map("post_id")
+  commentId String?       @map("comment_id")
+  createdAt DateTime      @default(now()) @map("created_at")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   ForumComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, commentId, type])
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("forum_reactions")
+}
+
+model ForumFollower {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  postId    String    @map("post_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("forum_followers")
+}
+
+model ForumPostSubscription {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("forum_post_subscriptions")
+}
+
+model ForumComment {
+  id              String          @id @default(cuid())
+  content         String
+  status          ForumPostStatus @default(PUBLISHED)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  author          User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId        String          @map("author_id")
+  post            ForumPost       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId          String          @map("post_id")
+  quotedComment   ForumComment?   @relation("QuotedComment", fields: [quotedCommentId], references: [id], onDelete: Cascade)
+  quotedCommentId String?         @map("quoted_comment_id")
+  quotedBy        ForumComment[]  @relation("QuotedComment")
+  reactions       ForumReaction[]
+  gif             Json? // { id: string, url: string, title: string, width: string, height: string }
+
+  @@index([authorId])
+  @@index([postId])
+  @@map("forum_comments")
+}
