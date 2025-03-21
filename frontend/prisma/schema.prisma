@@ -59,7 +59,7 @@ enum VerificationStatus {
 enum UserRole {
   SUPER_ADMIN
   ADMIN
-  COMMISIONER
+  COMMISSIONER
   BOG
   USER
 }
@@ -76,6 +76,23 @@ enum CHLSubLeague {
   QMJHL
   WHL
   NAJHL
+}
+
+enum PositionGroup {
+  FORWARD // LW, C, RW
+  DEFENSE // LD, RD
+  GOALIE // G
+}
+
+enum PlayerPosition {
+  LW // Left Wing
+  C // Center
+  RW // Right Wing
+  LD // Left Defense
+  RD // Right Defense
+  G // Goalie
+
+  ECU // Emergency Call-Up (can play any position)
 }
 
 // --------- Authentication & Base User Models ---------
@@ -165,21 +182,6 @@ model SystemHistory {
   @@index([userId])
   @@map("system_history")
 }
-
-// REMOVED: Player model extends user information with gaming-specific details
-// Player model extends user information with gaming-specific details
-// Tracks player profiles across different gaming platforms and seasons
-// model Player {
-//   id           String            @id // This IS the user's ID
-//   ea_id        String            @map("ea_id")
-//   name         String
-//   activeSystem System            @map("active_system")
-//   createdAt    DateTime          @default(now()) @map("created_at")
-//   updatedAt    DateTime          @updatedAt @map("updated_at")
-//   user         User              @relation(fields: [id], references: [id])
-//   gamertags    GamertagHistory[]
-//   seasons      PlayerSeason[]
-// }
 
 // GamertagHistory tracks player's gaming identities across different systems
 // Enables historical tracking of player gamertags and platform transitions
@@ -284,7 +286,7 @@ model Division {
 // Supports tracking of multi-tier league seasons and player participation
 model Season {
   id            String         @id @default(uuid())
-  seasonId      String         @map("season_id")
+  seasonNumber  Int            @map("season_number") // 1, 2, 3, etc.
   isLatest      Boolean        @default(false) @map("is_latest")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
@@ -292,7 +294,7 @@ model Season {
   players       PlayerSeason[]
 }
 
-// TIER COMMISIONERS/BOGS
+// TIER COMMISSIONERS/BOGS
 model LeagueCommissioner {
   id             String   @id @default(cuid())
   userId         String   @map("user_id")
@@ -332,8 +334,12 @@ model Team {
   id             String @id @default(uuid())
   eaClubId       String @map("ea_club_id")
   eaClubName     String @map("ea_club_name")
-  officialName   String @map("official_name")
-  teamIdentifier String @map("team_identifier") @db.VarChar(14)
+
+  // Full name and abbreviation
+  fullTeamName   String @map("full_team_name") // "Toronto Maple Leafs"
+  teamAbbreviation String @map("team_abbreviation") @db.VarChar(14) // "TOR"
+
+  logoPath String? @map("logo_path")
 
   // League relationships
   leagueId String @map("league_id")
@@ -361,7 +367,7 @@ model Team {
   ahlAffiliates  Team[] @relation("NHLAffiliation")
   echlAffiliates Team[] @relation("AHLAffiliation")
 
-  @@unique([teamIdentifier, leagueId])
+  @@unique([teamAbbreviation, leagueId])
   @@index([nhlAffiliateId])
   @@index([ahlAffiliateId])
 }
@@ -385,7 +391,12 @@ model TeamSeason {
   leagueSeason LeagueSeason @relation(fields: [leagueSeasonId], references: [id], onDelete: Cascade)
 
   matches  Match[]
-  players  PlayerTeamSeason[]
+
+  rosterPlayers PlayerTeamSeason[] @relation("RosterPlayers")
+  trainingCampPlayers PlayerTeamSeason[] @relation("TrainingCampPlayers")
+  inactivePlayers PlayerTeamSeason[] @relation("InactivePlayers")
+
+
   bids     Bid[]              @relation("TeamSeasonBids")
   managers TeamManager[] // NEW: Relation to TeamManager (makes more sense as managers can change per season)
 
@@ -397,13 +408,18 @@ model TeamSeason {
 model PlayerSeason {
   id         String @id @default(uuid())
   userId     String @map("user_id")
+
+  // Season reference
   seasonId   String @map("season_id")
+
+  // Contract
   contractId String @unique @map("contract_id")
-  position   String
+
+  // Position
+  primaryPosition PlayerPosition @map("primary_position")
+  positionGroup   PositionGroup  @map("position_group")
 
   isInBidding Boolean  @default(true) @map("is_in_bidding")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
   user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -415,6 +431,9 @@ model PlayerSeason {
   // Match-related relations
   playerMatches PlayerMatch[]
   matches       Match[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("player_seasons")
 }
@@ -443,24 +462,28 @@ model PlayerTeamSeason {
   playerSeasonId String @map("player_season_id")
   teamSeasonId   String @map("team_season_id")
 
-  // REMOVED: All stats fields - they'll be calculated from Player Matches
-  // assists        Int           @default(0)
-  // gamesPlayed    Int           @default(0) @map("games_played")
-  // giveaways      Int           @default(0)
-  // goals          Int           @default(0)
-  // hits           Int           @default(0)
-  // penaltyMinutes Int           @default(0) @map("penalty_minutes")
-  // plusMinus      Int           @default(0) @map("plus_minus")
-  // shots          Int           @default(0)
-  // takeaways      Int           @default(0)
-  // saves          Int?
-  // goalsAgainst   Int?          @map("goals_against")
+  leagueType LeagueType @map("league_type")
+
+  // Relationship references
+  rosterTeamId String? @map("roster_team_id")
+  trainingCampTeamId String? @map("training_camp_team_id")
+  inactiveTeamId String? @map("inactive_team_id")
+
+  // Status flags
+  isRosterPlayer     Boolean @default(false) @map("is_roster_player")
+  isTrainingCamp     Boolean @default(false) @map("is_training_camp")
+  isInactivePlayer   Boolean @default(false) @map("is_inactive_player")
+
+  // Relationships
+  playerSeason  PlayerSeason  @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  rosterTeam      TeamSeason?   @relation("RosterPlayers", fields: [rosterTeamId], references: [id])
+  trainingCampTeam TeamSeason?  @relation("TrainingCampPlayers", fields: [trainingCampTeamId], references: [id])
+  inactiveTeam     TeamSeason?   @relation("InactivePlayers", fields: [inactiveTeamId], references: [id])
+
+  playerMatches PlayerMatch[]
 
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
-  playerSeason  PlayerSeason  @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
-  teamSeason    TeamSeason    @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
-  playerMatches PlayerMatch[]
 
   @@map("player_team_seasons")
 }
