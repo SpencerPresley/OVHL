@@ -92,6 +92,8 @@ export interface NHLTeam {
     secondary: string;
   };
   logo_path: string;
+  ahlTeamId: string;
+  echlTeamId: string;
 }
 
 export interface AHLTeam {
@@ -100,7 +102,8 @@ export interface AHLTeam {
   abbreviation: string;
   conference: AHLConference;
   division: AHLDivision;
-  nhlTeamId: string | null; // null for independent teams
+  nhlTeamId: string;
+  echlTeamId: string;
   colors: {
     primary: string;
     secondary: string;

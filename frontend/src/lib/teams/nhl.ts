@@ -26,6 +26,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#000000',
     },
     logo_path: '/team_logos/nhl/BOS.svg',
+    ahlTeamId: 'ahl_pro',
+    echlTeamId: 'echl_mne',
   },
   {
     id: 'nhl_buf',
@@ -38,6 +40,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FFB81C',
     },
     logo_path: '/team_logos/nhl/BUF.svg',
+    ahlTeamId: 'ahl_roc',
+    echlTeamId: 'echl_jax',
   },
   {
     id: 'nhl_det',
@@ -50,6 +54,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FFFFFF',
     },
     logo_path: '/team_logos/nhl/DET.svg',
+    ahlTeamId: 'ahl_gr',
+    echlTeamId: 'echl_tol',
   },
   {
     id: 'nhl_fla',
@@ -62,6 +68,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#C8102E',
     },
     logo_path: '/team_logos/nhl/FLA.svg',
+    ahlTeamId: 'ahl_cha',
+    echlTeamId: 'echl_sav',
   },
   {
     id: 'nhl_mtl',
@@ -74,6 +82,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#192168',
     },
     logo_path: '/team_logos/nhl/MTL.svg',
+    ahlTeamId: 'ahl_lav',
+    echlTeamId: 'echl_tr',
   },
   {
     id: 'nhl_ott',
@@ -86,6 +96,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#B79257',
     },
     logo_path: '/team_logos/nhl/OTT.svg',
+    ahlTeamId: 'ahl_bel',
+    echlTeamId: 'echl_aln',
   },
   {
     id: 'nhl_tbl',
@@ -98,6 +110,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FFFFFF',
     },
     logo_path: '/team_logos/nhl/TBL.svg',
+    ahlTeamId: 'ahl_syr',
+    echlTeamId: 'echl_orl',
   },
   {
     id: 'nhl_tor',
@@ -110,6 +124,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FFFFFF',
     },
     logo_path: '/team_logos/nhl/TOR.svg',
+    ahlTeamId: 'ahl_tor',
+    echlTeamId: 'echl_cin',
   },
 
   // Eastern Conference - Metropolitan Division
@@ -124,6 +140,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FFFFFF',
     },
     logo_path: '/team_logos/nhl/CAR.svg',
+    ahlTeamId: 'ahl_chi',
+    echlTeamId: 'echl_nf',
   },
   {
     id: 'nhl_cbj',
@@ -136,6 +154,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#CE1126',
     },
     logo_path: '/team_logos/nhl/CBJ.svg',
+    ahlTeamId: 'ahl_cle',
+    echlTeamId: 'echl_qc'
   },
   {
     id: 'nhl_njd',
@@ -148,6 +168,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#000000',
     },
     logo_path: '/team_logos/nhl/NJD.svg',
+    ahlTeamId: 'ahl_utc',
+    echlTeamId: 'echl_adk',
   },
   {
     id: 'nhl_nyi',
@@ -160,6 +182,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#F47D30',
     },
     logo_path: '/team_logos/nhl/NYI.svg',
+    ahlTeamId: 'ahl_bri',
+    echlTeamId: 'echl_wor',
   },
   {
     id: 'nhl_nyr',
@@ -172,6 +196,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#CE1126',
     },
     logo_path: '/team_logos/nhl/NYR.svg',
+    ahlTeamId: 'ahl_hfd',
+    echlTeamId: 'echl_blm',
   },
   {
     id: 'nhl_phi',
@@ -184,6 +210,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#000000',
     },
     logo_path: '/team_logos/nhl/PHI.svg',
+    ahlTeamId: 'ahl_lhv',
+    echlTeamId: 'echl_rea',
   },
   {
     id: 'nhl_pit',
@@ -196,6 +224,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FCB514',
     },
     logo_path: '/team_logos/nhl/PIT.svg',
+    ahlTeamId: 'ahl_wbs',
+    echlTeamId: 'echl_whl',
   },
   {
     id: 'nhl_wsh',
@@ -208,6 +238,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#C8102E',
     },
     logo_path: '/team_logos/nhl/WSH.svg',
+    ahlTeamId: 'ahl_her',
+    echlTeamId: 'echl_sc',
   },
 
   // Western Conference - Central Division
@@ -222,6 +254,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#E2D6B5',
     },
     logo_path: '/team_logos/nhl/UTA.svg',
+    ahlTeamId: 'ahl_tuc',
+    echlTeamId: 'echl_ala',
   },
   {
     id: 'nhl_chi',
@@ -234,6 +268,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FF671B',
     },
     logo_path: '/team_logos/nhl/CHI.svg',
+    ahlTeamId: 'ahl_rkf',
+    echlTeamId: 'echl_ind',
   },
   {
     id: 'nhl_col',
@@ -246,6 +282,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#236192',
     },
     logo_path: '/team_logos/nhl/COL.svg',
+    ahlTeamId: 'ahl_col',
+    echlTeamId: 'echl_uta',
   },
   {
     id: 'nhl_dal',
@@ -258,6 +296,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#8F8F8C',
     },
     logo_path: '/team_logos/nhl/DAL.svg',
+    ahlTeamId: 'ahl_tex',
+    echlTeamId: 'echl_idh',
   },
   {
     id: 'nhl_min',
@@ -270,6 +310,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#154734',
     },
     logo_path: '/team_logos/nhl/MIN.svg',
+    ahlTeamId: 'ahl_ia',
+    echlTeamId: 'echl_ia',
   },
   {
     id: 'nhl_nsh',
@@ -282,6 +324,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#041E42',
     },
     logo_path: '/team_logos/nhl/NSH.svg',
+    ahlTeamId: 'ahl_mil',
+    echlTeamId: 'echl_atl',
   },
   {
     id: 'nhl_stl',
@@ -294,6 +338,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FCB514',
     },
     logo_path: '/team_logos/nhl/STL.svg',
+    ahlTeamId: 'ahl_spr',
+    echlTeamId: 'echl_fla',
   },
   {
     id: 'nhl_wpg',
@@ -306,6 +352,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#004C97',
     },
     logo_path: '/team_logos/nhl/WPG.svg',
+    ahlTeamId: 'ahl_mb',
+    echlTeamId: 'echl_nor',
   },
 
   // Western Conference - Pacific Division
@@ -320,6 +368,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#B9975B',
     },
     logo_path: '/team_logos/nhl/ANA.svg',
+    ahlTeamId: 'ahl_sd',
+    echlTeamId: 'echl_tul',
   },
   {
     id: 'nhl_cgy',
@@ -332,6 +382,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FAAF19',
     },
     logo_path: '/team_logos/nhl/CGY.svg',
+    ahlTeamId: 'ahl_cgy',
+    echlTeamId: 'echl_rc',
   },
   {
     id: 'nhl_edm',
@@ -344,6 +396,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#FF4C00',
     },
     logo_path: '/team_logos/nhl/EDM.svg',
+    ahlTeamId: 'ahl_bak',
+    echlTeamId: 'echl_fw',
   },
   {
     id: 'nhl_lak',
@@ -356,6 +410,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#A2AAAD',
     },
     logo_path: '/team_logos/nhl/LAK.svg',
+    ahlTeamId: 'ahl_lak',
+    echlTeamId: 'echl_gvl',
   },
   {
     id: 'nhl_sjs',
@@ -368,6 +424,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#EA7200',
     },
     logo_path: '/team_logos/nhl/SJS.svg',
+    ahlTeamId: 'ahl_sj',
+    echlTeamId: 'echl_wic',
   },
   {
     id: 'nhl_sea',
@@ -380,6 +438,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#99D9D9',
     },
     logo_path: '/team_logos/nhl/SEA.svg',
+    ahlTeamId: 'ahl_cv',
+    echlTeamId: 'echl_kc',
   },
   {
     id: 'nhl_van',
@@ -392,6 +452,8 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#00843D',
     },
     logo_path: '/team_logos/nhl/VAN.svg',
+    ahlTeamId: 'ahl_abb',
+    echlTeamId: 'echl_kal',
   },
   {
     id: 'nhl_vgk',
@@ -404,5 +466,7 @@ export const NHL_TEAMS: NHLTeam[] = [
       secondary: '#333F42',
     },
     logo_path: '/team_logos/nhl/VGK.svg',
+    ahlTeamId: 'ahl_hnd',
+    echlTeamId: 'echl_tah',
   },
 ];

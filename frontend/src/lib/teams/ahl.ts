@@ -8,7 +8,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Bridgeport Islanders',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'nyi',
+    nhlTeamId: 'nhl_nyi',
+    echlTeamId: 'echl_wor',
     colors: {
       primary: '#00468B',
       secondary: '#F26924',
@@ -21,7 +22,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Charlotte Checkers',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'fla',
+    nhlTeamId: 'nhl_fla',
+    echlTeamId: 'echl_sav',
     colors: {
       primary: '#E51A38',
       secondary: '#000000',
@@ -34,7 +36,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Hartford Wolf Pack',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'nyr',
+    nhlTeamId: 'nhl_nyr',
+    echlTeamId: 'echl_blm',
     colors: {
       primary: '#00548E',
       secondary: '#EF3E42',
@@ -47,7 +50,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Hershey Bears',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'wsh',
+    nhlTeamId: 'nhl_wsh',
+    echlTeamId: 'echl_sc',
     colors: {
       primary: '#7E543A',
       secondary: '#472A2B',
@@ -60,7 +64,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Lehigh Valley Phantoms',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'phi',
+    nhlTeamId: 'nhl_phi',
+    echlTeamId: 'echl_rea',
     colors: {
       primary: '#F58220',
       secondary: '#000000',
@@ -73,7 +78,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Providence Bruins',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'bos',
+    nhlTeamId: 'nhl_bos',
+    echlTeamId: 'echl_mne',
     colors: {
       primary: '#FBB337',
       secondary: '#000000',
@@ -86,7 +92,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Springfield Thunderbirds',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'stl',
+    nhlTeamId: 'nhl_stl',
+    echlTeamId: 'echl_fla',
     colors: {
       primary: '#005CB9',
       secondary: '#041E41',
@@ -99,7 +106,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Wilkes-Barre/Scranton Penguins',
     conference: AHLConference.EASTERN,
     division: AHLDivision.ATLANTIC,
-    nhlTeamId: 'pit',
+    nhlTeamId: 'nhl_pit',
+    echlTeamId: 'echl_whl',
     colors: {
       primary: '#FEC23D',
       secondary: '#E31837',
@@ -114,7 +122,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Belleville Senators',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'ott',
+    nhlTeamId: 'nhl_ott',
+    echlTeamId: 'echl_aln',
     colors: {
       primary: '#E3173E',
       secondary: '#000000',
@@ -127,7 +136,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Cleveland Monsters',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'cbj',
+    nhlTeamId: 'nhl_cbj',
+    echlTeamId: 'echl_qc',
     colors: {
       primary: '#005695',
       secondary: '#FDBB30',
@@ -140,7 +150,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Laval Rocket',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'mtl',
+    nhlTeamId: 'nhl_mtl',
+    echlTeamId: 'echl_tr',
     colors: {
       primary: '#001E61',
       secondary: '#FFFFFF',
@@ -153,7 +164,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Rochester Americans',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'buf',
+    nhlTeamId: 'nhl_buf',
+    echlTeamId: 'echl_jax',
     colors: {
       primary: '#393A87',
       secondary: '#DE2944',
@@ -166,7 +178,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Syracuse Crunch',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'tbl',
+    nhlTeamId: 'nhl_tbl',
+    echlTeamId: 'echl_orl',
     colors: {
       primary: '#1D427C',
       secondary: '#AAA9AC',
@@ -179,7 +192,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Toronto Marlies',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'tor',
+    nhlTeamId: 'nhl_tor',
+    echlTeamId: 'echl_cin',
     colors: {
       primary: '#003E7E',
       secondary: '#FFC425',
@@ -192,7 +206,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Utica Comets',
     conference: AHLConference.EASTERN,
     division: AHLDivision.NORTH,
-    nhlTeamId: 'njd',
+    nhlTeamId: 'nhl_njd',
+    echlTeamId: 'echl_adk',
     colors: {
       primary: '#CF2031',
       secondary: '#000000',
@@ -207,7 +222,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Chicago Wolves',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: null, // Independent
+    nhlTeamId: "nhl_car",
+    echlTeamId: 'echl_nf',
     colors: {
       primary: '#939283',
       secondary: '#E03A3E',
@@ -220,7 +236,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Grand Rapids Griffins',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'det',
+    nhlTeamId: 'nhl_det',
+    echlTeamId: 'echl_tol',
     colors: {
       primary: '#866C3F',
       secondary: '#E51636',
@@ -233,7 +250,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Iowa Wild',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'min',
+    nhlTeamId: 'nhl_min',
+    echlTeamId: 'echl_ia',
     colors: {
       primary: '#144733',
       secondary: '#DFCAA3',
@@ -246,7 +264,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Manitoba Moose',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'wpg',
+    nhlTeamId: 'nhl_wpg',
+    echlTeamId: 'echl_nor',
     colors: {
       primary: '#041E41',
       secondary: '#A4A9AD',
@@ -259,7 +278,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Milwaukee Admirals',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'nsh',
+    nhlTeamId: 'nhl_nsh',
+    echlTeamId: 'echl_atl',
     colors: {
       primary: '#0E2B58',
       secondary: '#83C2EC',
@@ -272,7 +292,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Rockford IceHogs',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'chi',
+    nhlTeamId: 'nhl_chi',
+    echlTeamId: 'echl_ind',
     colors: {
       primary: '#DB1931',
       secondary: '#94959A',
@@ -285,7 +306,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Texas Stars',
     conference: AHLConference.WESTERN,
     division: AHLDivision.CENTRAL,
-    nhlTeamId: 'dal',
+    nhlTeamId: 'nhl_dal',
+    echlTeamId: 'echl_idh',
     colors: {
       primary: '#1B6031',
       secondary: '#A5A6A8',
@@ -300,7 +322,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Abbotsford Canucks',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'van',
+    nhlTeamId: 'nhl_van',
+    echlTeamId: 'echl_kal',
     colors: {
       primary: '#047835',
       secondary: '#0E1C2C',
@@ -313,7 +336,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Bakersfield Condors',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'edm',
+    nhlTeamId: 'nhl_edm',
+    echlTeamId: 'echl_fw',
     colors: {
       primary: '#152342',
       secondary: '#DF4E10',
@@ -326,7 +350,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Calgary Wranglers',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'cgy',
+    nhlTeamId: 'nhl_cgy',
+    echlTeamId: 'echl_rc',
     colors: {
       primary: '#C2273D',
       secondary: '#F3BD48',
@@ -339,7 +364,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Coachella Valley Firebirds',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'sea',
+    nhlTeamId: 'nhl_sea',
+    echlTeamId: 'echl_kc',
     colors: {
       primary: '#C8102E',
       secondary: '#FF681D',
@@ -352,7 +378,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Colorado Eagles',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'col',
+    nhlTeamId: 'nhl_col',
+    echlTeamId: 'echl_uta',
     colors: {
       primary: '#FFD457',
       secondary: '#19398A',
@@ -365,7 +392,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Henderson Silver Knights',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'vgk',
+    nhlTeamId: 'nhl_vgk',
+    echlTeamId: 'echl_tah',
     colors: {
       primary: '#C2C4C6',
       secondary: '#B4975B',
@@ -378,7 +406,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'Ontario Reign',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'lak',
+    nhlTeamId: 'nhl_lak',
+    echlTeamId: 'echl_gvl',
     colors: {
       primary: '#A4A9AD',
       secondary: '#000000',
@@ -391,7 +420,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'San Diego Gulls',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'ana',
+    nhlTeamId: 'nhl_ana',
+    echlTeamId: 'echl_tul',
     colors: {
       primary: '#FF4C00',
       secondary: '#0083BF',
@@ -404,7 +434,8 @@ export const AHL_TEAMS: AHLTeam[] = [
     name: 'San Jose Barracuda',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'sjs',
+    nhlTeamId: 'nhl_sjs',
+    echlTeamId: 'echl_wic',
     colors: {
       primary: '#266B73',
       secondary: '#DD8943',
@@ -414,10 +445,11 @@ export const AHL_TEAMS: AHLTeam[] = [
   {
     id: 'ahl_tuc',
     abbreviation: 'TUC',
-    name: 'Tucson Roadrunners',
+    name: 'Tuscon Roadrunners',
     conference: AHLConference.WESTERN,
     division: AHLDivision.PACIFIC,
-    nhlTeamId: 'ari',
+    nhlTeamId: 'nhl_uta',
+    echlTeamId: 'echl_ala',
     colors: {
       primary: '#8E0A26',
       secondary: '#EEE2BE',

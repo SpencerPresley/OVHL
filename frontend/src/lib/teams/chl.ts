@@ -20,7 +20,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#231F20',
       secondary: '#B47F3A',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/brantford-bulldogs.svg',
+    logo_path: '/team_logos/chl/ohl/brantford-bulldogs.svg',
   },
   {
     id: 'chl_kgn',
@@ -33,7 +33,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FCBA32',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/kingston-frontenacs.png',
+    logo_path: '/team_logos/chl/ohl/kingston-frontenacs.png',
   },
   {
     id: 'chl_ott',
@@ -46,7 +46,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#AC1F2D',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/ottawa-67s.svg',
+    logo_path: '/team_logos/chl/ohl/ottawa-67s.svg',
   },
   {
     id: 'chl_pet',
@@ -59,7 +59,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#94002A',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/peterborough-petes.svg',
+    logo_path: '/team_logos/chl/ohl/peterborough-petes.svg',
   },
   {
     id: 'chl_sud',
@@ -72,7 +72,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#231F20',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/sudbury-wolves.svg',
+    logo_path: '/team_logos/chl/ohl/sudbury-wolves.svg',
   },
 
   // Central Division
@@ -87,7 +87,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFD548',
       secondary: '#EC1B02',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/barrie-colts.svg',
+    logo_path: '/team_logos/chl/ohl/barrie-colts.svg',
   },
   {
     id: 'chl_brp',
@@ -100,7 +100,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#1A2857',
       secondary: '#8F9090',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/brampton-steelheads.png',
+    logo_path: '/team_logos/chl/ohl/brampton-steelheads.png',
   },
   {
     id: 'chl_nia',
@@ -113,7 +113,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#BF0C26',
       secondary: '#4C4E52',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/niagara-icedogs.svg',
+    logo_path: '/team_logos/chl/ohl/niagara-icedogs.svg',
   },
   {
     id: 'chl_nb',
@@ -126,7 +126,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#807A11',
       secondary: '#ED192D',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/north-bay-battalion.svg',
+    logo_path: '/team_logos/chl/ohl/north-bay-battalion.svg',
   },
   {
     id: 'chl_osh',
@@ -139,7 +139,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#E21836',
       secondary: '#002D62',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/oshawa-generals.svg',
+    logo_path: '/team_logos/chl/ohl/oshawa-generals.svg',
   },
 
   // Midwest Division
@@ -154,7 +154,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FEC52F',
       secondary: '#0A1E3F',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/erie-otters.svg',
+    logo_path: '/team_logos/chl/ohl/erie-otters.svg',
   },
   {
     id: 'chl_gue',
@@ -167,7 +167,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#900027',
       secondary: '#B3B5B8',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/guelph-storm.svg',
+    logo_path: '/team_logos/chl/ohl/guelph-storm.svg',
   },
   {
     id: 'chl_kit',
@@ -180,7 +180,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CF0A2C',
       secondary: '#0033A0',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/kitchener-rangers.svg',
+    logo_path: '/team_logos/chl/ohl/kitchener-rangers.svg',
   },
   {
     id: 'chl_ldn',
@@ -193,7 +193,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#27824D',
       secondary: '#FEB81C',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/london-knights.svg',
+    logo_path: '/team_logos/chl/ohl/london-knights.svg',
   },
   {
     id: 'chl_os',
@@ -205,7 +205,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFDD00',
       secondary: '#E03A3E',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/owen-sound-attack.svg',
+    logo_path: '/team_logos/chl/ohl/owen-sound-attack.svg',
   },
 
   // West Division
@@ -220,7 +220,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#0C1D3C',
       secondary: '#FC5D00',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/flint-firebirds.svg',
+    logo_path: '/team_logos/chl/ohl/flint-firebirds.svg',
   },
   {
     id: 'chl_sag',
@@ -233,7 +233,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#003263',
       secondary: '#BE2F38',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/saginaw-spirit.svg',
+    logo_path: '/team_logos/chl/ohl/saginaw-spirit.svg',
   },
   {
     id: 'chl_sar',
@@ -246,7 +246,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFC425',
       secondary: '#231F20',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/sarnia-sting.svg',
+    logo_path: '/team_logos/chl/ohl/sarnia-sting.svg',
   },
   {
     id: 'chl_soo',
@@ -259,7 +259,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CF2029',
       secondary: '#FFFFFF',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/soo-greyhounds.svg',
+    logo_path: '/team_logos/chl/ohl/soo-greyhounds.svg',
   },
   {
     id: 'chl_wsr',
@@ -272,7 +272,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#00274D',
       secondary: '#E31B23',
     },
-    logo_path: '/team_logos/chl_logos/ohl_logos/windsor-spitfires.svg',
+    logo_path: '/team_logos/chl/ohl/windsor-spitfires.svg',
   },
 
   // QMJHL Teams
@@ -288,7 +288,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CFAA79',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/acadie-bathurst-titan.png',
+    logo_path: '/team_logos/chl/qmjhl/acadie-bathurst-titan.png',
   },
   {
     id: 'chl_cbe',
@@ -301,7 +301,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FAB406',
       secondary: '#23282B',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/cape-breton-eagles.jpg',
+    logo_path: '/team_logos/chl/qmjhl/cape-breton-eagles.jpg',
   },
   {
     id: 'chl_cha',
@@ -314,7 +314,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#A8996E',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/charlottetown-islanders.png',
+    logo_path: '/team_logos/chl/qmjhl/charlottetown-islanders.png',
   },
   {
     id: 'chl_hal',
@@ -327,7 +327,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#006F51',
       secondary: '#E31837',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/halifax-mooseheads.png',
+    logo_path: '/team_logos/chl/qmjhl/halifax-mooseheads.png',
   },
   {
     id: 'chl_sjd',
@@ -340,7 +340,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#B1B6BD',
       secondary: '#4274A6',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/saint-john-seadogs.svg',
+    logo_path: '/team_logos/chl/qmjhl/saint-john-seadogs.svg',
   },
 
   // Central Division
@@ -355,7 +355,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFCC02',
       secondary: '#EC1C24',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/baie-comeau-drakkar.svg',
+    logo_path: '/team_logos/chl/qmjhl/baie-comeau-drakkar.svg',
   },
   {
     id: 'chl_chi',
@@ -368,7 +368,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#3AB4E7',
       secondary: '#003263',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/chicoutimi-saguenens.svg',
+    logo_path: '/team_logos/chl/qmjhl/chicoutimi-saguenens.svg',
   },
   {
     id: 'chl_que',
@@ -381,7 +381,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#E31836',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/quebec-remparts.svg',
+    logo_path: '/team_logos/chl/qmjhl/quebec-remparts.svg',
   },
   {
     id: 'chl_rim',
@@ -394,7 +394,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#18124B',
       secondary: '#ABD8C0',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/rimouski-oceanic.png',
+    logo_path: '/team_logos/chl/qmjhl/rimouski-oceanic.png',
   },
   {
     id: 'chl_vic',
@@ -407,7 +407,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FCB827',
       secondary: '#EC1C2E',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/victoriaville-tigres.svg',
+    logo_path: '/team_logos/chl/qmjhl/victoriaville-tigres.svg',
   },
 
   // West Division
@@ -422,7 +422,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#000000',
       secondary: '#FFFFFF',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/blainville-boisbriand-armada.svg',
+    logo_path: '/team_logos/chl/qmjhl/blainville-boisbriand-armada.svg',
   },
   {
     id: 'chl_dru',
@@ -435,7 +435,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#EE3224',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/drummondville-voltigeurs.svg',
+    logo_path: '/team_logos/chl/qmjhl/drummondville-voltigeurs.svg',
   },
   {
     id: 'chl_gat',
@@ -448,7 +448,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#717073',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/gatineau-olympiques.png',
+    logo_path: '/team_logos/chl/qmjhl/gatineau-olympiques.png',
   },
   {
     id: 'chl_rnh',
@@ -461,7 +461,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#ED1C2E',
       secondary: '#8E979D',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/rouyn-noranda-huskies.svg',
+    logo_path: '/team_logos/chl/qmjhl/rouyn-noranda-huskies.svg',
   },
   {
     id: 'chl_she',
@@ -474,7 +474,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#051B54',
       secondary: '#F8F2D7',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/sherbrooke-phoenix.png',
+    logo_path: '/team_logos/chl/qmjhl/sherbrooke-phoenix.png',
   },
   {
     id: 'chl_vdo',
@@ -487,7 +487,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#DDB208',
       secondary: '#005941',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/val-d-or-foreurs.svg',
+    logo_path: '/team_logos/chl/qmjhl/val-d-or-foreurs.svg',
   },
 
   // WHL Teams
@@ -503,7 +503,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#E6BF2E',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/brandon-wheat-kings.svg',
+    logo_path: '/team_logos/chl/whl/brandon-wheat-kings.svg',
   },
   {
     id: 'chl_mj',
@@ -516,7 +516,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CC0000',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/moose-jaw-warriors.png',
+    logo_path: '/team_logos/chl/whl/moose-jaw-warriors.png',
   },
   {
     id: 'chl_pa',
@@ -529,7 +529,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#0D843E',
       secondary: '#DAC796',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/prince-albert-raiders.svg',
+    logo_path: '/team_logos/chl/whl/prince-albert-raiders.svg',
   },
   {
     id: 'chl_reg',
@@ -542,7 +542,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#1A3668',
       secondary: '#EF3342',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/regina-pats.svg',
+    logo_path: '/team_logos/chl/whl/regina-pats.svg',
   },
   {
     id: 'chl_sas',
@@ -555,7 +555,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFCD36',
       secondary: '#262266',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/saskatoon-blades.png',
+    logo_path: '/team_logos/chl/whl/saskatoon-blades.png',
   },
   {
     id: 'chl_sc',
@@ -568,7 +568,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#026937',
       secondary: '#001F5B',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/swift-current-broncos.svg',
+    logo_path: '/team_logos/chl/whl/swift-current-broncos.svg',
   },
   {
     id: 'chl_wnw',
@@ -581,7 +581,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#002F87',
       secondary: '#FFFFFF',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/wenatchee-wild.png',
+    logo_path: '/team_logos/chl/whl/wenatchee-wild.png',
   },
 
   // Central Division
@@ -596,7 +596,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#E13A3E',
       secondary: '#9E7053',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/calgary-hitmen.svg',
+    logo_path: '/team_logos/chl/whl/calgary-hitmen.svg',
   },
   {
     id: 'chl_edm',
@@ -609,7 +609,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFC42A',
       secondary: '#048743',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/edmonton-oil-kings.svg',
+    logo_path: '/team_logos/chl/whl/edmonton-oil-kings.svg',
   },
   {
     id: 'chl_lbg',
@@ -622,7 +622,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CC1D30',
       secondary: '#121942',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/lethbridge-hurricanes.svg',
+    logo_path: '/team_logos/chl/whl/lethbridge-hurricanes.svg',
   },
   {
     id: 'chl_mh',
@@ -635,7 +635,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#E56B1F',
       secondary: '#C03440',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/medicine-hat-tigers.svg',
+    logo_path: '/team_logos/chl/whl/medicine-hat-tigers.svg',
   },
   {
     id: 'chl_rd',
@@ -648,7 +648,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#900028',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/red-deer-rebels.svg',
+    logo_path: '/team_logos/chl/whl/red-deer-rebels.svg',
   },
 
   // B.C. Division
@@ -663,7 +663,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#032C62',
       secondary: '#D0471D',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/kamloops-blazers.png',
+    logo_path: '/team_logos/chl/whl/kamloops-blazers.png',
   },
   {
     id: 'chl_kel',
@@ -676,7 +676,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#008394',
       secondary: '#000000',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/kelowna-rockets.svg',
+    logo_path: '/team_logos/chl/whl/kelowna-rockets.svg',
   },
   {
     id: 'chl_pg',
@@ -689,7 +689,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#D0202E',
       secondary: '#D0A176',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/prince-george-cougars.png',
+    logo_path: '/team_logos/chl/whl/prince-george-cougars.png',
   },
   {
     id: 'chl_van',
@@ -702,7 +702,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#B5B7B9',
       secondary: '#97002E',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/vancouver-giants.svg',
+    logo_path: '/team_logos/chl/whl/vancouver-giants.svg',
   },
   {
     id: 'chl_vic',
@@ -715,7 +715,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#013974',
       secondary: '#A4ADB4',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/victoria-royals.png',
+    logo_path: '/team_logos/chl/whl/victoria-royals.png',
   },
 
   // U.S. Division
@@ -730,7 +730,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#BC8448',
       secondary: '#045B41',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/everett-silvertips.png',
+    logo_path: '/team_logos/chl/whl/everett-silvertips.png',
   },
   {
     id: 'chl_por',
@@ -743,7 +743,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#CC202E',
       secondary: '#BE9D4D',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/portland-winterhawks.svg',
+    logo_path: '/team_logos/chl/whl/portland-winterhawks.svg',
   },
   {
     id: 'chl_sea',
@@ -756,7 +756,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#003876',
       secondary: '#008357',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/seattle-thunderbirds.svg',
+    logo_path: '/team_logos/chl/whl/seattle-thunderbirds.svg',
   },
   {
     id: 'chl_spo',
@@ -769,7 +769,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#C41230',
       secondary: '#013A81',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/spokane-chiefs.svg',
+    logo_path: '/team_logos/chl/whl/spokane-chiefs.svg',
   },
   {
     id: 'chl_tc',
@@ -782,7 +782,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#0D1D41',
       secondary: '#AC1A2D',
     },
-    logo_path: '/team_logos/chl_logos/whl_logos/tri-city-americans.svg',
+    logo_path: '/team_logos/chl/whl/tri-city-americans.svg',
   },
   {
     id: 'chl_shc',
@@ -795,7 +795,7 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FFC425',
       secondary: '#98002E',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/shawinigan-cataractes.svg',
+    logo_path: '/team_logos/chl/qmjhl/shawinigan-cataractes.svg',
   },
   {
     id: 'chl_mnw',
@@ -808,6 +808,6 @@ export const CHL_TEAMS: CHLTeam[] = [
       primary: '#FDC13D',
       secondary: '#D51E3C',
     },
-    logo_path: '/team_logos/chl_logos/qmjhl_logos/moncton-wildcats.png',
+    logo_path: '/team_logos/chl/qmjhl/moncton-wildcats.png',
   },
 ];
