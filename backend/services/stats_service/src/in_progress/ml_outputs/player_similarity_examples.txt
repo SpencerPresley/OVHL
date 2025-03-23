@@ -1,0 +1,90 @@
+
+Players similar to Prestaraa- (leftWing):
+  WAR: 19.27, Games: 9
+  Similar players:
+    Curly11C (center) - WAR: 8.75, Similarity: 89.50%
+    Stenbxrg (rightWing) - WAR: 4.19, Similarity: 85.11%
+    JASON0914 (leftWing) - WAR: 5.03, Similarity: 84.67%
+    toslick (rightWing) - WAR: 10.46, Similarity: 82.30%
+    PucksDeep22 (center) - WAR: 7.31, Similarity: 82.14%
+
+Players similar to the rocket05 (center):
+  WAR: 14.46, Games: 5
+  Similar players:
+    PucksDeep22 (center) - WAR: 7.31, Similarity: 89.92%
+    MyBooLove88 (center) - WAR: 6.88, Similarity: 81.50%
+    LNDxGeorgio (leftWing) - WAR: 5.76, Similarity: 80.07%
+    BigYanLocks- (rightWing) - WAR: 7.71, Similarity: 76.94%
+    Prestaraa- (leftWing) - WAR: 19.27, Similarity: 76.02%
+
+Players similar to xLeafs33 (goalie):
+  WAR: 13.50, Games: 9
+  Similar players:
+    GoNicsGo (goalie) - WAR: 12.33, Similarity: 93.85%
+    l React I (goalie) - WAR: 7.25, Similarity: 90.27%
+    Bolts714 (goalie) - WAR: 6.21, Similarity: 89.72%
+    JoPascaleQC3 (goalie) - WAR: 5.18, Similarity: 89.17%
+    Bsavage28 (goalie) - WAR: 9.44, Similarity: 88.14%
+
+Players similar to GoNicsGo (goalie):
+  WAR: 12.33, Games: 4
+  Similar players:
+    Bsavage28 (goalie) - WAR: 9.44, Similarity: 98.74%
+    l React I (goalie) - WAR: 7.25, Similarity: 97.60%
+    Bolts714 (goalie) - WAR: 6.21, Similarity: 95.09%
+    xLeafs33 (goalie) - WAR: 13.50, Similarity: 93.85%
+    gio91502 (goalie) - WAR: 5.23, Similarity: 89.69%
+
+Players similar to toslick (rightWing):
+  WAR: 10.46, Games: 3
+  Similar players:
+    Lemzy-_ (leftWing) - WAR: 8.05, Similarity: 96.99%
+    MyBooLove88 (center) - WAR: 6.88, Similarity: 96.79%
+    B_Real1337 (rightWing) - WAR: 6.23, Similarity: 93.40%
+    King Kapanen (leftWing) - WAR: 8.83, Similarity: 91.03%
+    Rodent_Lush7I7 (leftWing) - WAR: 6.71, Similarity: 88.70%
+
+Players similar to kaner23- (rightWing):
+  WAR: 10.30, Games: 4
+  Similar players:
+    Cammy l28l (leftWing) - WAR: 9.40, Similarity: 92.10%
+    Curly11C (center) - WAR: 8.75, Similarity: 86.23%
+    MyBooLove88 (center) - WAR: 6.88, Similarity: 80.37%
+    toslick (rightWing) - WAR: 10.46, Similarity: 77.91%
+    the rocket05 (center) - WAR: 14.46, Similarity: 75.32%
+
+Players similar to Bsavage28 (goalie):
+  WAR: 9.44, Games: 3
+  Similar players:
+    l React I (goalie) - WAR: 7.25, Similarity: 98.78%
+    GoNicsGo (goalie) - WAR: 12.33, Similarity: 98.74%
+    Bolts714 (goalie) - WAR: 6.21, Similarity: 96.46%
+    gio91502 (goalie) - WAR: 5.23, Similarity: 91.58%
+    DEP0RT I31I (goalie) - WAR: 5.24, Similarity: 89.61%
+
+Players similar to Cammy l28l (leftWing):
+  WAR: 9.40, Games: 3
+  Similar players:
+    kaner23- (rightWing) - WAR: 10.30, Similarity: 92.10%
+    MyBooLove88 (center) - WAR: 6.88, Similarity: 74.67%
+    the rocket05 (center) - WAR: 14.46, Similarity: 73.14%
+    b_e11iot819 (rightWing) - WAR: 4.99, Similarity: 70.48%
+    PucksDeep22 (center) - WAR: 7.31, Similarity: 70.36%
+
+Players similar to TyrantOfSicily (rightDefense):
+  WAR: 8.85, Games: 6
+  Similar players:
+    Cavy l53l (leftDefense) - WAR: 6.50, Similarity: 95.05%
+    Oshlag (rightDefense) - WAR: 7.05, Similarity: 90.30%
+    Vozzy411 (leftWing) - WAR: 4.06, Similarity: 87.84%
+    BBoivin (leftWing) - WAR: 6.95, Similarity: 85.15%
+    Nickollai (leftDefense) - WAR: 5.84, Similarity: 80.27%
+
+Players similar to King Kapanen (leftWing):
+  WAR: 8.83, Games: 3
+  Similar players:
+    B_Real1337 (rightWing) - WAR: 6.23, Similarity: 98.60%
+    Rodent_Lush7I7 (leftWing) - WAR: 6.71, Similarity: 98.35%
+    MyBooLove88 (center) - WAR: 6.88, Similarity: 94.59%
+    xT S P 0 0 N (leftWing) - WAR: 8.63, Similarity: 93.07%
+    toslick (rightWing) - WAR: 10.46, Similarity: 91.03%

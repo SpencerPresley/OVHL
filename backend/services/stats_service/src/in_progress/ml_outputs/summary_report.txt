@@ -1,0 +1,33 @@
+WAR ML Analysis Summary Report
+==============================
+
+Dataset: player_war_results.csv
+Players analyzed: 104
+Positions: leftWing, center, goalie, rightWing, rightDefense, leftDefense
+
+Player Clustering
+----------------
+Number of clusters: 2
+Cluster 0: 69 players, avg WAR: 3.42
+Cluster 1: 35 players, avg WAR: 7.01
+
+WAR Prediction Model
+-------------------
+Model type: RandomForestRegressor
+Top features:
+  skgoals: 0.2923
+  games_played: 0.2859
+  skplusmin: 0.1896
+  points: 0.1265
+  skassists: 0.1058
+
+Position-Specific Models
+----------------------
+leftWing: R² = -54.2228
+center: R² = -25.4213
+goalie: R² = -31.7194
+rightWing: R² = -16.8644
+rightDefense: R² = -41.3296
+leftDefense: R² = -46.4439
+
+Analysis artifacts saved to ml_outputs/ directory

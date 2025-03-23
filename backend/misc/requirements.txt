@@ -1,0 +1,3 @@
+# scrape_echl_logos.py
+requests
+beautifulsoup4

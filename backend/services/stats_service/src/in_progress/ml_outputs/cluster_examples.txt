@@ -1,0 +1,20 @@
+
+Cluster 0 Examples:
+  Avg WAR: 3.42
+  Player count: 69
+  Top representatives:
+    xLeafs33 (goalie) - WAR: 13.50, Points: 0
+    GoNicsGo (goalie) - WAR: 12.33, Points: 0
+    Bsavage28 (goalie) - WAR: 9.44, Points: 0
+    TyrantOfSicily (rightDefense) - WAR: 8.85, Points: 4
+    l React I (goalie) - WAR: 7.25, Points: 0
+
+Cluster 1 Examples:
+  Avg WAR: 7.01
+  Player count: 35
+  Top representatives:
+    Prestaraa- (leftWing) - WAR: 19.27, Points: 18
+    the rocket05 (center) - WAR: 14.46, Points: 10
+    toslick (rightWing) - WAR: 10.46, Points: 12
+    kaner23- (rightWing) - WAR: 10.30, Points: 5
+    Cammy l28l (leftWing) - WAR: 9.40, Points: 3

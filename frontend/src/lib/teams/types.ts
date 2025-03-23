@@ -4,6 +4,31 @@ export enum NHLConference {
   WESTERN = 'Western',
 }
 
+export enum AHLConference {
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
+}
+
+export enum ECHLConference {
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
+}
+
+export enum WHLConference {
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
+}
+
+export enum OHLConference {
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
+}
+
+export enum QMJHLConference {
+  EASTERN = 'Eastern',
+  WESTERN = 'Western',
+}
+
 export enum NHLDivision {
   ATLANTIC = 'Atlantic',
   METROPOLITAN = 'Metropolitan',
@@ -29,58 +54,65 @@ export enum ECHLDivision {
 
 // CHL League and Division Enums
 export enum CHLLeague {
-  NAJHL = 'NAJHL',
   OHL = 'OHL',
   QMJHL = 'QMJHL',
   WHL = 'WHL',
 }
 
-export enum NAJHLDivision {
+export enum OHLDivision {
   EAST = 'East',
+  CENTRAL = 'Central',
+  MIDWEST = 'Midwest',
   WEST = 'West',
 }
 
-export enum OHLDivision {
-  NORTH = 'North',
-  SOUTH = 'South',
-}
-
 export enum QMJHLDivision {
-  NORTH = 'North',
-  SOUTH = 'South',
+  WEST = 'West',
+  CENTRAL = 'Central',
+  EAST = 'East',
+  MARITIMES = 'Maritimes',
 }
 
 export enum WHLDivision {
   EAST = 'East',
-  WEST = 'West',
+  CENTRAL = 'Central',
+  BC = 'B.C.',
+  US = 'U.S.',
 }
 
 // Team Interfaces
 export interface NHLTeam {
   id: string;
   name: string;
+  abbreviation: string;
   conference: NHLConference;
   division: NHLDivision;
   colors: {
     primary: string;
     secondary: string;
   };
+  logo_path: string;
 }
 
 export interface AHLTeam {
   id: string;
   name: string;
+  abbreviation: string;
+  conference: AHLConference;
   division: AHLDivision;
   nhlTeamId: string | null; // null for independent teams
   colors: {
     primary: string;
     secondary: string;
   };
+  logo_path: string;
 }
 
 export interface ECHLTeam {
   id: string;
   name: string;
+  abbreviation: string;
+  conference: ECHLConference;
   division: ECHLDivision;
   nhlTeamId: string;
   ahlTeamId: string;
@@ -88,15 +120,19 @@ export interface ECHLTeam {
     primary: string;
     secondary: string;
   };
+  logo_path: string;
 }
 
 export interface CHLTeam {
   id: string;
   name: string;
+  abbreviation: string;
   league: CHLLeague;
-  division: NAJHLDivision | OHLDivision | QMJHLDivision | WHLDivision;
+  conference: OHLConference | QMJHLConference | WHLConference;
+  division: OHLDivision | QMJHLDivision | WHLDivision;
   colors: {
     primary: string;
     secondary: string;
   };
+  logo_path: string;
 }
