@@ -56,1918 +56,6 @@ from .generator import partial_models_ctx, PartialModelField
 log: logging.Logger = logging.getLogger(__name__)
 _created_partial_types: Set[str] = set()
 
-class User(bases.BaseUser):
-    """Represents a User record"""
-
-    id: _str
-    email: _str
-    username: _str
-    password: _str
-    name: Optional[_str] = None
-    avatarUrl: Optional[_str] = None
-    isAdmin: _bool
-    resetToken: Optional[_str] = None
-    resetTokenExpiresAt: Optional[datetime.datetime] = None
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    player: Optional['models.Player'] = None
-    notifications: Optional[List['models.Notification']] = None
-    forumPosts: Optional[List['models.ForumPost']] = None
-    forumComments: Optional[List['models.ForumComment']] = None
-    forumReactions: Optional[List['models.ForumReaction']] = None
-    forumFollowing: Optional[List['models.ForumFollower']] = None
-    forumSubscriptions: Optional[List['models.ForumPostSubscription']] = None
-    teamManagement: Optional[List['models.TeamManager']] = None
-    psnProfile: Optional['models.PSNProfile'] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.UserKeys']] = None,
-        exclude: Optional[Iterable['types.UserKeys']] = None,
-        required: Optional[Iterable['types.UserKeys']] = None,
-        optional: Optional[Iterable['types.UserKeys']] = None,
-        relations: Optional[Mapping['types.UserRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.UserKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _User_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _User_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _User_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _User_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _User_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _User_relational_fields:
-                        raise errors.UnknownRelationalFieldError('User', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid User / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'User',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Player(bases.BasePlayer):
-    """Represents a Player record"""
-
-    id: _str
-    ea_id: _str
-    name: _str
-    activeSystem: 'enums.System'
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    user: Optional['models.User'] = None
-    gamertags: Optional[List['models.GamertagHistory']] = None
-    seasons: Optional[List['models.PlayerSeason']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.PlayerKeys']] = None,
-        exclude: Optional[Iterable['types.PlayerKeys']] = None,
-        required: Optional[Iterable['types.PlayerKeys']] = None,
-        optional: Optional[Iterable['types.PlayerKeys']] = None,
-        relations: Optional[Mapping['types.PlayerRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.PlayerKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Player_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Player_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Player_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Player_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Player_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Player_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Player', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Player / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Player',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class GamertagHistory(bases.BaseGamertagHistory):
-    """Represents a GamertagHistory record"""
-
-    playerId: _str
-    system: 'enums.System'
-    gamertag: _str
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    verificationCode: Optional[_str] = None
-    codeGeneratedAt: Optional[datetime.datetime] = None
-    verificationStatus: Optional['enums.VerificationStatus'] = None
-    verifiedAt: Optional[datetime.datetime] = None
-    verificationAttempts: Optional[_int] = None
-    lastAttemptAt: Optional[datetime.datetime] = None
-    codeExpiresAt: Optional[datetime.datetime] = None
-    isVerified: _bool
-    verificationMetadata: Optional['fields.Json'] = None
-    player: Optional['models.Player'] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.GamertagHistoryKeys']] = None,
-        exclude: Optional[Iterable['types.GamertagHistoryKeys']] = None,
-        required: Optional[Iterable['types.GamertagHistoryKeys']] = None,
-        optional: Optional[Iterable['types.GamertagHistoryKeys']] = None,
-        relations: Optional[Mapping['types.GamertagHistoryRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.GamertagHistoryKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _GamertagHistory_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _GamertagHistory_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _GamertagHistory_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _GamertagHistory_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _GamertagHistory_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _GamertagHistory_relational_fields:
-                        raise errors.UnknownRelationalFieldError('GamertagHistory', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid GamertagHistory / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'GamertagHistory',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Season(bases.BaseSeason):
-    """Represents a Season record"""
-
-    id: _str
-    seasonId: _str
-    isLatest: _bool
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    tiers: Optional[List['models.Tier']] = None
-    players: Optional[List['models.PlayerSeason']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.SeasonKeys']] = None,
-        exclude: Optional[Iterable['types.SeasonKeys']] = None,
-        required: Optional[Iterable['types.SeasonKeys']] = None,
-        optional: Optional[Iterable['types.SeasonKeys']] = None,
-        relations: Optional[Mapping['types.SeasonRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.SeasonKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Season_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Season_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Season_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Season_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Season_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Season_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Season', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Season / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Season',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Tier(bases.BaseTier):
-    """Represents a Tier record"""
-
-    id: _str
-    seasonId: _str
-    leagueLevel: _int
-    name: _str
-    salaryCap: _int
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    season: Optional['models.Season'] = None
-    teams: Optional[List['models.TeamSeason']] = None
-    playerHistory: Optional[List['models.PlayerTierHistory']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.TierKeys']] = None,
-        exclude: Optional[Iterable['types.TierKeys']] = None,
-        required: Optional[Iterable['types.TierKeys']] = None,
-        optional: Optional[Iterable['types.TierKeys']] = None,
-        relations: Optional[Mapping['types.TierRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.TierKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Tier_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Tier_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Tier_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Tier_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Tier_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Tier_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Tier', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Tier / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Tier',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Team(bases.BaseTeam):
-    """Represents a Team record"""
-
-    id: _str
-    eaClubId: _str
-    eaClubName: _str
-    officialName: _str
-    teamIdentifier: _str
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    seasons: Optional[List['models.TeamSeason']] = None
-    managers: Optional[List['models.TeamManager']] = None
-    nhlAffiliateId: Optional[_str] = None
-    ahlAffiliateId: Optional[_str] = None
-    nhlAffiliate: Optional['models.Team'] = None
-    ahlAffiliate: Optional['models.Team'] = None
-    ahlAffiliates: Optional[List['models.Team']] = None
-    echlAffiliates: Optional[List['models.Team']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.TeamKeys']] = None,
-        exclude: Optional[Iterable['types.TeamKeys']] = None,
-        required: Optional[Iterable['types.TeamKeys']] = None,
-        optional: Optional[Iterable['types.TeamKeys']] = None,
-        relations: Optional[Mapping['types.TeamRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.TeamKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Team_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Team_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Team_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Team_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Team_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Team_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Team', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Team / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Team',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class TeamSeason(bases.BaseTeamSeason):
-    """Represents a TeamSeason record"""
-
-    id: _str
-    teamId: _str
-    tierId: _str
-    forwardCount: _int
-    defenseCount: _int
-    goalieCount: _int
-    wins: _int
-    losses: _int
-    otLosses: _int
-    goalsAgainst: _int
-    goalsFor: _int
-    matchesPlayed: _int
-    penaltyKillGoalsAgainst: _int
-    penaltyKillOpportunities: _int
-    powerplayGoals: _int
-    powerplayOpportunities: _int
-    shots: _int
-    shotsAgainst: _int
-    timeOnAttack: _int
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    team: Optional['models.Team'] = None
-    tier: Optional['models.Tier'] = None
-    matches: Optional[List['models.Match']] = None
-    players: Optional[List['models.PlayerTeamSeason']] = None
-    bids: Optional[List['models.Bid']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.TeamSeasonKeys']] = None,
-        exclude: Optional[Iterable['types.TeamSeasonKeys']] = None,
-        required: Optional[Iterable['types.TeamSeasonKeys']] = None,
-        optional: Optional[Iterable['types.TeamSeasonKeys']] = None,
-        relations: Optional[Mapping['types.TeamSeasonRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.TeamSeasonKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _TeamSeason_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _TeamSeason_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _TeamSeason_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _TeamSeason_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _TeamSeason_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _TeamSeason_relational_fields:
-                        raise errors.UnknownRelationalFieldError('TeamSeason', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid TeamSeason / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'TeamSeason',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class PlayerSeason(bases.BasePlayerSeason):
-    """Represents a PlayerSeason record"""
-
-    id: _str
-    playerId: _str
-    seasonId: _str
-    contractId: _str
-    position: _str
-    gamesPlayed: Optional[_int] = None
-    goals: Optional[_int] = None
-    assists: Optional[_int] = None
-    plusMinus: Optional[_int] = None
-    shots: Optional[_int] = None
-    hits: Optional[_int] = None
-    takeaways: Optional[_int] = None
-    giveaways: Optional[_int] = None
-    penaltyMinutes: Optional[_int] = None
-    saves: Optional[_int] = None
-    goalsAgainst: Optional[_int] = None
-    isInBidding: _bool
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    player: Optional['models.Player'] = None
-    season: Optional['models.Season'] = None
-    contract: Optional['models.Contract'] = None
-    teamSeasons: Optional[List['models.PlayerTeamSeason']] = None
-    tierHistory: Optional[List['models.PlayerTierHistory']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.PlayerSeasonKeys']] = None,
-        exclude: Optional[Iterable['types.PlayerSeasonKeys']] = None,
-        required: Optional[Iterable['types.PlayerSeasonKeys']] = None,
-        optional: Optional[Iterable['types.PlayerSeasonKeys']] = None,
-        relations: Optional[Mapping['types.PlayerSeasonRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.PlayerSeasonKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _PlayerSeason_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _PlayerSeason_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerSeason_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerSeason_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _PlayerSeason_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _PlayerSeason_relational_fields:
-                        raise errors.UnknownRelationalFieldError('PlayerSeason', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid PlayerSeason / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'PlayerSeason',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class PlayerTierHistory(bases.BasePlayerTierHistory):
-    """Represents a PlayerTierHistory record"""
-
-    id: _str
-    playerSeasonId: _str
-    tierId: _str
-    startDate: datetime.datetime
-    endDate: Optional[datetime.datetime] = None
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    playerSeason: Optional['models.PlayerSeason'] = None
-    tier: Optional['models.Tier'] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.PlayerTierHistoryKeys']] = None,
-        exclude: Optional[Iterable['types.PlayerTierHistoryKeys']] = None,
-        required: Optional[Iterable['types.PlayerTierHistoryKeys']] = None,
-        optional: Optional[Iterable['types.PlayerTierHistoryKeys']] = None,
-        relations: Optional[Mapping['types.PlayerTierHistoryRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.PlayerTierHistoryKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _PlayerTierHistory_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _PlayerTierHistory_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerTierHistory_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerTierHistory_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _PlayerTierHistory_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _PlayerTierHistory_relational_fields:
-                        raise errors.UnknownRelationalFieldError('PlayerTierHistory', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid PlayerTierHistory / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'PlayerTierHistory',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class PlayerTeamSeason(bases.BasePlayerTeamSeason):
-    """Represents a PlayerTeamSeason record"""
-
-    id: _str
-    playerSeasonId: _str
-    teamSeasonId: _str
-    assists: _int
-    gamesPlayed: _int
-    giveaways: _int
-    goals: _int
-    hits: _int
-    penaltyMinutes: _int
-    plusMinus: _int
-    shots: _int
-    takeaways: _int
-    saves: Optional[_int] = None
-    goalsAgainst: Optional[_int] = None
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    playerSeason: Optional['models.PlayerSeason'] = None
-    teamSeason: Optional['models.TeamSeason'] = None
-    matches: Optional[List['models.PlayerMatch']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
-        exclude: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
-        required: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
-        optional: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
-        relations: Optional[Mapping['types.PlayerTeamSeasonRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.PlayerTeamSeasonKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _PlayerTeamSeason_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _PlayerTeamSeason_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerTeamSeason_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerTeamSeason_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _PlayerTeamSeason_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _PlayerTeamSeason_relational_fields:
-                        raise errors.UnknownRelationalFieldError('PlayerTeamSeason', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid PlayerTeamSeason / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'PlayerTeamSeason',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Contract(bases.BaseContract):
-    """Represents a Contract record"""
-
-    id: _str
-    amount: _int
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    playerSeason: Optional['models.PlayerSeason'] = None
-    bids: Optional[List['models.Bid']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.ContractKeys']] = None,
-        exclude: Optional[Iterable['types.ContractKeys']] = None,
-        required: Optional[Iterable['types.ContractKeys']] = None,
-        optional: Optional[Iterable['types.ContractKeys']] = None,
-        relations: Optional[Mapping['types.ContractRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.ContractKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Contract_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Contract_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Contract_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Contract_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Contract_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Contract_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Contract', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Contract / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Contract',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Bid(bases.BaseBid):
-    """Represents a Bid record"""
-
-    id: _str
-    contract: Optional['models.Contract'] = None
-    contractId: _str
-    teamSeason: Optional['models.TeamSeason'] = None
-    teamSeasonId: _str
-    amount: _int
-    status: 'enums.BidStatus'
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.BidKeys']] = None,
-        exclude: Optional[Iterable['types.BidKeys']] = None,
-        required: Optional[Iterable['types.BidKeys']] = None,
-        optional: Optional[Iterable['types.BidKeys']] = None,
-        relations: Optional[Mapping['types.BidRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.BidKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Bid_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Bid_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Bid_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Bid_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Bid_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Bid_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Bid', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Bid / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Bid',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Match(bases.BaseMatch):
-    """Represents a Match record"""
-
-    id: _str
-    teamSeasonId: _str
-    eaMatchId: _str
-    goalsAgainst: _int
-    goalsFor: _int
-    opponentClubId: _str
-    opponentTeamId: _str
-    penaltyKillGoalsAgainst: _int
-    penaltyKillOpportunities: _int
-    powerplayGoals: _int
-    powerplayOpportunities: _int
-    shots: _int
-    shotsAgainst: _int
-    timeOnAttack: _int
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    teamSeason: Optional['models.TeamSeason'] = None
-    playerStats: Optional[List['models.PlayerMatch']] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.MatchKeys']] = None,
-        exclude: Optional[Iterable['types.MatchKeys']] = None,
-        required: Optional[Iterable['types.MatchKeys']] = None,
-        optional: Optional[Iterable['types.MatchKeys']] = None,
-        relations: Optional[Mapping['types.MatchRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.MatchKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Match_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Match_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Match_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Match_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Match_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Match_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Match', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Match / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Match',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class PlayerMatch(bases.BasePlayerMatch):
-    """Represents a PlayerMatch record"""
-
-    id: _str
-    matchId: _str
-    playerTeamSeasonId: _str
-    assists: _int
-    giveaways: _int
-    goals: _int
-    hits: _int
-    penaltyMinutes: _int
-    plusMinus: _int
-    ratingDefense: _float
-    ratingOffense: _float
-    ratingTeamplay: _float
-    shots: _int
-    takeaways: _int
-    timeOnIce: _int
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    match: Optional['models.Match'] = None
-    playerTeamSeason: Optional['models.PlayerTeamSeason'] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.PlayerMatchKeys']] = None,
-        exclude: Optional[Iterable['types.PlayerMatchKeys']] = None,
-        required: Optional[Iterable['types.PlayerMatchKeys']] = None,
-        optional: Optional[Iterable['types.PlayerMatchKeys']] = None,
-        relations: Optional[Mapping['types.PlayerMatchRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.PlayerMatchKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _PlayerMatch_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _PlayerMatch_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerMatch_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _PlayerMatch_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _PlayerMatch_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _PlayerMatch_relational_fields:
-                        raise errors.UnknownRelationalFieldError('PlayerMatch', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid PlayerMatch / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'PlayerMatch',
-            }
-        )
-        _created_partial_types.add(name)
-
-
-class Notification(bases.BaseNotification):
-    """Represents a Notification record"""
-
-    id: _str
-    userId: _str
-    type: 'enums.NotificationType'
-    title: _str
-    message: _str
-    status: 'enums.NotificationStatus'
-    link: Optional[_str] = None
-    metadata: Optional['fields.Json'] = None
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    user: Optional['models.User'] = None
-
-
-
-    @staticmethod
-    def create_partial(
-        name: str,
-        include: Optional[Iterable['types.NotificationKeys']] = None,
-        exclude: Optional[Iterable['types.NotificationKeys']] = None,
-        required: Optional[Iterable['types.NotificationKeys']] = None,
-        optional: Optional[Iterable['types.NotificationKeys']] = None,
-        relations: Optional[Mapping['types.NotificationRelationalFieldKeys', str]] = None,
-        exclude_relational_fields: bool = False,
-    ) -> None:
-        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
-            raise RuntimeError(
-                'Attempted to create a partial type outside of client generation.'
-            )
-
-        if name in _created_partial_types:
-            raise ValueError(f'Partial type "{name}" has already been created.')
-
-        if include is not None:
-            if exclude is not None:
-                raise TypeError('Exclude and include are mutually exclusive.')
-            if exclude_relational_fields is True:
-                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
-
-        if required and optional:
-            shared = set(required) & set(optional)
-            if shared:
-                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
-
-        if exclude_relational_fields and relations:
-            raise ValueError(
-                'exclude_relational_fields and relations are mutually exclusive'
-            )
-
-        fields: Dict['types.NotificationKeys', PartialModelField] = OrderedDict()
-
-        try:
-            if include:
-                for field in include:
-                    fields[field] = _Notification_fields[field].copy()
-            elif exclude:
-                for field in exclude:
-                    if field not in _Notification_fields:
-                        raise KeyError(field)
-
-                fields = {
-                    key: data.copy()
-                    for key, data in _Notification_fields.items()
-                    if key not in exclude
-                }
-            else:
-                fields = {
-                    key: data.copy()
-                    for key, data in _Notification_fields.items()
-                }
-
-            if required:
-                for field in required:
-                    fields[field]['optional'] = False
-
-            if optional:
-                for field in optional:
-                    fields[field]['optional'] = True
-
-            if exclude_relational_fields:
-                fields = {
-                    key: data
-                    for key, data in fields.items()
-                    if key not in _Notification_relational_fields
-                }
-
-            if relations:
-                for field, type_ in relations.items():
-                    if field not in _Notification_relational_fields:
-                        raise errors.UnknownRelationalFieldError('Notification', field)
-
-                    # TODO: this method of validating types is not ideal
-                    # as it means we cannot two create partial types that
-                    # reference each other
-                    if type_ not in _created_partial_types:
-                        raise ValueError(
-                            f'Unknown partial type: "{type_}". '
-                            f'Did you remember to generate the {type_} type before this one?'
-                        )
-
-                    # TODO: support non prisma.partials models
-                    info = fields[field]
-                    if info['is_list']:
-                        info['type'] = f'List[\'partials.{type_}\']'
-                    else:
-                        info['type'] = f'\'partials.{type_}\''
-        except KeyError as exc:
-            raise ValueError(
-                f'{exc.args[0]} is not a valid Notification / {name} field.'
-            ) from None
-
-        models = partial_models_ctx.get()
-        models.append(
-            {
-                'name': name,
-                'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'Notification',
-            }
-        )
-        _created_partial_types.add(name)
-
-
 class ForumPost(bases.BaseForumPost):
     """Represents a ForumPost record"""
 
@@ -2582,28 +670,32 @@ class ForumComment(bases.BaseForumComment):
         _created_partial_types.add(name)
 
 
-class TeamManager(bases.BaseTeamManager):
-    """Represents a TeamManager record"""
+class League(bases.BaseLeague):
+    """Represents a League record"""
 
     id: _str
-    userId: _str
-    teamId: _str
-    role: 'enums.TeamManagementRole'
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    user: Optional['models.User'] = None
-    team: Optional['models.Team'] = None
+    name: _str
+    shortName: _str
+    leagueType: 'enums.LeagueType'
+    isSubLeague: _bool
+    parentLeagueId: Optional[_str] = None
+    parentLeague: Optional['models.League'] = None
+    subLeagues: Optional[List['models.League']] = None
+    conferences: Optional[List['models.Conference']] = None
+    divisions: Optional[List['models.Division']] = None
+    teams: Optional[List['models.Team']] = None
+    seasons: Optional[List['models.LeagueSeason']] = None
 
 
 
     @staticmethod
     def create_partial(
         name: str,
-        include: Optional[Iterable['types.TeamManagerKeys']] = None,
-        exclude: Optional[Iterable['types.TeamManagerKeys']] = None,
-        required: Optional[Iterable['types.TeamManagerKeys']] = None,
-        optional: Optional[Iterable['types.TeamManagerKeys']] = None,
-        relations: Optional[Mapping['types.TeamManagerRelationalFieldKeys', str]] = None,
+        include: Optional[Iterable['types.LeagueKeys']] = None,
+        exclude: Optional[Iterable['types.LeagueKeys']] = None,
+        required: Optional[Iterable['types.LeagueKeys']] = None,
+        optional: Optional[Iterable['types.LeagueKeys']] = None,
+        relations: Optional[Mapping['types.LeagueRelationalFieldKeys', str]] = None,
         exclude_relational_fields: bool = False,
     ) -> None:
         if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
@@ -2630,26 +722,26 @@ class TeamManager(bases.BaseTeamManager):
                 'exclude_relational_fields and relations are mutually exclusive'
             )
 
-        fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedDict()
+        fields: Dict['types.LeagueKeys', PartialModelField] = OrderedDict()
 
         try:
             if include:
                 for field in include:
-                    fields[field] = _TeamManager_fields[field].copy()
+                    fields[field] = _League_fields[field].copy()
             elif exclude:
                 for field in exclude:
-                    if field not in _TeamManager_fields:
+                    if field not in _League_fields:
                         raise KeyError(field)
 
                 fields = {
                     key: data.copy()
-                    for key, data in _TeamManager_fields.items()
+                    for key, data in _League_fields.items()
                     if key not in exclude
                 }
             else:
                 fields = {
                     key: data.copy()
-                    for key, data in _TeamManager_fields.items()
+                    for key, data in _League_fields.items()
                 }
 
             if required:
@@ -2664,13 +756,13 @@ class TeamManager(bases.BaseTeamManager):
                 fields = {
                     key: data
                     for key, data in fields.items()
-                    if key not in _TeamManager_relational_fields
+                    if key not in _League_relational_fields
                 }
 
             if relations:
                 for field, type_ in relations.items():
-                    if field not in _TeamManager_relational_fields:
-                        raise errors.UnknownRelationalFieldError('TeamManager', field)
+                    if field not in _League_relational_fields:
+                        raise errors.UnknownRelationalFieldError('League', field)
 
                     # TODO: this method of validating types is not ideal
                     # as it means we cannot two create partial types that
@@ -2689,7 +781,7 @@ class TeamManager(bases.BaseTeamManager):
                         info['type'] = f'\'partials.{type_}\''
         except KeyError as exc:
             raise ValueError(
-                f'{exc.args[0]} is not a valid TeamManager / {name} field.'
+                f'{exc.args[0]} is not a valid League / {name} field.'
             ) from None
 
         models = partial_models_ctx.get()
@@ -2697,7 +789,2134 @@ class TeamManager(bases.BaseTeamManager):
             {
                 'name': name,
                 'fields': cast(Mapping[str, PartialModelField], fields),
-                'from_model': 'TeamManager',
+                'from_model': 'League',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class LeagueSeason(bases.BaseLeagueSeason):
+    """Represents a LeagueSeason record"""
+
+    id: _str
+    leagueId: _str
+    seasonId: _str
+    salaryCap: _int
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    league: Optional['models.League'] = None
+    season: Optional['models.Season'] = None
+    commissioners: Optional[List['models.LeagueCommissioner']] = None
+    bogs: Optional[List['models.LeagueBOG']] = None
+    teams: Optional[List['models.TeamSeason']] = None
+    playerHistory: Optional[List['models.PlayerLeagueHistory']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.LeagueSeasonKeys']] = None,
+        exclude: Optional[Iterable['types.LeagueSeasonKeys']] = None,
+        required: Optional[Iterable['types.LeagueSeasonKeys']] = None,
+        optional: Optional[Iterable['types.LeagueSeasonKeys']] = None,
+        relations: Optional[Mapping['types.LeagueSeasonRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.LeagueSeasonKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _LeagueSeason_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _LeagueSeason_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueSeason_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueSeason_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _LeagueSeason_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _LeagueSeason_relational_fields:
+                        raise errors.UnknownRelationalFieldError('LeagueSeason', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid LeagueSeason / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'LeagueSeason',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Conference(bases.BaseConference):
+    """Represents a Conference record"""
+
+    id: _str
+    name: _str
+    leagueId: _str
+    league: Optional['models.League'] = None
+    divisions: Optional[List['models.Division']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.ConferenceKeys']] = None,
+        exclude: Optional[Iterable['types.ConferenceKeys']] = None,
+        required: Optional[Iterable['types.ConferenceKeys']] = None,
+        optional: Optional[Iterable['types.ConferenceKeys']] = None,
+        relations: Optional[Mapping['types.ConferenceRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.ConferenceKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Conference_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Conference_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Conference_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Conference_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Conference_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Conference_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Conference', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Conference / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Conference',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Division(bases.BaseDivision):
+    """Represents a Division record"""
+
+    id: _str
+    name: _str
+    conferenceId: _str
+    leagueId: _str
+    conference: Optional['models.Conference'] = None
+    league: Optional['models.League'] = None
+    teams: Optional[List['models.Team']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.DivisionKeys']] = None,
+        exclude: Optional[Iterable['types.DivisionKeys']] = None,
+        required: Optional[Iterable['types.DivisionKeys']] = None,
+        optional: Optional[Iterable['types.DivisionKeys']] = None,
+        relations: Optional[Mapping['types.DivisionRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.DivisionKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Division_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Division_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Division_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Division_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Division_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Division_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Division', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Division / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Division',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Season(bases.BaseSeason):
+    """Represents a Season record"""
+
+    id: _str
+    seasonNumber: _int
+    isLatest: _bool
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    leagueSeasons: Optional[List['models.LeagueSeason']] = None
+    players: Optional[List['models.PlayerSeason']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.SeasonKeys']] = None,
+        exclude: Optional[Iterable['types.SeasonKeys']] = None,
+        required: Optional[Iterable['types.SeasonKeys']] = None,
+        optional: Optional[Iterable['types.SeasonKeys']] = None,
+        relations: Optional[Mapping['types.SeasonRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.SeasonKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Season_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Season_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Season_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Season_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Season_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Season_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Season', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Season / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Season',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class LeagueCommissioner(bases.BaseLeagueCommissioner):
+    """Represents a LeagueCommissioner record"""
+
+    id: _str
+    userId: _str
+    leagueSeasonId: _str
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+    leagueSeason: Optional['models.LeagueSeason'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.LeagueCommissionerKeys']] = None,
+        exclude: Optional[Iterable['types.LeagueCommissionerKeys']] = None,
+        required: Optional[Iterable['types.LeagueCommissionerKeys']] = None,
+        optional: Optional[Iterable['types.LeagueCommissionerKeys']] = None,
+        relations: Optional[Mapping['types.LeagueCommissionerRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.LeagueCommissionerKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _LeagueCommissioner_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _LeagueCommissioner_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueCommissioner_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueCommissioner_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _LeagueCommissioner_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _LeagueCommissioner_relational_fields:
+                        raise errors.UnknownRelationalFieldError('LeagueCommissioner', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid LeagueCommissioner / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'LeagueCommissioner',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class LeagueBOG(bases.BaseLeagueBOG):
+    """Represents a LeagueBOG record"""
+
+    id: _str
+    userId: _str
+    leagueSeasonId: _str
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+    leagueSeason: Optional['models.LeagueSeason'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.LeagueBOGKeys']] = None,
+        exclude: Optional[Iterable['types.LeagueBOGKeys']] = None,
+        required: Optional[Iterable['types.LeagueBOGKeys']] = None,
+        optional: Optional[Iterable['types.LeagueBOGKeys']] = None,
+        relations: Optional[Mapping['types.LeagueBOGRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.LeagueBOGKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _LeagueBOG_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _LeagueBOG_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueBOG_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _LeagueBOG_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _LeagueBOG_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _LeagueBOG_relational_fields:
+                        raise errors.UnknownRelationalFieldError('LeagueBOG', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid LeagueBOG / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'LeagueBOG',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Match(bases.BaseMatch):
+    """Represents a Match record"""
+
+    id: _str
+    teamSeasonId: _str
+    eaMatchId: _str
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    teamSeason: Optional['models.TeamSeason'] = None
+    clubMatchStats: Optional[List['models.ClubMatchStats']] = None
+    playerStats: Optional[List['models.PlayerMatch']] = None
+    clubAggregateMatchStats: Optional[List['models.ClubAggregateMatchStats']] = None
+    matchAnalytics: Optional[List['models.MatchAnalytics']] = None
+    playerSeasons: Optional[List['models.PlayerSeason']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.MatchKeys']] = None,
+        exclude: Optional[Iterable['types.MatchKeys']] = None,
+        required: Optional[Iterable['types.MatchKeys']] = None,
+        optional: Optional[Iterable['types.MatchKeys']] = None,
+        relations: Optional[Mapping['types.MatchRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.MatchKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Match_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Match_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Match_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Match_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Match_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Match_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Match', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Match / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Match',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class ClubMatchStats(bases.BaseClubMatchStats):
+    """Represents a ClubMatchStats record"""
+
+    id: _str
+    matchId: _str
+    clubDivision: _int
+    cNhlOnlineGameType: _str
+    goalsAgainstRaw: _int
+    goalsForRaw: _int
+    losses: _int
+    result: _int
+    score: _int
+    scoreString: _str
+    winnerByDnf: _int
+    winnerByGoalieDnf: _int
+    memberString: _str
+    passesAttempted: _int
+    passesCompleted: _int
+    powerplayGoals: _int
+    powerplayOpportunities: _int
+    shots: _int
+    teamArtAbbr: _str
+    teamSide: _int
+    timeOnAttack: _int
+    opponentClubId: _str
+    opponentScore: _int
+    opponentTeamArtAbbr: _str
+    goals: _int
+    goalsAgainst: _int
+    details: Optional['models.ClubMatchStatsDetails'] = None
+    match: Optional['models.Match'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.ClubMatchStatsKeys']] = None,
+        exclude: Optional[Iterable['types.ClubMatchStatsKeys']] = None,
+        required: Optional[Iterable['types.ClubMatchStatsKeys']] = None,
+        optional: Optional[Iterable['types.ClubMatchStatsKeys']] = None,
+        relations: Optional[Mapping['types.ClubMatchStatsRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.ClubMatchStatsKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _ClubMatchStats_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _ClubMatchStats_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubMatchStats_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubMatchStats_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _ClubMatchStats_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _ClubMatchStats_relational_fields:
+                        raise errors.UnknownRelationalFieldError('ClubMatchStats', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid ClubMatchStats / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'ClubMatchStats',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class ClubMatchStatsDetails(bases.BaseClubMatchStatsDetails):
+    """Represents a ClubMatchStatsDetails record"""
+
+    id: _str
+    clubMatchStatsId: _str
+    name: _str
+    eaClubId: _int
+    regionId: _int
+    teamId: _int
+    customKit: Optional['models.CustomKit'] = None
+    clubMatchStats: Optional['models.ClubMatchStats'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.ClubMatchStatsDetailsKeys']] = None,
+        exclude: Optional[Iterable['types.ClubMatchStatsDetailsKeys']] = None,
+        required: Optional[Iterable['types.ClubMatchStatsDetailsKeys']] = None,
+        optional: Optional[Iterable['types.ClubMatchStatsDetailsKeys']] = None,
+        relations: Optional[Mapping['types.ClubMatchStatsDetailsRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.ClubMatchStatsDetailsKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _ClubMatchStatsDetails_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _ClubMatchStatsDetails_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubMatchStatsDetails_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubMatchStatsDetails_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _ClubMatchStatsDetails_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _ClubMatchStatsDetails_relational_fields:
+                        raise errors.UnknownRelationalFieldError('ClubMatchStatsDetails', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid ClubMatchStatsDetails / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'ClubMatchStatsDetails',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class CustomKit(bases.BaseCustomKit):
+    """Represents a CustomKit record"""
+
+    id: _str
+    detailsId: _str
+    isCustomTeam: _int
+    crestAssetId: _int
+    useBaseAsset: _int
+    details: Optional['models.ClubMatchStatsDetails'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.CustomKitKeys']] = None,
+        exclude: Optional[Iterable['types.CustomKitKeys']] = None,
+        required: Optional[Iterable['types.CustomKitKeys']] = None,
+        optional: Optional[Iterable['types.CustomKitKeys']] = None,
+        relations: Optional[Mapping['types.CustomKitRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.CustomKitKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _CustomKit_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _CustomKit_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _CustomKit_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _CustomKit_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _CustomKit_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _CustomKit_relational_fields:
+                        raise errors.UnknownRelationalFieldError('CustomKit', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid CustomKit / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'CustomKit',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class ClubAggregateMatchStats(bases.BaseClubAggregateMatchStats):
+    """Represents a ClubAggregateMatchStats record"""
+
+    id: _str
+    matchId: _str
+    clubLevel: _int
+    position: _int
+    posSorted: _int
+    isGuest: _int
+    playerDnf: _int
+    playerLevel: _int
+    eaTeamId: _int
+    teamSide: _int
+    opponentEaClubId: _int
+    opponentEaTeamId: _int
+    opponentScore: _int
+    score: _int
+    ratingDefense: _float
+    ratingOffense: _float
+    ratingTeamplay: _float
+    toi: _int
+    toiSeconds: _int
+    assists: _int
+    blockedShots: _int
+    deflections: _int
+    faceoffsLost: _int
+    faceoffPct: _float
+    faceoffsWon: _int
+    giveaways: _int
+    goals: _int
+    hits: _int
+    interceptions: _int
+    passAttempts: _int
+    passes: _int
+    passPct: _float
+    penaltiesDrawn: _int
+    penaltyMinutes: _int
+    skaterPkClearZone: _int
+    plusMinus: _int
+    possession: _int
+    powerPlayGoals: _int
+    saucerPasses: _int
+    shortHandedGoals: _int
+    shotAttempts: _int
+    shotOnNetPct: _float
+    shots: _int
+    takeaways: _int
+    breakawaySavePct: _float
+    breakawaySaves: _int
+    breakawayShots: _int
+    desperationSaves: _int
+    goalsAgainst: _int
+    goalsAgainstAverage: _float
+    penaltyShotSavePct: _float
+    penaltyShotSaves: _int
+    goaliePkClearZone: _int
+    pokeChecks: _int
+    savePct: _float
+    totalSaves: _int
+    totalShotsFaced: _int
+    shutoutPeriods: _int
+    match: Optional['models.Match'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.ClubAggregateMatchStatsKeys']] = None,
+        exclude: Optional[Iterable['types.ClubAggregateMatchStatsKeys']] = None,
+        required: Optional[Iterable['types.ClubAggregateMatchStatsKeys']] = None,
+        optional: Optional[Iterable['types.ClubAggregateMatchStatsKeys']] = None,
+        relations: Optional[Mapping['types.ClubAggregateMatchStatsRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.ClubAggregateMatchStatsKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _ClubAggregateMatchStats_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _ClubAggregateMatchStats_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubAggregateMatchStats_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _ClubAggregateMatchStats_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _ClubAggregateMatchStats_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _ClubAggregateMatchStats_relational_fields:
+                        raise errors.UnknownRelationalFieldError('ClubAggregateMatchStats', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid ClubAggregateMatchStats / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'ClubAggregateMatchStats',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class MatchAnalytics(bases.BaseMatchAnalytics):
+    """Represents a MatchAnalytics record"""
+
+    id: _str
+    matchId: _str
+    possessionDifferential: _int
+    possessionPercentageHome: _float
+    possessionPercentageAway: _float
+    homeShootingEfficiency: _float
+    awayShootingEfficiency: _float
+    homePassingEfficiency: _float
+    awayPassingEfficiency: _float
+    homePossessionEfficiency: _float
+    awayPossessionEfficiency: _float
+    homePowerPlayPct: _float
+    awayPowerPlayPct: _float
+    homePenaltyKillPct: _float
+    awayPenaltyKillPct: _float
+    homeScore: _float
+    awayScore: _float
+    shotDifferential: _int
+    hitDifferential: _int
+    takeawayDifferential: _int
+    scoringChancesDifferential: _int
+    match: Optional['models.Match'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.MatchAnalyticsKeys']] = None,
+        exclude: Optional[Iterable['types.MatchAnalyticsKeys']] = None,
+        required: Optional[Iterable['types.MatchAnalyticsKeys']] = None,
+        optional: Optional[Iterable['types.MatchAnalyticsKeys']] = None,
+        relations: Optional[Mapping['types.MatchAnalyticsRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.MatchAnalyticsKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _MatchAnalytics_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _MatchAnalytics_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _MatchAnalytics_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _MatchAnalytics_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _MatchAnalytics_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _MatchAnalytics_relational_fields:
+                        raise errors.UnknownRelationalFieldError('MatchAnalytics', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid MatchAnalytics / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'MatchAnalytics',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class PlayerMatch(bases.BasePlayerMatch):
+    """Represents a PlayerMatch record"""
+
+    id: _str
+    matchId: _str
+    playerTeamSeasonId: _str
+    playerSeasonId: _str
+    playerLevel: _int
+    position: _str
+    posSorted: _int
+    playerName: _str
+    clientPlatform: _str
+    playerLevelDisplay: _int
+    isGuest: _bool
+    playerDnf: _bool
+    pNhlOnlineGameType: _str
+    eaTeamId: _str
+    teamSide: _int
+    opponentClubId: _str
+    opponentEaTeamId: _str
+    opponentScore: _int
+    score: _int
+    ratingDefense: _float
+    ratingOffense: _float
+    ratingTeamplay: _float
+    toi: _int
+    toiSeconds: _int
+    assists: _int
+    blockedShots: _int
+    deflections: _int
+    faceoffsLost: _int
+    faceoffPct: _float
+    faceoffsWon: _int
+    giveaways: _int
+    goals: _int
+    gameWinningGoals: _int
+    hits: _int
+    interceptions: _int
+    passAttempts: _int
+    passes: _int
+    passPct: _float
+    penaltiesDrawn: _int
+    penaltyMinutes: _int
+    skaterPkClearZone: _int
+    plusMinus: _int
+    possessionSeconds: _int
+    powerPlayGoals: _int
+    saucerPasses: _int
+    shortHandedGoals: _int
+    shotAttempts: _int
+    shotsOnNetPct: _float
+    shootingPct: _float
+    shotsOnGoal: _int
+    takeaways: _int
+    points: _int
+    faceoffsTotal: _int
+    shotsMissed: _int
+    passesMissed: _int
+    passingPct: _float
+    majorPenalties: _int
+    minorPenalties: _int
+    totalPenalties: _int
+    pointsPer60: _float
+    possessionPerMinute: _float
+    shotEfficiency: _float
+    tkawayGvawayRatio: _float
+    penaltyDifferential: _int
+    defActionsPerMinute: _float
+    offImpact: _float
+    defImpact: _float
+    detailedPosition: _str
+    positionAbbreviation: _str
+    gameImpactScore: _float
+    puckManagementRating: _float
+    possessionEfficiency: _float
+    netDefContribution: _float
+    timeAdjustedRating: _float
+    shotGenerationRate: _float
+    offZonePresence: _float
+    twoWayRating: _float
+    breakawaySavePct: _float
+    breakawaySaves: _int
+    breakawayShots: _int
+    desperationSaves: _int
+    goalsAgainst: _int
+    goalsAgainstAverage: _float
+    penaltyShotSavePct: _float
+    penaltyShotSaves: _int
+    penaltyShotsFaced: _int
+    goaliePkClearZone: _int
+    pokeChecks: _int
+    savePct: _float
+    totalSaves: _int
+    totalShotsFaced: _int
+    shutoutPeriods: _int
+    goalsSaved: _int
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    match: Optional['models.Match'] = None
+    playerTeamSeason: Optional['models.PlayerTeamSeason'] = None
+    playerSeason: Optional['models.PlayerSeason'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.PlayerMatchKeys']] = None,
+        exclude: Optional[Iterable['types.PlayerMatchKeys']] = None,
+        required: Optional[Iterable['types.PlayerMatchKeys']] = None,
+        optional: Optional[Iterable['types.PlayerMatchKeys']] = None,
+        relations: Optional[Mapping['types.PlayerMatchRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.PlayerMatchKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _PlayerMatch_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _PlayerMatch_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerMatch_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerMatch_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _PlayerMatch_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _PlayerMatch_relational_fields:
+                        raise errors.UnknownRelationalFieldError('PlayerMatch', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid PlayerMatch / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'PlayerMatch',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class PlayerSeason(bases.BasePlayerSeason):
+    """Represents a PlayerSeason record"""
+
+    id: _str
+    userId: _str
+    seasonId: _str
+    contractId: _str
+    primaryPosition: 'enums.PlayerPosition'
+    positionGroup: 'enums.PositionGroup'
+    isInBidding: _bool
+    user: Optional['models.User'] = None
+    season: Optional['models.Season'] = None
+    contract: Optional['models.Contract'] = None
+    teamSeasons: Optional[List['models.PlayerTeamSeason']] = None
+    leagueHistory: Optional[List['models.PlayerLeagueHistory']] = None
+    playerMatches: Optional[List['models.PlayerMatch']] = None
+    matches: Optional[List['models.Match']] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.PlayerSeasonKeys']] = None,
+        exclude: Optional[Iterable['types.PlayerSeasonKeys']] = None,
+        required: Optional[Iterable['types.PlayerSeasonKeys']] = None,
+        optional: Optional[Iterable['types.PlayerSeasonKeys']] = None,
+        relations: Optional[Mapping['types.PlayerSeasonRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.PlayerSeasonKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _PlayerSeason_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _PlayerSeason_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerSeason_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerSeason_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _PlayerSeason_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _PlayerSeason_relational_fields:
+                        raise errors.UnknownRelationalFieldError('PlayerSeason', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid PlayerSeason / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'PlayerSeason',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class PlayerTeamSeason(bases.BasePlayerTeamSeason):
+    """Represents a PlayerTeamSeason record"""
+
+    id: _str
+    playerSeasonId: _str
+    teamSeasonId: _str
+    leagueType: 'enums.LeagueType'
+    rosterTeamId: Optional[_str] = None
+    trainingCampTeamId: Optional[_str] = None
+    inactiveTeamId: Optional[_str] = None
+    isRosterPlayer: _bool
+    isTrainingCampPlayer: _bool
+    isInactivePlayer: _bool
+    playerSeason: Optional['models.PlayerSeason'] = None
+    rosterTeam: Optional['models.TeamSeason'] = None
+    trainingCampTeam: Optional['models.TeamSeason'] = None
+    inactiveTeam: Optional['models.TeamSeason'] = None
+    playerMatches: Optional[List['models.PlayerMatch']] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
+        exclude: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
+        required: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
+        optional: Optional[Iterable['types.PlayerTeamSeasonKeys']] = None,
+        relations: Optional[Mapping['types.PlayerTeamSeasonRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.PlayerTeamSeasonKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _PlayerTeamSeason_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _PlayerTeamSeason_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerTeamSeason_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerTeamSeason_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _PlayerTeamSeason_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _PlayerTeamSeason_relational_fields:
+                        raise errors.UnknownRelationalFieldError('PlayerTeamSeason', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid PlayerTeamSeason / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'PlayerTeamSeason',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class PlayerLeagueHistory(bases.BasePlayerLeagueHistory):
+    """Represents a PlayerLeagueHistory record"""
+
+    id: _str
+    playerSeasonId: _str
+    leagueSeasonId: _str
+    startDate: datetime.datetime
+    endDate: Optional[datetime.datetime] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    playerSeason: Optional['models.PlayerSeason'] = None
+    leagueSeason: Optional['models.LeagueSeason'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.PlayerLeagueHistoryKeys']] = None,
+        exclude: Optional[Iterable['types.PlayerLeagueHistoryKeys']] = None,
+        required: Optional[Iterable['types.PlayerLeagueHistoryKeys']] = None,
+        optional: Optional[Iterable['types.PlayerLeagueHistoryKeys']] = None,
+        relations: Optional[Mapping['types.PlayerLeagueHistoryRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.PlayerLeagueHistoryKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _PlayerLeagueHistory_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _PlayerLeagueHistory_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerLeagueHistory_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _PlayerLeagueHistory_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _PlayerLeagueHistory_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _PlayerLeagueHistory_relational_fields:
+                        raise errors.UnknownRelationalFieldError('PlayerLeagueHistory', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid PlayerLeagueHistory / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'PlayerLeagueHistory',
             }
         )
         _created_partial_types.add(name)
@@ -3483,1895 +3702,1266 @@ class PSNGameTrophies(bases.BasePSNGameTrophies):
         _created_partial_types.add(name)
 
 
+class Team(bases.BaseTeam):
+    """Represents a Team record"""
 
-_User_relational_fields: Set[str] = {
-        'player',
-        'notifications',
-        'forumPosts',
-        'forumComments',
-        'forumReactions',
-        'forumFollowing',
-        'forumSubscriptions',
-        'teamManagement',
-        'psnProfile',
-    }
-_User_fields: Dict['types.UserKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('email', {
-            'name': 'email',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('username', {
-            'name': 'username',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('password', {
-            'name': 'password',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('name', {
-            'name': 'name',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('avatarUrl', {
-            'name': 'avatarUrl',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('isAdmin', {
-            'name': 'isAdmin',
-            'is_list': False,
-            'optional': False,
-            'type': '_bool',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('resetToken', {
-            'name': 'resetToken',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('resetTokenExpiresAt', {
-            'name': 'resetTokenExpiresAt',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('player', {
-            'name': 'player',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Player',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('notifications', {
-            'name': 'notifications',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Notification\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('forumPosts', {
-            'name': 'forumPosts',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.ForumPost\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('forumComments', {
-            'name': 'forumComments',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.ForumComment\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('forumReactions', {
-            'name': 'forumReactions',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.ForumReaction\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('forumFollowing', {
-            'name': 'forumFollowing',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.ForumFollower\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('forumSubscriptions', {
-            'name': 'forumSubscriptions',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.ForumPostSubscription\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('teamManagement', {
-            'name': 'teamManagement',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.TeamManager\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('psnProfile', {
-            'name': 'psnProfile',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.PSNProfile',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+    id: _str
+    eaClubId: _str
+    eaClubName: _str
+    fullTeamName: _str
+    teamAbbreviation: _str
+    logoPath: Optional[_str] = None
+    leagueId: _str
+    league: Optional['models.League'] = None
+    divisionId: Optional[_str] = None
+    division: Optional['models.Division'] = None
+    primaryColor: Optional[_str] = None
+    secondaryColor: Optional[_str] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    seasons: Optional[List['models.TeamSeason']] = None
+    nhlAffiliateId: Optional[_str] = None
+    ahlAffiliateId: Optional[_str] = None
+    nhlAffiliate: Optional['models.Team'] = None
+    ahlAffiliate: Optional['models.Team'] = None
+    ahlAffiliates: Optional[List['models.Team']] = None
+    echlAffiliates: Optional[List['models.Team']] = None
 
-_Player_relational_fields: Set[str] = {
-        'user',
-        'gamertags',
-        'seasons',
-    }
-_Player_fields: Dict['types.PlayerKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('ea_id', {
-            'name': 'ea_id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('name', {
-            'name': 'name',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('activeSystem', {
-            'name': 'activeSystem',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.System',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('user', {
-            'name': 'user',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.User',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('gamertags', {
-            'name': 'gamertags',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.GamertagHistory\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('seasons', {
-            'name': 'seasons',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
 
-_GamertagHistory_relational_fields: Set[str] = {
-        'player',
-    }
-_GamertagHistory_fields: Dict['types.GamertagHistoryKeys', PartialModelField] = OrderedDict(
-    [
-        ('playerId', {
-            'name': 'playerId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('system', {
-            'name': 'system',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.System',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('gamertag', {
-            'name': 'gamertag',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('verificationCode', {
-            'name': 'verificationCode',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('codeGeneratedAt', {
-            'name': 'codeGeneratedAt',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('verificationStatus', {
-            'name': 'verificationStatus',
-            'is_list': False,
-            'optional': True,
-            'type': 'enums.VerificationStatus',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('verifiedAt', {
-            'name': 'verifiedAt',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('verificationAttempts', {
-            'name': 'verificationAttempts',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('lastAttemptAt', {
-            'name': 'lastAttemptAt',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('codeExpiresAt', {
-            'name': 'codeExpiresAt',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('isVerified', {
-            'name': 'isVerified',
-            'is_list': False,
-            'optional': False,
-            'type': '_bool',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('verificationMetadata', {
-            'name': 'verificationMetadata',
-            'is_list': False,
-            'optional': True,
-            'type': 'fields.Json',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('player', {
-            'name': 'player',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Player',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
 
-_Season_relational_fields: Set[str] = {
-        'tiers',
-        'players',
-    }
-_Season_fields: Dict['types.SeasonKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('seasonId', {
-            'name': 'seasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('isLatest', {
-            'name': 'isLatest',
-            'is_list': False,
-            'optional': False,
-            'type': '_bool',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('tiers', {
-            'name': 'tiers',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Tier\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('players', {
-            'name': 'players',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.TeamKeys']] = None,
+        exclude: Optional[Iterable['types.TeamKeys']] = None,
+        required: Optional[Iterable['types.TeamKeys']] = None,
+        optional: Optional[Iterable['types.TeamKeys']] = None,
+        relations: Optional[Mapping['types.TeamRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
 
-_Tier_relational_fields: Set[str] = {
-        'season',
-        'teams',
-        'playerHistory',
-    }
-_Tier_fields: Dict['types.TierKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('seasonId', {
-            'name': 'seasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('leagueLevel', {
-            'name': 'leagueLevel',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('name', {
-            'name': 'name',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('salaryCap', {
-            'name': 'salaryCap',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('season', {
-            'name': 'season',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Season',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('teams', {
-            'name': 'teams',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.TeamSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('playerHistory', {
-            'name': 'playerHistory',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerTierHistory\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
 
-_Team_relational_fields: Set[str] = {
-        'seasons',
-        'managers',
-        'nhlAffiliate',
-        'ahlAffiliate',
-        'ahlAffiliates',
-        'echlAffiliates',
-    }
-_Team_fields: Dict['types.TeamKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('eaClubId', {
-            'name': 'eaClubId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('eaClubName', {
-            'name': 'eaClubName',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('officialName', {
-            'name': 'officialName',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamIdentifier', {
-            'name': 'teamIdentifier',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('seasons', {
-            'name': 'seasons',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.TeamSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('managers', {
-            'name': 'managers',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.TeamManager\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('nhlAffiliateId', {
-            'name': 'nhlAffiliateId',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('ahlAffiliateId', {
-            'name': 'ahlAffiliateId',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('nhlAffiliate', {
-            'name': 'nhlAffiliate',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Team',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('ahlAffiliate', {
-            'name': 'ahlAffiliate',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Team',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('ahlAffiliates', {
-            'name': 'ahlAffiliates',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Team\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('echlAffiliates', {
-            'name': 'echlAffiliates',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Team\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
 
-_TeamSeason_relational_fields: Set[str] = {
-        'team',
-        'tier',
-        'matches',
-        'players',
-        'bids',
-    }
-_TeamSeason_fields: Dict['types.TeamSeasonKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamId', {
-            'name': 'teamId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('tierId', {
-            'name': 'tierId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('forwardCount', {
-            'name': 'forwardCount',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('defenseCount', {
-            'name': 'defenseCount',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalieCount', {
-            'name': 'goalieCount',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('wins', {
-            'name': 'wins',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('losses', {
-            'name': 'losses',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('otLosses', {
-            'name': 'otLosses',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsAgainst', {
-            'name': 'goalsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsFor', {
-            'name': 'goalsFor',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('matchesPlayed', {
-            'name': 'matchesPlayed',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyKillGoalsAgainst', {
-            'name': 'penaltyKillGoalsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyKillOpportunities', {
-            'name': 'penaltyKillOpportunities',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('powerplayGoals', {
-            'name': 'powerplayGoals',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('powerplayOpportunities', {
-            'name': 'powerplayOpportunities',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shots', {
-            'name': 'shots',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shotsAgainst', {
-            'name': 'shotsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('timeOnAttack', {
-            'name': 'timeOnAttack',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('team', {
-            'name': 'team',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Team',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('tier', {
-            'name': 'tier',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Tier',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('matches', {
-            'name': 'matches',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Match\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('players', {
-            'name': 'players',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerTeamSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('bids', {
-            'name': 'bids',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Bid\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
 
-_PlayerSeason_relational_fields: Set[str] = {
-        'player',
-        'season',
-        'contract',
-        'teamSeasons',
-        'tierHistory',
-    }
-_PlayerSeason_fields: Dict['types.PlayerSeasonKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerId', {
-            'name': 'playerId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('seasonId', {
-            'name': 'seasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('contractId', {
-            'name': 'contractId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('position', {
-            'name': 'position',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('gamesPlayed', {
-            'name': 'gamesPlayed',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goals', {
-            'name': 'goals',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('assists', {
-            'name': 'assists',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('plusMinus', {
-            'name': 'plusMinus',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shots', {
-            'name': 'shots',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('hits', {
-            'name': 'hits',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('takeaways', {
-            'name': 'takeaways',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('giveaways', {
-            'name': 'giveaways',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyMinutes', {
-            'name': 'penaltyMinutes',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('saves', {
-            'name': 'saves',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsAgainst', {
-            'name': 'goalsAgainst',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('isInBidding', {
-            'name': 'isInBidding',
-            'is_list': False,
-            'optional': False,
-            'type': '_bool',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('player', {
-            'name': 'player',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Player',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('season', {
-            'name': 'season',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Season',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('contract', {
-            'name': 'contract',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Contract',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('teamSeasons', {
-            'name': 'teamSeasons',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerTeamSeason\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('tierHistory', {
-            'name': 'tierHistory',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerTierHistory\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
 
-_PlayerTierHistory_relational_fields: Set[str] = {
-        'playerSeason',
-        'tier',
-    }
-_PlayerTierHistory_fields: Dict['types.PlayerTierHistoryKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerSeasonId', {
-            'name': 'playerSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('tierId', {
-            'name': 'tierId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('startDate', {
-            'name': 'startDate',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('endDate', {
-            'name': 'endDate',
-            'is_list': False,
-            'optional': True,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerSeason', {
-            'name': 'playerSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.PlayerSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('tier', {
-            'name': 'tier',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Tier',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        fields: Dict['types.TeamKeys', PartialModelField] = OrderedDict()
 
-_PlayerTeamSeason_relational_fields: Set[str] = {
-        'playerSeason',
-        'teamSeason',
-        'matches',
-    }
-_PlayerTeamSeason_fields: Dict['types.PlayerTeamSeasonKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerSeasonId', {
-            'name': 'playerSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamSeasonId', {
-            'name': 'teamSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('assists', {
-            'name': 'assists',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('gamesPlayed', {
-            'name': 'gamesPlayed',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('giveaways', {
-            'name': 'giveaways',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goals', {
-            'name': 'goals',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('hits', {
-            'name': 'hits',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyMinutes', {
-            'name': 'penaltyMinutes',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('plusMinus', {
-            'name': 'plusMinus',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shots', {
-            'name': 'shots',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('takeaways', {
-            'name': 'takeaways',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('saves', {
-            'name': 'saves',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsAgainst', {
-            'name': 'goalsAgainst',
-            'is_list': False,
-            'optional': True,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerSeason', {
-            'name': 'playerSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.PlayerSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('teamSeason', {
-            'name': 'teamSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.TeamSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('matches', {
-            'name': 'matches',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerMatch\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Team_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Team_fields:
+                        raise KeyError(field)
 
-_Contract_relational_fields: Set[str] = {
-        'playerSeason',
-        'bids',
-    }
-_Contract_fields: Dict['types.ContractKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('amount', {
-            'name': 'amount',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerSeason', {
-            'name': 'playerSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.PlayerSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('bids', {
-            'name': 'bids',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.Bid\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+                fields = {
+                    key: data.copy()
+                    for key, data in _Team_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Team_fields.items()
+                }
 
-_Bid_relational_fields: Set[str] = {
-        'contract',
-        'teamSeason',
-    }
-_Bid_fields: Dict['types.BidKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('contract', {
-            'name': 'contract',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Contract',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('contractId', {
-            'name': 'contractId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamSeason', {
-            'name': 'teamSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.TeamSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('teamSeasonId', {
-            'name': 'teamSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('amount', {
-            'name': 'amount',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('status', {
-            'name': 'status',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.BidStatus',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-    ],
-)
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
 
-_Match_relational_fields: Set[str] = {
-        'teamSeason',
-        'playerStats',
-    }
-_Match_fields: Dict['types.MatchKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamSeasonId', {
-            'name': 'teamSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('eaMatchId', {
-            'name': 'eaMatchId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsAgainst', {
-            'name': 'goalsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goalsFor', {
-            'name': 'goalsFor',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('opponentClubId', {
-            'name': 'opponentClubId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('opponentTeamId', {
-            'name': 'opponentTeamId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyKillGoalsAgainst', {
-            'name': 'penaltyKillGoalsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyKillOpportunities', {
-            'name': 'penaltyKillOpportunities',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('powerplayGoals', {
-            'name': 'powerplayGoals',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('powerplayOpportunities', {
-            'name': 'powerplayOpportunities',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shots', {
-            'name': 'shots',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shotsAgainst', {
-            'name': 'shotsAgainst',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('timeOnAttack', {
-            'name': 'timeOnAttack',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('teamSeason', {
-            'name': 'teamSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.TeamSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('playerStats', {
-            'name': 'playerStats',
-            'is_list': True,
-            'optional': True,
-            'type': 'List[\'models.PlayerMatch\']',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
 
-_PlayerMatch_relational_fields: Set[str] = {
-        'match',
-        'playerTeamSeason',
-    }
-_PlayerMatch_fields: Dict['types.PlayerMatchKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('matchId', {
-            'name': 'matchId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('playerTeamSeasonId', {
-            'name': 'playerTeamSeasonId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('assists', {
-            'name': 'assists',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('giveaways', {
-            'name': 'giveaways',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('goals', {
-            'name': 'goals',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('hits', {
-            'name': 'hits',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('penaltyMinutes', {
-            'name': 'penaltyMinutes',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('plusMinus', {
-            'name': 'plusMinus',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('ratingDefense', {
-            'name': 'ratingDefense',
-            'is_list': False,
-            'optional': False,
-            'type': '_float',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('ratingOffense', {
-            'name': 'ratingOffense',
-            'is_list': False,
-            'optional': False,
-            'type': '_float',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('ratingTeamplay', {
-            'name': 'ratingTeamplay',
-            'is_list': False,
-            'optional': False,
-            'type': '_float',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('shots', {
-            'name': 'shots',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('takeaways', {
-            'name': 'takeaways',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('timeOnIce', {
-            'name': 'timeOnIce',
-            'is_list': False,
-            'optional': False,
-            'type': '_int',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('match', {
-            'name': 'match',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.Match',
-            'is_relational': True,
-            'documentation': None,
-        }),
-        ('playerTeamSeason', {
-            'name': 'playerTeamSeason',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.PlayerTeamSeason',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Team_relational_fields
+                }
 
-_Notification_relational_fields: Set[str] = {
-        'user',
-    }
-_Notification_fields: Dict['types.NotificationKeys', PartialModelField] = OrderedDict(
-    [
-        ('id', {
-            'name': 'id',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('userId', {
-            'name': 'userId',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('type', {
-            'name': 'type',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.NotificationType',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('title', {
-            'name': 'title',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('message', {
-            'name': 'message',
-            'is_list': False,
-            'optional': False,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('status', {
-            'name': 'status',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.NotificationStatus',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('link', {
-            'name': 'link',
-            'is_list': False,
-            'optional': True,
-            'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('metadata', {
-            'name': 'metadata',
-            'is_list': False,
-            'optional': True,
-            'type': 'fields.Json',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('createdAt', {
-            'name': 'createdAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('updatedAt', {
-            'name': 'updatedAt',
-            'is_list': False,
-            'optional': False,
-            'type': 'datetime.datetime',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('user', {
-            'name': 'user',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.User',
-            'is_relational': True,
-            'documentation': None,
-        }),
-    ],
-)
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Team_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Team', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Team / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Team',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class TeamSeason(bases.BaseTeamSeason):
+    """Represents a TeamSeason record"""
+
+    id: _str
+    teamId: _str
+    leagueSeasonId: _str
+    forwardCount: _int
+    defenseCount: _int
+    goalieCount: _int
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    team: Optional['models.Team'] = None
+    leagueSeason: Optional['models.LeagueSeason'] = None
+    matches: Optional[List['models.Match']] = None
+    rosterPlayers: Optional[List['models.PlayerTeamSeason']] = None
+    trainingCampPlayers: Optional[List['models.PlayerTeamSeason']] = None
+    inactivePlayers: Optional[List['models.PlayerTeamSeason']] = None
+    bids: Optional[List['models.Bid']] = None
+    managers: Optional[List['models.TeamManager']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.TeamSeasonKeys']] = None,
+        exclude: Optional[Iterable['types.TeamSeasonKeys']] = None,
+        required: Optional[Iterable['types.TeamSeasonKeys']] = None,
+        optional: Optional[Iterable['types.TeamSeasonKeys']] = None,
+        relations: Optional[Mapping['types.TeamSeasonRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.TeamSeasonKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _TeamSeason_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _TeamSeason_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _TeamSeason_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _TeamSeason_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _TeamSeason_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _TeamSeason_relational_fields:
+                        raise errors.UnknownRelationalFieldError('TeamSeason', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid TeamSeason / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'TeamSeason',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class TeamManager(bases.BaseTeamManager):
+    """Represents a TeamManager record"""
+
+    id: _str
+    userId: _str
+    teamSeasonId: _str
+    role: 'enums.TeamManagementRole'
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+    teamSeason: Optional['models.TeamSeason'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.TeamManagerKeys']] = None,
+        exclude: Optional[Iterable['types.TeamManagerKeys']] = None,
+        required: Optional[Iterable['types.TeamManagerKeys']] = None,
+        optional: Optional[Iterable['types.TeamManagerKeys']] = None,
+        relations: Optional[Mapping['types.TeamManagerRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _TeamManager_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _TeamManager_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _TeamManager_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _TeamManager_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _TeamManager_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _TeamManager_relational_fields:
+                        raise errors.UnknownRelationalFieldError('TeamManager', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid TeamManager / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'TeamManager',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Bid(bases.BaseBid):
+    """Represents a Bid record"""
+
+    id: _str
+    contract: Optional['models.Contract'] = None
+    contractId: _str
+    teamSeason: Optional['models.TeamSeason'] = None
+    teamSeasonId: _str
+    amount: _int
+    status: 'enums.BidStatus'
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.BidKeys']] = None,
+        exclude: Optional[Iterable['types.BidKeys']] = None,
+        required: Optional[Iterable['types.BidKeys']] = None,
+        optional: Optional[Iterable['types.BidKeys']] = None,
+        relations: Optional[Mapping['types.BidRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.BidKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Bid_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Bid_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Bid_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Bid_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Bid_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Bid_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Bid', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Bid / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Bid',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Contract(bases.BaseContract):
+    """Represents a Contract record"""
+
+    id: _str
+    amount: _int
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    playerSeason: Optional['models.PlayerSeason'] = None
+    bids: Optional[List['models.Bid']] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.ContractKeys']] = None,
+        exclude: Optional[Iterable['types.ContractKeys']] = None,
+        required: Optional[Iterable['types.ContractKeys']] = None,
+        optional: Optional[Iterable['types.ContractKeys']] = None,
+        relations: Optional[Mapping['types.ContractRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.ContractKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Contract_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Contract_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Contract_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Contract_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Contract_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Contract_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Contract', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Contract / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Contract',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class User(bases.BaseUser):
+    """Represents a User record"""
+
+    id: _str
+    email: _str
+    username: _str
+    password: _str
+    name: Optional[_str] = None
+    role: 'enums.UserRole'
+    avatarUrl: Optional[_str] = None
+    isSuperAdmin: _bool
+    isAdmin: _bool
+    isCommissioner: _bool
+    isBog: _bool
+    isTeamManager: _bool
+    passwordResetToken: Optional[_str] = None
+    passwordResetTokenExpiresAt: Optional[datetime.datetime] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    notifications: Optional[List['models.Notification']] = None
+    forumPosts: Optional[List['models.ForumPost']] = None
+    forumComments: Optional[List['models.ForumComment']] = None
+    forumReactions: Optional[List['models.ForumReaction']] = None
+    forumFollowing: Optional[List['models.ForumFollower']] = None
+    forumSubscriptions: Optional[List['models.ForumPostSubscription']] = None
+    currentEaId: Optional[_str] = None
+    activeSystem: Optional['enums.System'] = None
+    eaIdHistory: Optional[List['models.EaIdHistory']] = None
+    systemHistory: Optional[List['models.SystemHistory']] = None
+    gamertags: Optional[List['models.GamertagHistory']] = None
+    leagueCommissioners: Optional[List['models.LeagueCommissioner']] = None
+    leagueBogs: Optional[List['models.LeagueBOG']] = None
+    activeSeasons: Optional[List['models.PlayerSeason']] = None
+    teamManagement: Optional[List['models.TeamManager']] = None
+    psnProfile: Optional['models.PSNProfile'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.UserKeys']] = None,
+        exclude: Optional[Iterable['types.UserKeys']] = None,
+        required: Optional[Iterable['types.UserKeys']] = None,
+        optional: Optional[Iterable['types.UserKeys']] = None,
+        relations: Optional[Mapping['types.UserRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.UserKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _User_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _User_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _User_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _User_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _User_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _User_relational_fields:
+                        raise errors.UnknownRelationalFieldError('User', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid User / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'User',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class EaIdHistory(bases.BaseEaIdHistory):
+    """Represents a EaIdHistory record"""
+
+    id: _str
+    userId: _str
+    eaId: _str
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.EaIdHistoryKeys']] = None,
+        exclude: Optional[Iterable['types.EaIdHistoryKeys']] = None,
+        required: Optional[Iterable['types.EaIdHistoryKeys']] = None,
+        optional: Optional[Iterable['types.EaIdHistoryKeys']] = None,
+        relations: Optional[Mapping['types.EaIdHistoryRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.EaIdHistoryKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _EaIdHistory_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _EaIdHistory_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _EaIdHistory_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _EaIdHistory_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _EaIdHistory_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _EaIdHistory_relational_fields:
+                        raise errors.UnknownRelationalFieldError('EaIdHistory', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid EaIdHistory / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'EaIdHistory',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class SystemHistory(bases.BaseSystemHistory):
+    """Represents a SystemHistory record"""
+
+    id: _str
+    userId: _str
+    system: 'enums.System'
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.SystemHistoryKeys']] = None,
+        exclude: Optional[Iterable['types.SystemHistoryKeys']] = None,
+        required: Optional[Iterable['types.SystemHistoryKeys']] = None,
+        optional: Optional[Iterable['types.SystemHistoryKeys']] = None,
+        relations: Optional[Mapping['types.SystemHistoryRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.SystemHistoryKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _SystemHistory_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _SystemHistory_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _SystemHistory_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _SystemHistory_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _SystemHistory_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _SystemHistory_relational_fields:
+                        raise errors.UnknownRelationalFieldError('SystemHistory', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid SystemHistory / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'SystemHistory',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class GamertagHistory(bases.BaseGamertagHistory):
+    """Represents a GamertagHistory record"""
+
+    userId: _str
+    system: 'enums.System'
+    gamertag: _str
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    verificationCode: Optional[_str] = None
+    codeGeneratedAt: Optional[datetime.datetime] = None
+    verificationStatus: Optional['enums.VerificationStatus'] = None
+    verifiedAt: Optional[datetime.datetime] = None
+    verificationAttempts: Optional[_int] = None
+    lastAttemptAt: Optional[datetime.datetime] = None
+    codeExpiresAt: Optional[datetime.datetime] = None
+    isVerified: _bool
+    verificationMetadata: Optional['fields.Json'] = None
+    user: Optional['models.User'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.GamertagHistoryKeys']] = None,
+        exclude: Optional[Iterable['types.GamertagHistoryKeys']] = None,
+        required: Optional[Iterable['types.GamertagHistoryKeys']] = None,
+        optional: Optional[Iterable['types.GamertagHistoryKeys']] = None,
+        relations: Optional[Mapping['types.GamertagHistoryRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.GamertagHistoryKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _GamertagHistory_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _GamertagHistory_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _GamertagHistory_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _GamertagHistory_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _GamertagHistory_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _GamertagHistory_relational_fields:
+                        raise errors.UnknownRelationalFieldError('GamertagHistory', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid GamertagHistory / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'GamertagHistory',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Notification(bases.BaseNotification):
+    """Represents a Notification record"""
+
+    id: _str
+    userId: _str
+    type: 'enums.NotificationType'
+    title: _str
+    message: _str
+    status: 'enums.NotificationStatus'
+    link: Optional[_str] = None
+    metadata: Optional['fields.Json'] = None
+    createdAt: datetime.datetime
+    updatedAt: datetime.datetime
+    user: Optional['models.User'] = None
+
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.NotificationKeys']] = None,
+        exclude: Optional[Iterable['types.NotificationKeys']] = None,
+        required: Optional[Iterable['types.NotificationKeys']] = None,
+        optional: Optional[Iterable['types.NotificationKeys']] = None,
+        relations: Optional[Mapping['types.NotificationRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.NotificationKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Notification_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Notification_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Notification_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Notification_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Notification_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Notification_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Notification', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Notification / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Notification',
+            }
+        )
+        _created_partial_types.add(name)
+
+
 
 _ForumPost_relational_fields: Set[str] = {
         'author',
@@ -5817,11 +5407,409 @@ _ForumComment_fields: Dict['types.ForumCommentKeys', PartialModelField] = Ordere
     ],
 )
 
-_TeamManager_relational_fields: Set[str] = {
-        'user',
-        'team',
+_League_relational_fields: Set[str] = {
+        'parentLeague',
+        'subLeagues',
+        'conferences',
+        'divisions',
+        'teams',
+        'seasons',
     }
-_TeamManager_fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedDict(
+_League_fields: Dict['types.LeagueKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shortName', {
+            'name': 'shortName',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueType', {
+            'name': 'leagueType',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.LeagueType',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isSubLeague', {
+            'name': 'isSubLeague',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('parentLeagueId', {
+            'name': 'parentLeagueId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('parentLeague', {
+            'name': 'parentLeague',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.League',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('subLeagues', {
+            'name': 'subLeagues',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.League\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('conferences', {
+            'name': 'conferences',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Conference\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('divisions', {
+            'name': 'divisions',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Division\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teams', {
+            'name': 'teams',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Team\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('seasons', {
+            'name': 'seasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_LeagueSeason_relational_fields: Set[str] = {
+        'league',
+        'season',
+        'commissioners',
+        'bogs',
+        'teams',
+        'playerHistory',
+    }
+_LeagueSeason_fields: Dict['types.LeagueSeasonKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueId', {
+            'name': 'leagueId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('seasonId', {
+            'name': 'seasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('salaryCap', {
+            'name': 'salaryCap',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('league', {
+            'name': 'league',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.League',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('season', {
+            'name': 'season',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Season',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('commissioners', {
+            'name': 'commissioners',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueCommissioner\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('bogs', {
+            'name': 'bogs',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueBOG\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teams', {
+            'name': 'teams',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.TeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerHistory', {
+            'name': 'playerHistory',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerLeagueHistory\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Conference_relational_fields: Set[str] = {
+        'league',
+        'divisions',
+    }
+_Conference_fields: Dict['types.ConferenceKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueId', {
+            'name': 'leagueId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('league', {
+            'name': 'league',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.League',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('divisions', {
+            'name': 'divisions',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Division\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Division_relational_fields: Set[str] = {
+        'conference',
+        'league',
+        'teams',
+    }
+_Division_fields: Dict['types.DivisionKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('conferenceId', {
+            'name': 'conferenceId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueId', {
+            'name': 'leagueId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('conference', {
+            'name': 'conference',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Conference',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('league', {
+            'name': 'league',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.League',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teams', {
+            'name': 'teams',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Team\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Season_relational_fields: Set[str] = {
+        'leagueSeasons',
+        'players',
+    }
+_Season_fields: Dict['types.SeasonKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('seasonNumber', {
+            'name': 'seasonNumber',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isLatest', {
+            'name': 'isLatest',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueSeasons', {
+            'name': 'leagueSeasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('players', {
+            'name': 'players',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_LeagueCommissioner_relational_fields: Set[str] = {
+        'user',
+        'leagueSeason',
+    }
+_LeagueCommissioner_fields: Dict['types.LeagueCommissionerKeys', PartialModelField] = OrderedDict(
     [
         ('id', {
             'name': 'id',
@@ -5839,19 +5827,11 @@ _TeamManager_fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedD
             'is_relational': False,
             'documentation': None,
         }),
-        ('teamId', {
-            'name': 'teamId',
+        ('leagueSeasonId', {
+            'name': 'leagueSeasonId',
             'is_list': False,
             'optional': False,
             'type': '_str',
-            'is_relational': False,
-            'documentation': None,
-        }),
-        ('role', {
-            'name': 'role',
-            'is_list': False,
-            'optional': False,
-            'type': 'enums.TeamManagementRole',
             'is_relational': False,
             'documentation': None,
         }),
@@ -5879,11 +5859,2368 @@ _TeamManager_fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedD
             'is_relational': True,
             'documentation': None,
         }),
-        ('team', {
-            'name': 'team',
+        ('leagueSeason', {
+            'name': 'leagueSeason',
             'is_list': False,
             'optional': True,
-            'type': 'models.Team',
+            'type': 'models.LeagueSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_LeagueBOG_relational_fields: Set[str] = {
+        'user',
+        'leagueSeason',
+    }
+_LeagueBOG_fields: Dict['types.LeagueBOGKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueSeasonId', {
+            'name': 'leagueSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueSeason', {
+            'name': 'leagueSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.LeagueSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Match_relational_fields: Set[str] = {
+        'teamSeason',
+        'clubMatchStats',
+        'playerStats',
+        'clubAggregateMatchStats',
+        'matchAnalytics',
+        'playerSeasons',
+    }
+_Match_fields: Dict['types.MatchKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSeasonId', {
+            'name': 'teamSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaMatchId', {
+            'name': 'eaMatchId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSeason', {
+            'name': 'teamSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('clubMatchStats', {
+            'name': 'clubMatchStats',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ClubMatchStats\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerStats', {
+            'name': 'playerStats',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerMatch\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('clubAggregateMatchStats', {
+            'name': 'clubAggregateMatchStats',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ClubAggregateMatchStats\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('matchAnalytics', {
+            'name': 'matchAnalytics',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.MatchAnalytics\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerSeasons', {
+            'name': 'playerSeasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_ClubMatchStats_relational_fields: Set[str] = {
+        'details',
+        'match',
+    }
+_ClubMatchStats_fields: Dict['types.ClubMatchStatsKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('matchId', {
+            'name': 'matchId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('clubDivision', {
+            'name': 'clubDivision',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('cNhlOnlineGameType', {
+            'name': 'cNhlOnlineGameType',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainstRaw', {
+            'name': 'goalsAgainstRaw',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsForRaw', {
+            'name': 'goalsForRaw',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('losses', {
+            'name': 'losses',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('result', {
+            'name': 'result',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('score', {
+            'name': 'score',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('scoreString', {
+            'name': 'scoreString',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('winnerByDnf', {
+            'name': 'winnerByDnf',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('winnerByGoalieDnf', {
+            'name': 'winnerByGoalieDnf',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('memberString', {
+            'name': 'memberString',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passesAttempted', {
+            'name': 'passesAttempted',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passesCompleted', {
+            'name': 'passesCompleted',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('powerplayGoals', {
+            'name': 'powerplayGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('powerplayOpportunities', {
+            'name': 'powerplayOpportunities',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shots', {
+            'name': 'shots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamArtAbbr', {
+            'name': 'teamArtAbbr',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSide', {
+            'name': 'teamSide',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('timeOnAttack', {
+            'name': 'timeOnAttack',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentClubId', {
+            'name': 'opponentClubId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentScore', {
+            'name': 'opponentScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentTeamArtAbbr', {
+            'name': 'opponentTeamArtAbbr',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goals', {
+            'name': 'goals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainst', {
+            'name': 'goalsAgainst',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('details', {
+            'name': 'details',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.ClubMatchStatsDetails',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('match', {
+            'name': 'match',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Match',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_ClubMatchStatsDetails_relational_fields: Set[str] = {
+        'customKit',
+        'clubMatchStats',
+    }
+_ClubMatchStatsDetails_fields: Dict['types.ClubMatchStatsDetailsKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('clubMatchStatsId', {
+            'name': 'clubMatchStatsId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaClubId', {
+            'name': 'eaClubId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('regionId', {
+            'name': 'regionId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamId', {
+            'name': 'teamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('customKit', {
+            'name': 'customKit',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.CustomKit',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('clubMatchStats', {
+            'name': 'clubMatchStats',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.ClubMatchStats',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_CustomKit_relational_fields: Set[str] = {
+        'details',
+    }
+_CustomKit_fields: Dict['types.CustomKitKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('detailsId', {
+            'name': 'detailsId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isCustomTeam', {
+            'name': 'isCustomTeam',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('crestAssetId', {
+            'name': 'crestAssetId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('useBaseAsset', {
+            'name': 'useBaseAsset',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('details', {
+            'name': 'details',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.ClubMatchStatsDetails',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_ClubAggregateMatchStats_relational_fields: Set[str] = {
+        'match',
+    }
+_ClubAggregateMatchStats_fields: Dict['types.ClubAggregateMatchStatsKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('matchId', {
+            'name': 'matchId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('clubLevel', {
+            'name': 'clubLevel',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('position', {
+            'name': 'position',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('posSorted', {
+            'name': 'posSorted',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isGuest', {
+            'name': 'isGuest',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerDnf', {
+            'name': 'playerDnf',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerLevel', {
+            'name': 'playerLevel',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaTeamId', {
+            'name': 'eaTeamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSide', {
+            'name': 'teamSide',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentEaClubId', {
+            'name': 'opponentEaClubId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentEaTeamId', {
+            'name': 'opponentEaTeamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentScore', {
+            'name': 'opponentScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('score', {
+            'name': 'score',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingDefense', {
+            'name': 'ratingDefense',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingOffense', {
+            'name': 'ratingOffense',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingTeamplay', {
+            'name': 'ratingTeamplay',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('toi', {
+            'name': 'toi',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('toiSeconds', {
+            'name': 'toiSeconds',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('assists', {
+            'name': 'assists',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('blockedShots', {
+            'name': 'blockedShots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('deflections', {
+            'name': 'deflections',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffsLost', {
+            'name': 'faceoffsLost',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffPct', {
+            'name': 'faceoffPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffsWon', {
+            'name': 'faceoffsWon',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('giveaways', {
+            'name': 'giveaways',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goals', {
+            'name': 'goals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('hits', {
+            'name': 'hits',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('interceptions', {
+            'name': 'interceptions',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passAttempts', {
+            'name': 'passAttempts',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passes', {
+            'name': 'passes',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passPct', {
+            'name': 'passPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltiesDrawn', {
+            'name': 'penaltiesDrawn',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyMinutes', {
+            'name': 'penaltyMinutes',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('skaterPkClearZone', {
+            'name': 'skaterPkClearZone',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('plusMinus', {
+            'name': 'plusMinus',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possession', {
+            'name': 'possession',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('powerPlayGoals', {
+            'name': 'powerPlayGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('saucerPasses', {
+            'name': 'saucerPasses',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shortHandedGoals', {
+            'name': 'shortHandedGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotAttempts', {
+            'name': 'shotAttempts',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotOnNetPct', {
+            'name': 'shotOnNetPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shots', {
+            'name': 'shots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('takeaways', {
+            'name': 'takeaways',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawaySavePct', {
+            'name': 'breakawaySavePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawaySaves', {
+            'name': 'breakawaySaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawayShots', {
+            'name': 'breakawayShots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('desperationSaves', {
+            'name': 'desperationSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainst', {
+            'name': 'goalsAgainst',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainstAverage', {
+            'name': 'goalsAgainstAverage',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyShotSavePct', {
+            'name': 'penaltyShotSavePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyShotSaves', {
+            'name': 'penaltyShotSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goaliePkClearZone', {
+            'name': 'goaliePkClearZone',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('pokeChecks', {
+            'name': 'pokeChecks',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('savePct', {
+            'name': 'savePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('totalSaves', {
+            'name': 'totalSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('totalShotsFaced', {
+            'name': 'totalShotsFaced',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shutoutPeriods', {
+            'name': 'shutoutPeriods',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('match', {
+            'name': 'match',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Match',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_MatchAnalytics_relational_fields: Set[str] = {
+        'match',
+    }
+_MatchAnalytics_fields: Dict['types.MatchAnalyticsKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('matchId', {
+            'name': 'matchId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionDifferential', {
+            'name': 'possessionDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionPercentageHome', {
+            'name': 'possessionPercentageHome',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionPercentageAway', {
+            'name': 'possessionPercentageAway',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homeShootingEfficiency', {
+            'name': 'homeShootingEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayShootingEfficiency', {
+            'name': 'awayShootingEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homePassingEfficiency', {
+            'name': 'homePassingEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayPassingEfficiency', {
+            'name': 'awayPassingEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homePossessionEfficiency', {
+            'name': 'homePossessionEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayPossessionEfficiency', {
+            'name': 'awayPossessionEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homePowerPlayPct', {
+            'name': 'homePowerPlayPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayPowerPlayPct', {
+            'name': 'awayPowerPlayPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homePenaltyKillPct', {
+            'name': 'homePenaltyKillPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayPenaltyKillPct', {
+            'name': 'awayPenaltyKillPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('homeScore', {
+            'name': 'homeScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('awayScore', {
+            'name': 'awayScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotDifferential', {
+            'name': 'shotDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('hitDifferential', {
+            'name': 'hitDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('takeawayDifferential', {
+            'name': 'takeawayDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('scoringChancesDifferential', {
+            'name': 'scoringChancesDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('match', {
+            'name': 'match',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Match',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_PlayerMatch_relational_fields: Set[str] = {
+        'match',
+        'playerTeamSeason',
+        'playerSeason',
+    }
+_PlayerMatch_fields: Dict['types.PlayerMatchKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('matchId', {
+            'name': 'matchId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerTeamSeasonId', {
+            'name': 'playerTeamSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeasonId', {
+            'name': 'playerSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerLevel', {
+            'name': 'playerLevel',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('position', {
+            'name': 'position',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('posSorted', {
+            'name': 'posSorted',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerName', {
+            'name': 'playerName',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('clientPlatform', {
+            'name': 'clientPlatform',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerLevelDisplay', {
+            'name': 'playerLevelDisplay',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isGuest', {
+            'name': 'isGuest',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerDnf', {
+            'name': 'playerDnf',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('pNhlOnlineGameType', {
+            'name': 'pNhlOnlineGameType',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaTeamId', {
+            'name': 'eaTeamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSide', {
+            'name': 'teamSide',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentClubId', {
+            'name': 'opponentClubId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentEaTeamId', {
+            'name': 'opponentEaTeamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('opponentScore', {
+            'name': 'opponentScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('score', {
+            'name': 'score',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingDefense', {
+            'name': 'ratingDefense',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingOffense', {
+            'name': 'ratingOffense',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ratingTeamplay', {
+            'name': 'ratingTeamplay',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('toi', {
+            'name': 'toi',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('toiSeconds', {
+            'name': 'toiSeconds',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('assists', {
+            'name': 'assists',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('blockedShots', {
+            'name': 'blockedShots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('deflections', {
+            'name': 'deflections',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffsLost', {
+            'name': 'faceoffsLost',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffPct', {
+            'name': 'faceoffPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffsWon', {
+            'name': 'faceoffsWon',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('giveaways', {
+            'name': 'giveaways',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goals', {
+            'name': 'goals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('gameWinningGoals', {
+            'name': 'gameWinningGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('hits', {
+            'name': 'hits',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('interceptions', {
+            'name': 'interceptions',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passAttempts', {
+            'name': 'passAttempts',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passes', {
+            'name': 'passes',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passPct', {
+            'name': 'passPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltiesDrawn', {
+            'name': 'penaltiesDrawn',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyMinutes', {
+            'name': 'penaltyMinutes',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('skaterPkClearZone', {
+            'name': 'skaterPkClearZone',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('plusMinus', {
+            'name': 'plusMinus',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionSeconds', {
+            'name': 'possessionSeconds',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('powerPlayGoals', {
+            'name': 'powerPlayGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('saucerPasses', {
+            'name': 'saucerPasses',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shortHandedGoals', {
+            'name': 'shortHandedGoals',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotAttempts', {
+            'name': 'shotAttempts',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotsOnNetPct', {
+            'name': 'shotsOnNetPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shootingPct', {
+            'name': 'shootingPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotsOnGoal', {
+            'name': 'shotsOnGoal',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('takeaways', {
+            'name': 'takeaways',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('points', {
+            'name': 'points',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('faceoffsTotal', {
+            'name': 'faceoffsTotal',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotsMissed', {
+            'name': 'shotsMissed',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passesMissed', {
+            'name': 'passesMissed',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passingPct', {
+            'name': 'passingPct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('majorPenalties', {
+            'name': 'majorPenalties',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('minorPenalties', {
+            'name': 'minorPenalties',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('totalPenalties', {
+            'name': 'totalPenalties',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('pointsPer60', {
+            'name': 'pointsPer60',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionPerMinute', {
+            'name': 'possessionPerMinute',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotEfficiency', {
+            'name': 'shotEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('tkawayGvawayRatio', {
+            'name': 'tkawayGvawayRatio',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyDifferential', {
+            'name': 'penaltyDifferential',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('defActionsPerMinute', {
+            'name': 'defActionsPerMinute',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('offImpact', {
+            'name': 'offImpact',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('defImpact', {
+            'name': 'defImpact',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('detailedPosition', {
+            'name': 'detailedPosition',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('positionAbbreviation', {
+            'name': 'positionAbbreviation',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('gameImpactScore', {
+            'name': 'gameImpactScore',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('puckManagementRating', {
+            'name': 'puckManagementRating',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('possessionEfficiency', {
+            'name': 'possessionEfficiency',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('netDefContribution', {
+            'name': 'netDefContribution',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('timeAdjustedRating', {
+            'name': 'timeAdjustedRating',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shotGenerationRate', {
+            'name': 'shotGenerationRate',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('offZonePresence', {
+            'name': 'offZonePresence',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('twoWayRating', {
+            'name': 'twoWayRating',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawaySavePct', {
+            'name': 'breakawaySavePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawaySaves', {
+            'name': 'breakawaySaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('breakawayShots', {
+            'name': 'breakawayShots',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('desperationSaves', {
+            'name': 'desperationSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainst', {
+            'name': 'goalsAgainst',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsAgainstAverage', {
+            'name': 'goalsAgainstAverage',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyShotSavePct', {
+            'name': 'penaltyShotSavePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyShotSaves', {
+            'name': 'penaltyShotSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('penaltyShotsFaced', {
+            'name': 'penaltyShotsFaced',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goaliePkClearZone', {
+            'name': 'goaliePkClearZone',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('pokeChecks', {
+            'name': 'pokeChecks',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('savePct', {
+            'name': 'savePct',
+            'is_list': False,
+            'optional': False,
+            'type': '_float',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('totalSaves', {
+            'name': 'totalSaves',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('totalShotsFaced', {
+            'name': 'totalShotsFaced',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('shutoutPeriods', {
+            'name': 'shutoutPeriods',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalsSaved', {
+            'name': 'goalsSaved',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('match', {
+            'name': 'match',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Match',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerTeamSeason', {
+            'name': 'playerTeamSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PlayerTeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerSeason', {
+            'name': 'playerSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PlayerSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_PlayerSeason_relational_fields: Set[str] = {
+        'user',
+        'season',
+        'contract',
+        'teamSeasons',
+        'leagueHistory',
+        'playerMatches',
+        'matches',
+    }
+_PlayerSeason_fields: Dict['types.PlayerSeasonKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('seasonId', {
+            'name': 'seasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('contractId', {
+            'name': 'contractId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('primaryPosition', {
+            'name': 'primaryPosition',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.PlayerPosition',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('positionGroup', {
+            'name': 'positionGroup',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.PositionGroup',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isInBidding', {
+            'name': 'isInBidding',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('season', {
+            'name': 'season',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Season',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('contract', {
+            'name': 'contract',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Contract',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teamSeasons', {
+            'name': 'teamSeasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerTeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueHistory', {
+            'name': 'leagueHistory',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerLeagueHistory\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerMatches', {
+            'name': 'playerMatches',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerMatch\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('matches', {
+            'name': 'matches',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Match\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+    ],
+)
+
+_PlayerTeamSeason_relational_fields: Set[str] = {
+        'playerSeason',
+        'rosterTeam',
+        'trainingCampTeam',
+        'inactiveTeam',
+        'playerMatches',
+    }
+_PlayerTeamSeason_fields: Dict['types.PlayerTeamSeasonKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeasonId', {
+            'name': 'playerSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSeasonId', {
+            'name': 'teamSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueType', {
+            'name': 'leagueType',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.LeagueType',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('rosterTeamId', {
+            'name': 'rosterTeamId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('trainingCampTeamId', {
+            'name': 'trainingCampTeamId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('inactiveTeamId', {
+            'name': 'inactiveTeamId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isRosterPlayer', {
+            'name': 'isRosterPlayer',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isTrainingCampPlayer', {
+            'name': 'isTrainingCampPlayer',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isInactivePlayer', {
+            'name': 'isInactivePlayer',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeason', {
+            'name': 'playerSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PlayerSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('rosterTeam', {
+            'name': 'rosterTeam',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('trainingCampTeam', {
+            'name': 'trainingCampTeam',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('inactiveTeam', {
+            'name': 'inactiveTeam',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('playerMatches', {
+            'name': 'playerMatches',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerMatch\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+    ],
+)
+
+_PlayerLeagueHistory_relational_fields: Set[str] = {
+        'playerSeason',
+        'leagueSeason',
+    }
+_PlayerLeagueHistory_fields: Dict['types.PlayerLeagueHistoryKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeasonId', {
+            'name': 'playerSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueSeasonId', {
+            'name': 'leagueSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('startDate', {
+            'name': 'startDate',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('endDate', {
+            'name': 'endDate',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeason', {
+            'name': 'playerSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PlayerSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueSeason', {
+            'name': 'leagueSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.LeagueSeason',
             'is_relational': True,
             'documentation': None,
         }),
@@ -6657,6 +8994,1155 @@ _PSNGameTrophies_fields: Dict['types.PSNGameTrophiesKeys', PartialModelField] = 
     ],
 )
 
+_Team_relational_fields: Set[str] = {
+        'league',
+        'division',
+        'seasons',
+        'nhlAffiliate',
+        'ahlAffiliate',
+        'ahlAffiliates',
+        'echlAffiliates',
+    }
+_Team_fields: Dict['types.TeamKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaClubId', {
+            'name': 'eaClubId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaClubName', {
+            'name': 'eaClubName',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('fullTeamName', {
+            'name': 'fullTeamName',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamAbbreviation', {
+            'name': 'teamAbbreviation',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('logoPath', {
+            'name': 'logoPath',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueId', {
+            'name': 'leagueId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('league', {
+            'name': 'league',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.League',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('divisionId', {
+            'name': 'divisionId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('division', {
+            'name': 'division',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Division',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('primaryColor', {
+            'name': 'primaryColor',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('secondaryColor', {
+            'name': 'secondaryColor',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('seasons', {
+            'name': 'seasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.TeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('nhlAffiliateId', {
+            'name': 'nhlAffiliateId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('ahlAffiliateId', {
+            'name': 'ahlAffiliateId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('nhlAffiliate', {
+            'name': 'nhlAffiliate',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Team',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('ahlAffiliate', {
+            'name': 'ahlAffiliate',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Team',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('ahlAffiliates', {
+            'name': 'ahlAffiliates',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Team\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('echlAffiliates', {
+            'name': 'echlAffiliates',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Team\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_TeamSeason_relational_fields: Set[str] = {
+        'team',
+        'leagueSeason',
+        'matches',
+        'rosterPlayers',
+        'trainingCampPlayers',
+        'inactivePlayers',
+        'bids',
+        'managers',
+    }
+_TeamSeason_fields: Dict['types.TeamSeasonKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamId', {
+            'name': 'teamId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('leagueSeasonId', {
+            'name': 'leagueSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('forwardCount', {
+            'name': 'forwardCount',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('defenseCount', {
+            'name': 'defenseCount',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('goalieCount', {
+            'name': 'goalieCount',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('team', {
+            'name': 'team',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Team',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueSeason', {
+            'name': 'leagueSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.LeagueSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('matches', {
+            'name': 'matches',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Match\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('rosterPlayers', {
+            'name': 'rosterPlayers',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerTeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('trainingCampPlayers', {
+            'name': 'trainingCampPlayers',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerTeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('inactivePlayers', {
+            'name': 'inactivePlayers',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerTeamSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('bids', {
+            'name': 'bids',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Bid\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('managers', {
+            'name': 'managers',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.TeamManager\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_TeamManager_relational_fields: Set[str] = {
+        'user',
+        'teamSeason',
+    }
+_TeamManager_fields: Dict['types.TeamManagerKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSeasonId', {
+            'name': 'teamSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('role', {
+            'name': 'role',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.TeamManagementRole',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teamSeason', {
+            'name': 'teamSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Bid_relational_fields: Set[str] = {
+        'contract',
+        'teamSeason',
+    }
+_Bid_fields: Dict['types.BidKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('contract', {
+            'name': 'contract',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Contract',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('contractId', {
+            'name': 'contractId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('teamSeason', {
+            'name': 'teamSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.TeamSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teamSeasonId', {
+            'name': 'teamSeasonId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('amount', {
+            'name': 'amount',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('status', {
+            'name': 'status',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.BidStatus',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Contract_relational_fields: Set[str] = {
+        'playerSeason',
+        'bids',
+    }
+_Contract_fields: Dict['types.ContractKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('amount', {
+            'name': 'amount',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('playerSeason', {
+            'name': 'playerSeason',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PlayerSeason',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('bids', {
+            'name': 'bids',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Bid\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_User_relational_fields: Set[str] = {
+        'notifications',
+        'forumPosts',
+        'forumComments',
+        'forumReactions',
+        'forumFollowing',
+        'forumSubscriptions',
+        'eaIdHistory',
+        'systemHistory',
+        'gamertags',
+        'leagueCommissioners',
+        'leagueBogs',
+        'activeSeasons',
+        'teamManagement',
+        'psnProfile',
+    }
+_User_fields: Dict['types.UserKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('email', {
+            'name': 'email',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('username', {
+            'name': 'username',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('password', {
+            'name': 'password',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('role', {
+            'name': 'role',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.UserRole',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('avatarUrl', {
+            'name': 'avatarUrl',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isSuperAdmin', {
+            'name': 'isSuperAdmin',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isAdmin', {
+            'name': 'isAdmin',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isCommissioner', {
+            'name': 'isCommissioner',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isBog', {
+            'name': 'isBog',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isTeamManager', {
+            'name': 'isTeamManager',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passwordResetToken', {
+            'name': 'passwordResetToken',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('passwordResetTokenExpiresAt', {
+            'name': 'passwordResetTokenExpiresAt',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('notifications', {
+            'name': 'notifications',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Notification\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('forumPosts', {
+            'name': 'forumPosts',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ForumPost\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('forumComments', {
+            'name': 'forumComments',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ForumComment\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('forumReactions', {
+            'name': 'forumReactions',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ForumReaction\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('forumFollowing', {
+            'name': 'forumFollowing',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ForumFollower\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('forumSubscriptions', {
+            'name': 'forumSubscriptions',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.ForumPostSubscription\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('currentEaId', {
+            'name': 'currentEaId',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('activeSystem', {
+            'name': 'activeSystem',
+            'is_list': False,
+            'optional': True,
+            'type': 'enums.System',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaIdHistory', {
+            'name': 'eaIdHistory',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.EaIdHistory\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('systemHistory', {
+            'name': 'systemHistory',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.SystemHistory\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('gamertags', {
+            'name': 'gamertags',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GamertagHistory\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueCommissioners', {
+            'name': 'leagueCommissioners',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueCommissioner\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('leagueBogs', {
+            'name': 'leagueBogs',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LeagueBOG\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('activeSeasons', {
+            'name': 'activeSeasons',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.PlayerSeason\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('teamManagement', {
+            'name': 'teamManagement',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.TeamManager\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('psnProfile', {
+            'name': 'psnProfile',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.PSNProfile',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_EaIdHistory_relational_fields: Set[str] = {
+        'user',
+    }
+_EaIdHistory_fields: Dict['types.EaIdHistoryKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('eaId', {
+            'name': 'eaId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_SystemHistory_relational_fields: Set[str] = {
+        'user',
+    }
+_SystemHistory_fields: Dict['types.SystemHistoryKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('system', {
+            'name': 'system',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.System',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_GamertagHistory_relational_fields: Set[str] = {
+        'user',
+    }
+_GamertagHistory_fields: Dict['types.GamertagHistoryKeys', PartialModelField] = OrderedDict(
+    [
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('system', {
+            'name': 'system',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.System',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('gamertag', {
+            'name': 'gamertag',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('verificationCode', {
+            'name': 'verificationCode',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('codeGeneratedAt', {
+            'name': 'codeGeneratedAt',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('verificationStatus', {
+            'name': 'verificationStatus',
+            'is_list': False,
+            'optional': True,
+            'type': 'enums.VerificationStatus',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('verifiedAt', {
+            'name': 'verifiedAt',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('verificationAttempts', {
+            'name': 'verificationAttempts',
+            'is_list': False,
+            'optional': True,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('lastAttemptAt', {
+            'name': 'lastAttemptAt',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('codeExpiresAt', {
+            'name': 'codeExpiresAt',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('isVerified', {
+            'name': 'isVerified',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('verificationMetadata', {
+            'name': 'verificationMetadata',
+            'is_list': False,
+            'optional': True,
+            'type': 'fields.Json',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Notification_relational_fields: Set[str] = {
+        'user',
+    }
+_Notification_fields: Dict['types.NotificationKeys', PartialModelField] = OrderedDict(
+    [
+        ('id', {
+            'name': 'id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('userId', {
+            'name': 'userId',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('type', {
+            'name': 'type',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.NotificationType',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('title', {
+            'name': 'title',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('message', {
+            'name': 'message',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('status', {
+            'name': 'status',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.NotificationStatus',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('link', {
+            'name': 'link',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('metadata', {
+            'name': 'metadata',
+            'is_list': False,
+            'optional': True,
+            'type': 'fields.Json',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('createdAt', {
+            'name': 'createdAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updatedAt', {
+            'name': 'updatedAt',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.User',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
 
 
 # we have to import ourselves as relation types are namespaced to models
@@ -6664,30 +10150,41 @@ _PSNGameTrophies_fields: Dict['types.PSNGameTrophiesKeys', PartialModelField] = 
 from . import models, actions
 
 # required to support relationships between models
-model_rebuild(User)
-model_rebuild(Player)
-model_rebuild(GamertagHistory)
-model_rebuild(Season)
-model_rebuild(Tier)
-model_rebuild(Team)
-model_rebuild(TeamSeason)
-model_rebuild(PlayerSeason)
-model_rebuild(PlayerTierHistory)
-model_rebuild(PlayerTeamSeason)
-model_rebuild(Contract)
-model_rebuild(Bid)
-model_rebuild(Match)
-model_rebuild(PlayerMatch)
-model_rebuild(Notification)
 model_rebuild(ForumPost)
 model_rebuild(ForumReaction)
 model_rebuild(ForumFollower)
 model_rebuild(ForumPostSubscription)
 model_rebuild(ForumComment)
-model_rebuild(TeamManager)
+model_rebuild(League)
+model_rebuild(LeagueSeason)
+model_rebuild(Conference)
+model_rebuild(Division)
+model_rebuild(Season)
+model_rebuild(LeagueCommissioner)
+model_rebuild(LeagueBOG)
+model_rebuild(Match)
+model_rebuild(ClubMatchStats)
+model_rebuild(ClubMatchStatsDetails)
+model_rebuild(CustomKit)
+model_rebuild(ClubAggregateMatchStats)
+model_rebuild(MatchAnalytics)
+model_rebuild(PlayerMatch)
+model_rebuild(PlayerSeason)
+model_rebuild(PlayerTeamSeason)
+model_rebuild(PlayerLeagueHistory)
 model_rebuild(PSNProfile)
 model_rebuild(PSNAvatar)
 model_rebuild(PSNTrophy)
 model_rebuild(PSNGame)
 model_rebuild(PSNSyncLog)
 model_rebuild(PSNGameTrophies)
+model_rebuild(Team)
+model_rebuild(TeamSeason)
+model_rebuild(TeamManager)
+model_rebuild(Bid)
+model_rebuild(Contract)
+model_rebuild(User)
+model_rebuild(EaIdHistory)
+model_rebuild(SystemHistory)
+model_rebuild(GamertagHistory)
+model_rebuild(Notification)

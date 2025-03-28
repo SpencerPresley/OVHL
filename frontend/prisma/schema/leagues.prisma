@@ -50,22 +50,24 @@ model LeagueSeason {
 }
 
 model Conference {
-    id        String     @id @default(uuid())
-    name      String // "Eastern", "Western", etc.
-    leagueId  String     @map("league_id")
-    league    League     @relation(fields: [leagueId], references: [id])
-    divisions Division[]
+    id           String     @id @default(uuid())
+    name         String // "Eastern", "Western", etc.
+    displayOrder Int        @default(0)
+    leagueId     String     @map("league_id")
+    league       League     @relation(fields: [leagueId], references: [id])
+    divisions    Division[]
 
     @@unique([name, leagueId])
 }
 
 model Division {
-    id           String      @id @default(uuid())
+    id           String     @id @default(uuid())
     name         String // "Atlantic", "Metropolitan", etc.
-    conferenceId String      @map("conference_id")
-    leagueId     String      @map("league_id")
-    conference   Conference? @relation(fields: [conferenceId], references: [id])
-    league       League      @relation(fields: [leagueId], references: [id])
+    displayOrder Int        @default(0)
+    conferenceId String     @map("conference_id")
+    leagueId     String     @map("league_id")
+    conference   Conference @relation(fields: [conferenceId], references: [id])
+    league       League     @relation(fields: [leagueId], references: [id])
     teams        Team[]
 
     @@unique([name, leagueId])

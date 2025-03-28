@@ -85,7 +85,7 @@ __all__ = (
 
 log: logging.Logger = logging.getLogger(__name__)
 
-SCHEMA_PATH = Path('/Users/spencerpresley/LeagueFrontend/OVHL/frontend/prisma/schema.prisma')
+SCHEMA_PATH = Path('/Users/spencerpresley/LeagueFrontend/OVHL/frontend/prisma/schema')
 PACKAGED_SCHEMA_PATH = Path(__file__).parent.joinpath('schema.prisma')
 ENGINE_TYPE: EngineType = EngineType.binary
 BINARY_PATHS = model_parse(BinaryPaths, {'queryEngine': {'darwin-arm64': '/Users/spencerpresley/.cache/prisma-python/binaries/5.17.0/393aa359c9ad4a4bb28630fb5613f9c281cde053/node_modules/prisma/query-engine-darwin-arm64'}, 'introspectionEngine': {}, 'migrationEngine': {}, 'libqueryEngine': {}, 'prismaFmt': {}})
@@ -94,62 +94,84 @@ BINARY_PATHS = model_parse(BinaryPaths, {'queryEngine': {'darwin-arm64': '/Users
 class Prisma(AsyncBasePrisma):
     # Note: these property names can be customised using `/// @Python(instance_name: '...')`
     # https://prisma-client-py.readthedocs.io/en/stable/reference/schema-extensions/#instance_name
-    user: 'actions.UserActions[models.User]'
-    player: 'actions.PlayerActions[models.Player]'
-    gamertaghistory: 'actions.GamertagHistoryActions[models.GamertagHistory]'
-    season: 'actions.SeasonActions[models.Season]'
-    tier: 'actions.TierActions[models.Tier]'
-    team: 'actions.TeamActions[models.Team]'
-    teamseason: 'actions.TeamSeasonActions[models.TeamSeason]'
-    playerseason: 'actions.PlayerSeasonActions[models.PlayerSeason]'
-    playertierhistory: 'actions.PlayerTierHistoryActions[models.PlayerTierHistory]'
-    playerteamseason: 'actions.PlayerTeamSeasonActions[models.PlayerTeamSeason]'
-    contract: 'actions.ContractActions[models.Contract]'
-    bid: 'actions.BidActions[models.Bid]'
-    match: 'actions.MatchActions[models.Match]'
-    playermatch: 'actions.PlayerMatchActions[models.PlayerMatch]'
-    notification: 'actions.NotificationActions[models.Notification]'
     forumpost: 'actions.ForumPostActions[models.ForumPost]'
     forumreaction: 'actions.ForumReactionActions[models.ForumReaction]'
     forumfollower: 'actions.ForumFollowerActions[models.ForumFollower]'
     forumpostsubscription: 'actions.ForumPostSubscriptionActions[models.ForumPostSubscription]'
     forumcomment: 'actions.ForumCommentActions[models.ForumComment]'
-    teammanager: 'actions.TeamManagerActions[models.TeamManager]'
+    league: 'actions.LeagueActions[models.League]'
+    leagueseason: 'actions.LeagueSeasonActions[models.LeagueSeason]'
+    conference: 'actions.ConferenceActions[models.Conference]'
+    division: 'actions.DivisionActions[models.Division]'
+    season: 'actions.SeasonActions[models.Season]'
+    leaguecommissioner: 'actions.LeagueCommissionerActions[models.LeagueCommissioner]'
+    leaguebog: 'actions.LeagueBOGActions[models.LeagueBOG]'
+    match: 'actions.MatchActions[models.Match]'
+    clubmatchstats: 'actions.ClubMatchStatsActions[models.ClubMatchStats]'
+    clubmatchstatsdetails: 'actions.ClubMatchStatsDetailsActions[models.ClubMatchStatsDetails]'
+    customkit: 'actions.CustomKitActions[models.CustomKit]'
+    clubaggregatematchstats: 'actions.ClubAggregateMatchStatsActions[models.ClubAggregateMatchStats]'
+    matchanalytics: 'actions.MatchAnalyticsActions[models.MatchAnalytics]'
+    playermatch: 'actions.PlayerMatchActions[models.PlayerMatch]'
+    playerseason: 'actions.PlayerSeasonActions[models.PlayerSeason]'
+    playerteamseason: 'actions.PlayerTeamSeasonActions[models.PlayerTeamSeason]'
+    playerleaguehistory: 'actions.PlayerLeagueHistoryActions[models.PlayerLeagueHistory]'
     psnprofile: 'actions.PSNProfileActions[models.PSNProfile]'
     psnavatar: 'actions.PSNAvatarActions[models.PSNAvatar]'
     psntrophy: 'actions.PSNTrophyActions[models.PSNTrophy]'
     psngame: 'actions.PSNGameActions[models.PSNGame]'
     psnsynclog: 'actions.PSNSyncLogActions[models.PSNSyncLog]'
     psngametrophies: 'actions.PSNGameTrophiesActions[models.PSNGameTrophies]'
+    team: 'actions.TeamActions[models.Team]'
+    teamseason: 'actions.TeamSeasonActions[models.TeamSeason]'
+    teammanager: 'actions.TeamManagerActions[models.TeamManager]'
+    bid: 'actions.BidActions[models.Bid]'
+    contract: 'actions.ContractActions[models.Contract]'
+    user: 'actions.UserActions[models.User]'
+    eaidhistory: 'actions.EaIdHistoryActions[models.EaIdHistory]'
+    systemhistory: 'actions.SystemHistoryActions[models.SystemHistory]'
+    gamertaghistory: 'actions.GamertagHistoryActions[models.GamertagHistory]'
+    notification: 'actions.NotificationActions[models.Notification]'
 
     __slots__ = (
-        'user',
-        'player',
-        'gamertaghistory',
-        'season',
-        'tier',
-        'team',
-        'teamseason',
-        'playerseason',
-        'playertierhistory',
-        'playerteamseason',
-        'contract',
-        'bid',
-        'match',
-        'playermatch',
-        'notification',
         'forumpost',
         'forumreaction',
         'forumfollower',
         'forumpostsubscription',
         'forumcomment',
-        'teammanager',
+        'league',
+        'leagueseason',
+        'conference',
+        'division',
+        'season',
+        'leaguecommissioner',
+        'leaguebog',
+        'match',
+        'clubmatchstats',
+        'clubmatchstatsdetails',
+        'customkit',
+        'clubaggregatematchstats',
+        'matchanalytics',
+        'playermatch',
+        'playerseason',
+        'playerteamseason',
+        'playerleaguehistory',
         'psnprofile',
         'psnavatar',
         'psntrophy',
         'psngame',
         'psnsynclog',
         'psngametrophies',
+        'team',
+        'teamseason',
+        'teammanager',
+        'bid',
+        'contract',
+        'user',
+        'eaidhistory',
+        'systemhistory',
+        'gamertaghistory',
+        'notification',
     )
 
     def __init__(
@@ -175,38 +197,49 @@ class Prisma(AsyncBasePrisma):
             prisma_models=PRISMA_MODELS,
             packaged_schema_path=PACKAGED_SCHEMA_PATH,
             relational_field_mappings=RELATIONAL_FIELD_MAPPINGS,
-            preview_features=set([]),
+            preview_features=set(['prismaSchemaFolder']),
             active_provider='postgresql',
             default_datasource_name='db',
         )
 
-        self.user = actions.UserActions[models.User](self, models.User)
-        self.player = actions.PlayerActions[models.Player](self, models.Player)
-        self.gamertaghistory = actions.GamertagHistoryActions[models.GamertagHistory](self, models.GamertagHistory)
-        self.season = actions.SeasonActions[models.Season](self, models.Season)
-        self.tier = actions.TierActions[models.Tier](self, models.Tier)
-        self.team = actions.TeamActions[models.Team](self, models.Team)
-        self.teamseason = actions.TeamSeasonActions[models.TeamSeason](self, models.TeamSeason)
-        self.playerseason = actions.PlayerSeasonActions[models.PlayerSeason](self, models.PlayerSeason)
-        self.playertierhistory = actions.PlayerTierHistoryActions[models.PlayerTierHistory](self, models.PlayerTierHistory)
-        self.playerteamseason = actions.PlayerTeamSeasonActions[models.PlayerTeamSeason](self, models.PlayerTeamSeason)
-        self.contract = actions.ContractActions[models.Contract](self, models.Contract)
-        self.bid = actions.BidActions[models.Bid](self, models.Bid)
-        self.match = actions.MatchActions[models.Match](self, models.Match)
-        self.playermatch = actions.PlayerMatchActions[models.PlayerMatch](self, models.PlayerMatch)
-        self.notification = actions.NotificationActions[models.Notification](self, models.Notification)
         self.forumpost = actions.ForumPostActions[models.ForumPost](self, models.ForumPost)
         self.forumreaction = actions.ForumReactionActions[models.ForumReaction](self, models.ForumReaction)
         self.forumfollower = actions.ForumFollowerActions[models.ForumFollower](self, models.ForumFollower)
         self.forumpostsubscription = actions.ForumPostSubscriptionActions[models.ForumPostSubscription](self, models.ForumPostSubscription)
         self.forumcomment = actions.ForumCommentActions[models.ForumComment](self, models.ForumComment)
-        self.teammanager = actions.TeamManagerActions[models.TeamManager](self, models.TeamManager)
+        self.league = actions.LeagueActions[models.League](self, models.League)
+        self.leagueseason = actions.LeagueSeasonActions[models.LeagueSeason](self, models.LeagueSeason)
+        self.conference = actions.ConferenceActions[models.Conference](self, models.Conference)
+        self.division = actions.DivisionActions[models.Division](self, models.Division)
+        self.season = actions.SeasonActions[models.Season](self, models.Season)
+        self.leaguecommissioner = actions.LeagueCommissionerActions[models.LeagueCommissioner](self, models.LeagueCommissioner)
+        self.leaguebog = actions.LeagueBOGActions[models.LeagueBOG](self, models.LeagueBOG)
+        self.match = actions.MatchActions[models.Match](self, models.Match)
+        self.clubmatchstats = actions.ClubMatchStatsActions[models.ClubMatchStats](self, models.ClubMatchStats)
+        self.clubmatchstatsdetails = actions.ClubMatchStatsDetailsActions[models.ClubMatchStatsDetails](self, models.ClubMatchStatsDetails)
+        self.customkit = actions.CustomKitActions[models.CustomKit](self, models.CustomKit)
+        self.clubaggregatematchstats = actions.ClubAggregateMatchStatsActions[models.ClubAggregateMatchStats](self, models.ClubAggregateMatchStats)
+        self.matchanalytics = actions.MatchAnalyticsActions[models.MatchAnalytics](self, models.MatchAnalytics)
+        self.playermatch = actions.PlayerMatchActions[models.PlayerMatch](self, models.PlayerMatch)
+        self.playerseason = actions.PlayerSeasonActions[models.PlayerSeason](self, models.PlayerSeason)
+        self.playerteamseason = actions.PlayerTeamSeasonActions[models.PlayerTeamSeason](self, models.PlayerTeamSeason)
+        self.playerleaguehistory = actions.PlayerLeagueHistoryActions[models.PlayerLeagueHistory](self, models.PlayerLeagueHistory)
         self.psnprofile = actions.PSNProfileActions[models.PSNProfile](self, models.PSNProfile)
         self.psnavatar = actions.PSNAvatarActions[models.PSNAvatar](self, models.PSNAvatar)
         self.psntrophy = actions.PSNTrophyActions[models.PSNTrophy](self, models.PSNTrophy)
         self.psngame = actions.PSNGameActions[models.PSNGame](self, models.PSNGame)
         self.psnsynclog = actions.PSNSyncLogActions[models.PSNSyncLog](self, models.PSNSyncLog)
         self.psngametrophies = actions.PSNGameTrophiesActions[models.PSNGameTrophies](self, models.PSNGameTrophies)
+        self.team = actions.TeamActions[models.Team](self, models.Team)
+        self.teamseason = actions.TeamSeasonActions[models.TeamSeason](self, models.TeamSeason)
+        self.teammanager = actions.TeamManagerActions[models.TeamManager](self, models.TeamManager)
+        self.bid = actions.BidActions[models.Bid](self, models.Bid)
+        self.contract = actions.ContractActions[models.Contract](self, models.Contract)
+        self.user = actions.UserActions[models.User](self, models.User)
+        self.eaidhistory = actions.EaIdHistoryActions[models.EaIdHistory](self, models.EaIdHistory)
+        self.systemhistory = actions.SystemHistoryActions[models.SystemHistory](self, models.SystemHistory)
+        self.gamertaghistory = actions.GamertagHistoryActions[models.GamertagHistory](self, models.GamertagHistory)
+        self.notification = actions.NotificationActions[models.Notification](self, models.Notification)
 
         if auto_register:
             register(self)
@@ -217,7 +250,7 @@ class Prisma(AsyncBasePrisma):
         return {
             'name': 'db',
             'url': OptionalValueFromEnvVar(**{'value': None, 'fromEnvVar': 'DATABASE_URL'}).resolve(),
-            'source_file_path': '/Users/spencerpresley/LeagueFrontend/OVHL/frontend/prisma/schema.prisma',
+            'source_file_path': '/Users/spencerpresley/LeagueFrontend/OVHL/frontend/prisma/schema/main.prisma',
         }
 
     async def execute_raw(self, query: LiteralString, *args: Any) -> int:
@@ -357,65 +390,87 @@ TransactionManager = AsyncTransactionManager[Prisma]
 # TODO: this should return the results as well
 # TODO: don't require copy-pasting arguments between actions and batch actions
 class Batch:
-    user: 'UserBatchActions'
-    player: 'PlayerBatchActions'
-    gamertaghistory: 'GamertagHistoryBatchActions'
-    season: 'SeasonBatchActions'
-    tier: 'TierBatchActions'
-    team: 'TeamBatchActions'
-    teamseason: 'TeamSeasonBatchActions'
-    playerseason: 'PlayerSeasonBatchActions'
-    playertierhistory: 'PlayerTierHistoryBatchActions'
-    playerteamseason: 'PlayerTeamSeasonBatchActions'
-    contract: 'ContractBatchActions'
-    bid: 'BidBatchActions'
-    match: 'MatchBatchActions'
-    playermatch: 'PlayerMatchBatchActions'
-    notification: 'NotificationBatchActions'
     forumpost: 'ForumPostBatchActions'
     forumreaction: 'ForumReactionBatchActions'
     forumfollower: 'ForumFollowerBatchActions'
     forumpostsubscription: 'ForumPostSubscriptionBatchActions'
     forumcomment: 'ForumCommentBatchActions'
-    teammanager: 'TeamManagerBatchActions'
+    league: 'LeagueBatchActions'
+    leagueseason: 'LeagueSeasonBatchActions'
+    conference: 'ConferenceBatchActions'
+    division: 'DivisionBatchActions'
+    season: 'SeasonBatchActions'
+    leaguecommissioner: 'LeagueCommissionerBatchActions'
+    leaguebog: 'LeagueBOGBatchActions'
+    match: 'MatchBatchActions'
+    clubmatchstats: 'ClubMatchStatsBatchActions'
+    clubmatchstatsdetails: 'ClubMatchStatsDetailsBatchActions'
+    customkit: 'CustomKitBatchActions'
+    clubaggregatematchstats: 'ClubAggregateMatchStatsBatchActions'
+    matchanalytics: 'MatchAnalyticsBatchActions'
+    playermatch: 'PlayerMatchBatchActions'
+    playerseason: 'PlayerSeasonBatchActions'
+    playerteamseason: 'PlayerTeamSeasonBatchActions'
+    playerleaguehistory: 'PlayerLeagueHistoryBatchActions'
     psnprofile: 'PSNProfileBatchActions'
     psnavatar: 'PSNAvatarBatchActions'
     psntrophy: 'PSNTrophyBatchActions'
     psngame: 'PSNGameBatchActions'
     psnsynclog: 'PSNSyncLogBatchActions'
     psngametrophies: 'PSNGameTrophiesBatchActions'
+    team: 'TeamBatchActions'
+    teamseason: 'TeamSeasonBatchActions'
+    teammanager: 'TeamManagerBatchActions'
+    bid: 'BidBatchActions'
+    contract: 'ContractBatchActions'
+    user: 'UserBatchActions'
+    eaidhistory: 'EaIdHistoryBatchActions'
+    systemhistory: 'SystemHistoryBatchActions'
+    gamertaghistory: 'GamertagHistoryBatchActions'
+    notification: 'NotificationBatchActions'
 
     def __init__(self, client: Prisma) -> None:
         self.__client = client
         self.__queries: List[str] = []
         self._active_provider = client._active_provider
-        self.user = UserBatchActions(self)
-        self.player = PlayerBatchActions(self)
-        self.gamertaghistory = GamertagHistoryBatchActions(self)
-        self.season = SeasonBatchActions(self)
-        self.tier = TierBatchActions(self)
-        self.team = TeamBatchActions(self)
-        self.teamseason = TeamSeasonBatchActions(self)
-        self.playerseason = PlayerSeasonBatchActions(self)
-        self.playertierhistory = PlayerTierHistoryBatchActions(self)
-        self.playerteamseason = PlayerTeamSeasonBatchActions(self)
-        self.contract = ContractBatchActions(self)
-        self.bid = BidBatchActions(self)
-        self.match = MatchBatchActions(self)
-        self.playermatch = PlayerMatchBatchActions(self)
-        self.notification = NotificationBatchActions(self)
         self.forumpost = ForumPostBatchActions(self)
         self.forumreaction = ForumReactionBatchActions(self)
         self.forumfollower = ForumFollowerBatchActions(self)
         self.forumpostsubscription = ForumPostSubscriptionBatchActions(self)
         self.forumcomment = ForumCommentBatchActions(self)
-        self.teammanager = TeamManagerBatchActions(self)
+        self.league = LeagueBatchActions(self)
+        self.leagueseason = LeagueSeasonBatchActions(self)
+        self.conference = ConferenceBatchActions(self)
+        self.division = DivisionBatchActions(self)
+        self.season = SeasonBatchActions(self)
+        self.leaguecommissioner = LeagueCommissionerBatchActions(self)
+        self.leaguebog = LeagueBOGBatchActions(self)
+        self.match = MatchBatchActions(self)
+        self.clubmatchstats = ClubMatchStatsBatchActions(self)
+        self.clubmatchstatsdetails = ClubMatchStatsDetailsBatchActions(self)
+        self.customkit = CustomKitBatchActions(self)
+        self.clubaggregatematchstats = ClubAggregateMatchStatsBatchActions(self)
+        self.matchanalytics = MatchAnalyticsBatchActions(self)
+        self.playermatch = PlayerMatchBatchActions(self)
+        self.playerseason = PlayerSeasonBatchActions(self)
+        self.playerteamseason = PlayerTeamSeasonBatchActions(self)
+        self.playerleaguehistory = PlayerLeagueHistoryBatchActions(self)
         self.psnprofile = PSNProfileBatchActions(self)
         self.psnavatar = PSNAvatarBatchActions(self)
         self.psntrophy = PSNTrophyBatchActions(self)
         self.psngame = PSNGameBatchActions(self)
         self.psnsynclog = PSNSyncLogBatchActions(self)
         self.psngametrophies = PSNGameTrophiesBatchActions(self)
+        self.team = TeamBatchActions(self)
+        self.teamseason = TeamSeasonBatchActions(self)
+        self.teammanager = TeamManagerBatchActions(self)
+        self.bid = BidBatchActions(self)
+        self.contract = ContractBatchActions(self)
+        self.user = UserBatchActions(self)
+        self.eaidhistory = EaIdHistoryBatchActions(self)
+        self.systemhistory = SystemHistoryBatchActions(self)
+        self.gamertaghistory = GamertagHistoryBatchActions(self)
+        self.notification = NotificationBatchActions(self)
 
     def _add(self, **kwargs: Any) -> None:
         builder = QueryBuilder(
@@ -466,1671 +521,6 @@ class Batch:
     ) -> None:
         if exc is None:
             await self.commit()
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class UserBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.UserCreateInput,
-        include: Optional[types.UserInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.User,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.UserCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.User,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.UserWhereUniqueInput,
-        include: Optional[types.UserInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.User,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.UserUpdateInput,
-        where: types.UserWhereUniqueInput,
-        include: Optional[types.UserInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.User,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.UserWhereUniqueInput,
-        data: types.UserUpsertInput,
-        include: Optional[types.UserInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.User,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.UserUpdateManyMutationInput,
-        where: types.UserWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.User,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.UserWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.User,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class PlayerBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.PlayerCreateInput,
-        include: Optional[types.PlayerInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Player,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.PlayerCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Player,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.PlayerWhereUniqueInput,
-        include: Optional[types.PlayerInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Player,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.PlayerUpdateInput,
-        where: types.PlayerWhereUniqueInput,
-        include: Optional[types.PlayerInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Player,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.PlayerWhereUniqueInput,
-        data: types.PlayerUpsertInput,
-        include: Optional[types.PlayerInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Player,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.PlayerUpdateManyMutationInput,
-        where: types.PlayerWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Player,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.PlayerWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Player,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class GamertagHistoryBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.GamertagHistoryCreateInput,
-        include: Optional[types.GamertagHistoryInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.GamertagHistory,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.GamertagHistoryCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.GamertagHistory,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.GamertagHistoryWhereUniqueInput,
-        include: Optional[types.GamertagHistoryInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.GamertagHistory,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.GamertagHistoryUpdateInput,
-        where: types.GamertagHistoryWhereUniqueInput,
-        include: Optional[types.GamertagHistoryInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.GamertagHistory,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.GamertagHistoryWhereUniqueInput,
-        data: types.GamertagHistoryUpsertInput,
-        include: Optional[types.GamertagHistoryInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.GamertagHistory,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.GamertagHistoryUpdateManyMutationInput,
-        where: types.GamertagHistoryWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.GamertagHistory,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.GamertagHistoryWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.GamertagHistory,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class SeasonBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.SeasonCreateInput,
-        include: Optional[types.SeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Season,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.SeasonCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Season,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.SeasonWhereUniqueInput,
-        include: Optional[types.SeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Season,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.SeasonUpdateInput,
-        where: types.SeasonWhereUniqueInput,
-        include: Optional[types.SeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Season,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.SeasonWhereUniqueInput,
-        data: types.SeasonUpsertInput,
-        include: Optional[types.SeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Season,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.SeasonUpdateManyMutationInput,
-        where: types.SeasonWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Season,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.SeasonWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Season,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class TierBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.TierCreateInput,
-        include: Optional[types.TierInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Tier,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.TierCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Tier,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.TierWhereUniqueInput,
-        include: Optional[types.TierInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Tier,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.TierUpdateInput,
-        where: types.TierWhereUniqueInput,
-        include: Optional[types.TierInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Tier,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.TierWhereUniqueInput,
-        data: types.TierUpsertInput,
-        include: Optional[types.TierInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Tier,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.TierUpdateManyMutationInput,
-        where: types.TierWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Tier,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.TierWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Tier,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class TeamBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.TeamCreateInput,
-        include: Optional[types.TeamInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Team,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.TeamCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Team,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.TeamWhereUniqueInput,
-        include: Optional[types.TeamInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Team,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.TeamUpdateInput,
-        where: types.TeamWhereUniqueInput,
-        include: Optional[types.TeamInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Team,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.TeamWhereUniqueInput,
-        data: types.TeamUpsertInput,
-        include: Optional[types.TeamInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Team,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.TeamUpdateManyMutationInput,
-        where: types.TeamWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Team,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.TeamWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Team,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class TeamSeasonBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.TeamSeasonCreateInput,
-        include: Optional[types.TeamSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.TeamSeason,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.TeamSeasonCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.TeamSeason,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.TeamSeasonWhereUniqueInput,
-        include: Optional[types.TeamSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.TeamSeason,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.TeamSeasonUpdateInput,
-        where: types.TeamSeasonWhereUniqueInput,
-        include: Optional[types.TeamSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.TeamSeason,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.TeamSeasonWhereUniqueInput,
-        data: types.TeamSeasonUpsertInput,
-        include: Optional[types.TeamSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.TeamSeason,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.TeamSeasonUpdateManyMutationInput,
-        where: types.TeamSeasonWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.TeamSeason,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.TeamSeasonWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.TeamSeason,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class PlayerSeasonBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.PlayerSeasonCreateInput,
-        include: Optional[types.PlayerSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.PlayerSeason,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.PlayerSeasonCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.PlayerSeason,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.PlayerSeasonWhereUniqueInput,
-        include: Optional[types.PlayerSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.PlayerSeason,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.PlayerSeasonUpdateInput,
-        where: types.PlayerSeasonWhereUniqueInput,
-        include: Optional[types.PlayerSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.PlayerSeason,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.PlayerSeasonWhereUniqueInput,
-        data: types.PlayerSeasonUpsertInput,
-        include: Optional[types.PlayerSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.PlayerSeason,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.PlayerSeasonUpdateManyMutationInput,
-        where: types.PlayerSeasonWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.PlayerSeason,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.PlayerSeasonWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.PlayerSeason,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class PlayerTierHistoryBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.PlayerTierHistoryCreateInput,
-        include: Optional[types.PlayerTierHistoryInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.PlayerTierHistory,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.PlayerTierHistoryCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.PlayerTierHistory,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.PlayerTierHistoryWhereUniqueInput,
-        include: Optional[types.PlayerTierHistoryInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.PlayerTierHistory,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.PlayerTierHistoryUpdateInput,
-        where: types.PlayerTierHistoryWhereUniqueInput,
-        include: Optional[types.PlayerTierHistoryInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.PlayerTierHistory,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.PlayerTierHistoryWhereUniqueInput,
-        data: types.PlayerTierHistoryUpsertInput,
-        include: Optional[types.PlayerTierHistoryInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.PlayerTierHistory,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.PlayerTierHistoryUpdateManyMutationInput,
-        where: types.PlayerTierHistoryWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.PlayerTierHistory,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.PlayerTierHistoryWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.PlayerTierHistory,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class PlayerTeamSeasonBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.PlayerTeamSeasonCreateInput,
-        include: Optional[types.PlayerTeamSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.PlayerTeamSeason,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.PlayerTeamSeasonCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.PlayerTeamSeason,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.PlayerTeamSeasonWhereUniqueInput,
-        include: Optional[types.PlayerTeamSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.PlayerTeamSeason,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.PlayerTeamSeasonUpdateInput,
-        where: types.PlayerTeamSeasonWhereUniqueInput,
-        include: Optional[types.PlayerTeamSeasonInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.PlayerTeamSeason,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.PlayerTeamSeasonWhereUniqueInput,
-        data: types.PlayerTeamSeasonUpsertInput,
-        include: Optional[types.PlayerTeamSeasonInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.PlayerTeamSeason,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.PlayerTeamSeasonUpdateManyMutationInput,
-        where: types.PlayerTeamSeasonWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.PlayerTeamSeason,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.PlayerTeamSeasonWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.PlayerTeamSeason,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class ContractBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.ContractCreateInput,
-        include: Optional[types.ContractInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Contract,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.ContractCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Contract,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.ContractWhereUniqueInput,
-        include: Optional[types.ContractInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Contract,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.ContractUpdateInput,
-        where: types.ContractWhereUniqueInput,
-        include: Optional[types.ContractInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Contract,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.ContractWhereUniqueInput,
-        data: types.ContractUpsertInput,
-        include: Optional[types.ContractInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Contract,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.ContractUpdateManyMutationInput,
-        where: types.ContractWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Contract,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.ContractWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Contract,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class BidBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.BidCreateInput,
-        include: Optional[types.BidInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Bid,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.BidCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Bid,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.BidWhereUniqueInput,
-        include: Optional[types.BidInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Bid,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.BidUpdateInput,
-        where: types.BidWhereUniqueInput,
-        include: Optional[types.BidInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Bid,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.BidWhereUniqueInput,
-        data: types.BidUpsertInput,
-        include: Optional[types.BidInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Bid,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.BidUpdateManyMutationInput,
-        where: types.BidWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Bid,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.BidWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Bid,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class MatchBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.MatchCreateInput,
-        include: Optional[types.MatchInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Match,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.MatchCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Match,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.MatchWhereUniqueInput,
-        include: Optional[types.MatchInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Match,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.MatchUpdateInput,
-        where: types.MatchWhereUniqueInput,
-        include: Optional[types.MatchInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Match,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.MatchWhereUniqueInput,
-        data: types.MatchUpsertInput,
-        include: Optional[types.MatchInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Match,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.MatchUpdateManyMutationInput,
-        where: types.MatchWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Match,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.MatchWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Match,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class PlayerMatchBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.PlayerMatchCreateInput,
-        include: Optional[types.PlayerMatchInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.PlayerMatch,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.PlayerMatchCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.PlayerMatch,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.PlayerMatchWhereUniqueInput,
-        include: Optional[types.PlayerMatchInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.PlayerMatch,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.PlayerMatchUpdateInput,
-        where: types.PlayerMatchWhereUniqueInput,
-        include: Optional[types.PlayerMatchInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.PlayerMatch,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.PlayerMatchWhereUniqueInput,
-        data: types.PlayerMatchUpsertInput,
-        include: Optional[types.PlayerMatchInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.PlayerMatch,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.PlayerMatchUpdateManyMutationInput,
-        where: types.PlayerMatchWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.PlayerMatch,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.PlayerMatchWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.PlayerMatch,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
-
-
-# NOTE: some arguments are meaningless in this context but are included
-# for completeness sake
-class NotificationBatchActions:
-    def __init__(self, batcher: Batch) -> None:
-        self._batcher = batcher
-
-    def create(
-        self,
-        data: types.NotificationCreateInput,
-        include: Optional[types.NotificationInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='create',
-            model=models.Notification,
-            arguments={
-                'data': data,
-                'include': include,
-            },
-        )
-
-    def create_many(
-        self,
-        data: List[types.NotificationCreateWithoutRelationsInput],
-        *,
-        skip_duplicates: Optional[bool] = None,
-    ) -> None:
-        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
-            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
-
-        self._batcher._add(
-            method='create_many',
-            model=models.Notification,
-            arguments={
-                'data': data,
-                'skipDuplicates': skip_duplicates,
-            },
-            root_selection=['count'],
-        )
-
-    def delete(
-        self,
-        where: types.NotificationWhereUniqueInput,
-        include: Optional[types.NotificationInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete',
-            model=models.Notification,
-            arguments={
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def update(
-        self,
-        data: types.NotificationUpdateInput,
-        where: types.NotificationWhereUniqueInput,
-        include: Optional[types.NotificationInclude] = None
-    ) -> None:
-        self._batcher._add(
-            method='update',
-            model=models.Notification,
-            arguments={
-                'data': data,
-                'where': where,
-                'include': include,
-            },
-        )
-
-    def upsert(
-        self,
-        where: types.NotificationWhereUniqueInput,
-        data: types.NotificationUpsertInput,
-        include: Optional[types.NotificationInclude] = None,
-    ) -> None:
-        self._batcher._add(
-            method='upsert',
-            model=models.Notification,
-            arguments={
-                'where': where,
-                'include': include,
-                'create': data.get('create'),
-                'update': data.get('update'),
-            },
-        )
-
-    def update_many(
-        self,
-        data: types.NotificationUpdateManyMutationInput,
-        where: types.NotificationWhereInput,
-    ) -> None:
-        self._batcher._add(
-            method='update_many',
-            model=models.Notification,
-            arguments={'data': data, 'where': where,},
-            root_selection=['count'],
-        )
-
-    def delete_many(
-        self,
-        where: Optional[types.NotificationWhereInput] = None,
-    ) -> None:
-        self._batcher._add(
-            method='delete_many',
-            model=models.Notification,
-            arguments={'where': where},
-            root_selection=['count'],
-        )
-
 
 
 # NOTE: some arguments are meaningless in this context but are included
@@ -2690,18 +1080,18 @@ class ForumCommentBatchActions:
 
 # NOTE: some arguments are meaningless in this context but are included
 # for completeness sake
-class TeamManagerBatchActions:
+class LeagueBatchActions:
     def __init__(self, batcher: Batch) -> None:
         self._batcher = batcher
 
     def create(
         self,
-        data: types.TeamManagerCreateInput,
-        include: Optional[types.TeamManagerInclude] = None
+        data: types.LeagueCreateInput,
+        include: Optional[types.LeagueInclude] = None
     ) -> None:
         self._batcher._add(
             method='create',
-            model=models.TeamManager,
+            model=models.League,
             arguments={
                 'data': data,
                 'include': include,
@@ -2710,7 +1100,7 @@ class TeamManagerBatchActions:
 
     def create_many(
         self,
-        data: List[types.TeamManagerCreateWithoutRelationsInput],
+        data: List[types.LeagueCreateWithoutRelationsInput],
         *,
         skip_duplicates: Optional[bool] = None,
     ) -> None:
@@ -2719,7 +1109,7 @@ class TeamManagerBatchActions:
 
         self._batcher._add(
             method='create_many',
-            model=models.TeamManager,
+            model=models.League,
             arguments={
                 'data': data,
                 'skipDuplicates': skip_duplicates,
@@ -2729,12 +1119,12 @@ class TeamManagerBatchActions:
 
     def delete(
         self,
-        where: types.TeamManagerWhereUniqueInput,
-        include: Optional[types.TeamManagerInclude] = None,
+        where: types.LeagueWhereUniqueInput,
+        include: Optional[types.LeagueInclude] = None,
     ) -> None:
         self._batcher._add(
             method='delete',
-            model=models.TeamManager,
+            model=models.League,
             arguments={
                 'where': where,
                 'include': include,
@@ -2743,13 +1133,13 @@ class TeamManagerBatchActions:
 
     def update(
         self,
-        data: types.TeamManagerUpdateInput,
-        where: types.TeamManagerWhereUniqueInput,
-        include: Optional[types.TeamManagerInclude] = None
+        data: types.LeagueUpdateInput,
+        where: types.LeagueWhereUniqueInput,
+        include: Optional[types.LeagueInclude] = None
     ) -> None:
         self._batcher._add(
             method='update',
-            model=models.TeamManager,
+            model=models.League,
             arguments={
                 'data': data,
                 'where': where,
@@ -2759,13 +1149,13 @@ class TeamManagerBatchActions:
 
     def upsert(
         self,
-        where: types.TeamManagerWhereUniqueInput,
-        data: types.TeamManagerUpsertInput,
-        include: Optional[types.TeamManagerInclude] = None,
+        where: types.LeagueWhereUniqueInput,
+        data: types.LeagueUpsertInput,
+        include: Optional[types.LeagueInclude] = None,
     ) -> None:
         self._batcher._add(
             method='upsert',
-            model=models.TeamManager,
+            model=models.League,
             arguments={
                 'where': where,
                 'include': include,
@@ -2776,23 +1166,1799 @@ class TeamManagerBatchActions:
 
     def update_many(
         self,
-        data: types.TeamManagerUpdateManyMutationInput,
-        where: types.TeamManagerWhereInput,
+        data: types.LeagueUpdateManyMutationInput,
+        where: types.LeagueWhereInput,
     ) -> None:
         self._batcher._add(
             method='update_many',
-            model=models.TeamManager,
+            model=models.League,
             arguments={'data': data, 'where': where,},
             root_selection=['count'],
         )
 
     def delete_many(
         self,
-        where: Optional[types.TeamManagerWhereInput] = None,
+        where: Optional[types.LeagueWhereInput] = None,
     ) -> None:
         self._batcher._add(
             method='delete_many',
-            model=models.TeamManager,
+            model=models.League,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class LeagueSeasonBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.LeagueSeasonCreateInput,
+        include: Optional[types.LeagueSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.LeagueSeason,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.LeagueSeasonCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.LeagueSeason,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.LeagueSeasonWhereUniqueInput,
+        include: Optional[types.LeagueSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.LeagueSeason,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.LeagueSeasonUpdateInput,
+        where: types.LeagueSeasonWhereUniqueInput,
+        include: Optional[types.LeagueSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.LeagueSeason,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.LeagueSeasonWhereUniqueInput,
+        data: types.LeagueSeasonUpsertInput,
+        include: Optional[types.LeagueSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.LeagueSeason,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.LeagueSeasonUpdateManyMutationInput,
+        where: types.LeagueSeasonWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.LeagueSeason,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.LeagueSeasonWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.LeagueSeason,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class ConferenceBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.ConferenceCreateInput,
+        include: Optional[types.ConferenceInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Conference,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.ConferenceCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Conference,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.ConferenceWhereUniqueInput,
+        include: Optional[types.ConferenceInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Conference,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.ConferenceUpdateInput,
+        where: types.ConferenceWhereUniqueInput,
+        include: Optional[types.ConferenceInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Conference,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.ConferenceWhereUniqueInput,
+        data: types.ConferenceUpsertInput,
+        include: Optional[types.ConferenceInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Conference,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.ConferenceUpdateManyMutationInput,
+        where: types.ConferenceWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Conference,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.ConferenceWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Conference,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class DivisionBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.DivisionCreateInput,
+        include: Optional[types.DivisionInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Division,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.DivisionCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Division,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.DivisionWhereUniqueInput,
+        include: Optional[types.DivisionInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Division,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.DivisionUpdateInput,
+        where: types.DivisionWhereUniqueInput,
+        include: Optional[types.DivisionInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Division,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.DivisionWhereUniqueInput,
+        data: types.DivisionUpsertInput,
+        include: Optional[types.DivisionInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Division,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.DivisionUpdateManyMutationInput,
+        where: types.DivisionWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Division,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.DivisionWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Division,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class SeasonBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.SeasonCreateInput,
+        include: Optional[types.SeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Season,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.SeasonCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Season,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.SeasonWhereUniqueInput,
+        include: Optional[types.SeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Season,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.SeasonUpdateInput,
+        where: types.SeasonWhereUniqueInput,
+        include: Optional[types.SeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Season,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.SeasonWhereUniqueInput,
+        data: types.SeasonUpsertInput,
+        include: Optional[types.SeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Season,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.SeasonUpdateManyMutationInput,
+        where: types.SeasonWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Season,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.SeasonWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Season,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class LeagueCommissionerBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.LeagueCommissionerCreateInput,
+        include: Optional[types.LeagueCommissionerInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.LeagueCommissioner,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.LeagueCommissionerCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.LeagueCommissioner,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.LeagueCommissionerWhereUniqueInput,
+        include: Optional[types.LeagueCommissionerInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.LeagueCommissioner,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.LeagueCommissionerUpdateInput,
+        where: types.LeagueCommissionerWhereUniqueInput,
+        include: Optional[types.LeagueCommissionerInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.LeagueCommissioner,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.LeagueCommissionerWhereUniqueInput,
+        data: types.LeagueCommissionerUpsertInput,
+        include: Optional[types.LeagueCommissionerInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.LeagueCommissioner,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.LeagueCommissionerUpdateManyMutationInput,
+        where: types.LeagueCommissionerWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.LeagueCommissioner,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.LeagueCommissionerWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.LeagueCommissioner,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class LeagueBOGBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.LeagueBOGCreateInput,
+        include: Optional[types.LeagueBOGInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.LeagueBOG,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.LeagueBOGCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.LeagueBOG,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.LeagueBOGWhereUniqueInput,
+        include: Optional[types.LeagueBOGInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.LeagueBOG,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.LeagueBOGUpdateInput,
+        where: types.LeagueBOGWhereUniqueInput,
+        include: Optional[types.LeagueBOGInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.LeagueBOG,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.LeagueBOGWhereUniqueInput,
+        data: types.LeagueBOGUpsertInput,
+        include: Optional[types.LeagueBOGInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.LeagueBOG,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.LeagueBOGUpdateManyMutationInput,
+        where: types.LeagueBOGWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.LeagueBOG,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.LeagueBOGWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.LeagueBOG,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class MatchBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.MatchCreateInput,
+        include: Optional[types.MatchInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Match,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.MatchCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Match,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.MatchWhereUniqueInput,
+        include: Optional[types.MatchInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Match,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.MatchUpdateInput,
+        where: types.MatchWhereUniqueInput,
+        include: Optional[types.MatchInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Match,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.MatchWhereUniqueInput,
+        data: types.MatchUpsertInput,
+        include: Optional[types.MatchInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Match,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.MatchUpdateManyMutationInput,
+        where: types.MatchWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Match,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.MatchWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Match,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class ClubMatchStatsBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.ClubMatchStatsCreateInput,
+        include: Optional[types.ClubMatchStatsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.ClubMatchStats,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.ClubMatchStatsCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.ClubMatchStats,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.ClubMatchStatsWhereUniqueInput,
+        include: Optional[types.ClubMatchStatsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.ClubMatchStats,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.ClubMatchStatsUpdateInput,
+        where: types.ClubMatchStatsWhereUniqueInput,
+        include: Optional[types.ClubMatchStatsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.ClubMatchStats,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.ClubMatchStatsWhereUniqueInput,
+        data: types.ClubMatchStatsUpsertInput,
+        include: Optional[types.ClubMatchStatsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.ClubMatchStats,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.ClubMatchStatsUpdateManyMutationInput,
+        where: types.ClubMatchStatsWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.ClubMatchStats,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.ClubMatchStatsWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.ClubMatchStats,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class ClubMatchStatsDetailsBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.ClubMatchStatsDetailsCreateInput,
+        include: Optional[types.ClubMatchStatsDetailsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.ClubMatchStatsDetails,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.ClubMatchStatsDetailsCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.ClubMatchStatsDetails,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.ClubMatchStatsDetailsWhereUniqueInput,
+        include: Optional[types.ClubMatchStatsDetailsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.ClubMatchStatsDetails,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.ClubMatchStatsDetailsUpdateInput,
+        where: types.ClubMatchStatsDetailsWhereUniqueInput,
+        include: Optional[types.ClubMatchStatsDetailsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.ClubMatchStatsDetails,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.ClubMatchStatsDetailsWhereUniqueInput,
+        data: types.ClubMatchStatsDetailsUpsertInput,
+        include: Optional[types.ClubMatchStatsDetailsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.ClubMatchStatsDetails,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.ClubMatchStatsDetailsUpdateManyMutationInput,
+        where: types.ClubMatchStatsDetailsWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.ClubMatchStatsDetails,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.ClubMatchStatsDetailsWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.ClubMatchStatsDetails,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class CustomKitBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.CustomKitCreateInput,
+        include: Optional[types.CustomKitInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.CustomKit,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.CustomKitCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.CustomKit,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.CustomKitWhereUniqueInput,
+        include: Optional[types.CustomKitInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.CustomKit,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.CustomKitUpdateInput,
+        where: types.CustomKitWhereUniqueInput,
+        include: Optional[types.CustomKitInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.CustomKit,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.CustomKitWhereUniqueInput,
+        data: types.CustomKitUpsertInput,
+        include: Optional[types.CustomKitInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.CustomKit,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.CustomKitUpdateManyMutationInput,
+        where: types.CustomKitWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.CustomKit,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.CustomKitWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.CustomKit,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class ClubAggregateMatchStatsBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.ClubAggregateMatchStatsCreateInput,
+        include: Optional[types.ClubAggregateMatchStatsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.ClubAggregateMatchStats,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.ClubAggregateMatchStatsCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.ClubAggregateMatchStats,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.ClubAggregateMatchStatsWhereUniqueInput,
+        include: Optional[types.ClubAggregateMatchStatsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.ClubAggregateMatchStats,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.ClubAggregateMatchStatsUpdateInput,
+        where: types.ClubAggregateMatchStatsWhereUniqueInput,
+        include: Optional[types.ClubAggregateMatchStatsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.ClubAggregateMatchStats,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.ClubAggregateMatchStatsWhereUniqueInput,
+        data: types.ClubAggregateMatchStatsUpsertInput,
+        include: Optional[types.ClubAggregateMatchStatsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.ClubAggregateMatchStats,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.ClubAggregateMatchStatsUpdateManyMutationInput,
+        where: types.ClubAggregateMatchStatsWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.ClubAggregateMatchStats,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.ClubAggregateMatchStatsWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.ClubAggregateMatchStats,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class MatchAnalyticsBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.MatchAnalyticsCreateInput,
+        include: Optional[types.MatchAnalyticsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.MatchAnalytics,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.MatchAnalyticsCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.MatchAnalytics,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.MatchAnalyticsWhereUniqueInput,
+        include: Optional[types.MatchAnalyticsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.MatchAnalytics,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.MatchAnalyticsUpdateInput,
+        where: types.MatchAnalyticsWhereUniqueInput,
+        include: Optional[types.MatchAnalyticsInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.MatchAnalytics,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.MatchAnalyticsWhereUniqueInput,
+        data: types.MatchAnalyticsUpsertInput,
+        include: Optional[types.MatchAnalyticsInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.MatchAnalytics,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.MatchAnalyticsUpdateManyMutationInput,
+        where: types.MatchAnalyticsWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.MatchAnalytics,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.MatchAnalyticsWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.MatchAnalytics,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class PlayerMatchBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.PlayerMatchCreateInput,
+        include: Optional[types.PlayerMatchInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.PlayerMatch,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.PlayerMatchCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.PlayerMatch,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.PlayerMatchWhereUniqueInput,
+        include: Optional[types.PlayerMatchInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.PlayerMatch,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.PlayerMatchUpdateInput,
+        where: types.PlayerMatchWhereUniqueInput,
+        include: Optional[types.PlayerMatchInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.PlayerMatch,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.PlayerMatchWhereUniqueInput,
+        data: types.PlayerMatchUpsertInput,
+        include: Optional[types.PlayerMatchInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.PlayerMatch,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.PlayerMatchUpdateManyMutationInput,
+        where: types.PlayerMatchWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.PlayerMatch,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.PlayerMatchWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.PlayerMatch,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class PlayerSeasonBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.PlayerSeasonCreateInput,
+        include: Optional[types.PlayerSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.PlayerSeason,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.PlayerSeasonCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.PlayerSeason,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.PlayerSeasonWhereUniqueInput,
+        include: Optional[types.PlayerSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.PlayerSeason,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.PlayerSeasonUpdateInput,
+        where: types.PlayerSeasonWhereUniqueInput,
+        include: Optional[types.PlayerSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.PlayerSeason,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.PlayerSeasonWhereUniqueInput,
+        data: types.PlayerSeasonUpsertInput,
+        include: Optional[types.PlayerSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.PlayerSeason,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.PlayerSeasonUpdateManyMutationInput,
+        where: types.PlayerSeasonWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.PlayerSeason,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.PlayerSeasonWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.PlayerSeason,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class PlayerTeamSeasonBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.PlayerTeamSeasonCreateInput,
+        include: Optional[types.PlayerTeamSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.PlayerTeamSeason,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.PlayerTeamSeasonCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.PlayerTeamSeason,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.PlayerTeamSeasonWhereUniqueInput,
+        include: Optional[types.PlayerTeamSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.PlayerTeamSeason,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.PlayerTeamSeasonUpdateInput,
+        where: types.PlayerTeamSeasonWhereUniqueInput,
+        include: Optional[types.PlayerTeamSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.PlayerTeamSeason,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.PlayerTeamSeasonWhereUniqueInput,
+        data: types.PlayerTeamSeasonUpsertInput,
+        include: Optional[types.PlayerTeamSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.PlayerTeamSeason,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.PlayerTeamSeasonUpdateManyMutationInput,
+        where: types.PlayerTeamSeasonWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.PlayerTeamSeason,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.PlayerTeamSeasonWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.PlayerTeamSeason,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class PlayerLeagueHistoryBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.PlayerLeagueHistoryCreateInput,
+        include: Optional[types.PlayerLeagueHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.PlayerLeagueHistory,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.PlayerLeagueHistoryCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.PlayerLeagueHistory,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.PlayerLeagueHistoryWhereUniqueInput,
+        include: Optional[types.PlayerLeagueHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.PlayerLeagueHistory,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.PlayerLeagueHistoryUpdateInput,
+        where: types.PlayerLeagueHistoryWhereUniqueInput,
+        include: Optional[types.PlayerLeagueHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.PlayerLeagueHistory,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.PlayerLeagueHistoryWhereUniqueInput,
+        data: types.PlayerLeagueHistoryUpsertInput,
+        include: Optional[types.PlayerLeagueHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.PlayerLeagueHistory,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.PlayerLeagueHistoryUpdateManyMutationInput,
+        where: types.PlayerLeagueHistoryWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.PlayerLeagueHistory,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.PlayerLeagueHistoryWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.PlayerLeagueHistory,
             arguments={'where': where},
             root_selection=['count'],
         )
@@ -3459,6 +3625,1116 @@ class PSNGameTrophiesBatchActions:
         self._batcher._add(
             method='delete_many',
             model=models.PSNGameTrophies,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class TeamBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.TeamCreateInput,
+        include: Optional[types.TeamInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Team,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.TeamCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Team,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.TeamWhereUniqueInput,
+        include: Optional[types.TeamInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Team,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.TeamUpdateInput,
+        where: types.TeamWhereUniqueInput,
+        include: Optional[types.TeamInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Team,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.TeamWhereUniqueInput,
+        data: types.TeamUpsertInput,
+        include: Optional[types.TeamInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Team,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.TeamUpdateManyMutationInput,
+        where: types.TeamWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Team,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.TeamWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Team,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class TeamSeasonBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.TeamSeasonCreateInput,
+        include: Optional[types.TeamSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.TeamSeason,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.TeamSeasonCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.TeamSeason,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.TeamSeasonWhereUniqueInput,
+        include: Optional[types.TeamSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.TeamSeason,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.TeamSeasonUpdateInput,
+        where: types.TeamSeasonWhereUniqueInput,
+        include: Optional[types.TeamSeasonInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.TeamSeason,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.TeamSeasonWhereUniqueInput,
+        data: types.TeamSeasonUpsertInput,
+        include: Optional[types.TeamSeasonInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.TeamSeason,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.TeamSeasonUpdateManyMutationInput,
+        where: types.TeamSeasonWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.TeamSeason,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.TeamSeasonWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.TeamSeason,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class TeamManagerBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.TeamManagerCreateInput,
+        include: Optional[types.TeamManagerInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.TeamManager,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.TeamManagerCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.TeamManager,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.TeamManagerWhereUniqueInput,
+        include: Optional[types.TeamManagerInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.TeamManager,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.TeamManagerUpdateInput,
+        where: types.TeamManagerWhereUniqueInput,
+        include: Optional[types.TeamManagerInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.TeamManager,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.TeamManagerWhereUniqueInput,
+        data: types.TeamManagerUpsertInput,
+        include: Optional[types.TeamManagerInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.TeamManager,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.TeamManagerUpdateManyMutationInput,
+        where: types.TeamManagerWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.TeamManager,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.TeamManagerWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.TeamManager,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class BidBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.BidCreateInput,
+        include: Optional[types.BidInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Bid,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.BidCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Bid,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.BidWhereUniqueInput,
+        include: Optional[types.BidInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Bid,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.BidUpdateInput,
+        where: types.BidWhereUniqueInput,
+        include: Optional[types.BidInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Bid,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.BidWhereUniqueInput,
+        data: types.BidUpsertInput,
+        include: Optional[types.BidInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Bid,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.BidUpdateManyMutationInput,
+        where: types.BidWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Bid,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.BidWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Bid,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class ContractBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.ContractCreateInput,
+        include: Optional[types.ContractInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Contract,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.ContractCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Contract,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.ContractWhereUniqueInput,
+        include: Optional[types.ContractInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Contract,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.ContractUpdateInput,
+        where: types.ContractWhereUniqueInput,
+        include: Optional[types.ContractInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Contract,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.ContractWhereUniqueInput,
+        data: types.ContractUpsertInput,
+        include: Optional[types.ContractInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Contract,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.ContractUpdateManyMutationInput,
+        where: types.ContractWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Contract,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.ContractWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Contract,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class UserBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.UserCreateInput,
+        include: Optional[types.UserInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.User,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.UserCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.User,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.UserWhereUniqueInput,
+        include: Optional[types.UserInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.User,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.UserUpdateInput,
+        where: types.UserWhereUniqueInput,
+        include: Optional[types.UserInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.User,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.UserWhereUniqueInput,
+        data: types.UserUpsertInput,
+        include: Optional[types.UserInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.User,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.UserUpdateManyMutationInput,
+        where: types.UserWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.User,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.UserWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.User,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class EaIdHistoryBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.EaIdHistoryCreateInput,
+        include: Optional[types.EaIdHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.EaIdHistory,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.EaIdHistoryCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.EaIdHistory,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.EaIdHistoryWhereUniqueInput,
+        include: Optional[types.EaIdHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.EaIdHistory,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.EaIdHistoryUpdateInput,
+        where: types.EaIdHistoryWhereUniqueInput,
+        include: Optional[types.EaIdHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.EaIdHistory,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.EaIdHistoryWhereUniqueInput,
+        data: types.EaIdHistoryUpsertInput,
+        include: Optional[types.EaIdHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.EaIdHistory,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.EaIdHistoryUpdateManyMutationInput,
+        where: types.EaIdHistoryWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.EaIdHistory,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.EaIdHistoryWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.EaIdHistory,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class SystemHistoryBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.SystemHistoryCreateInput,
+        include: Optional[types.SystemHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.SystemHistory,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.SystemHistoryCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.SystemHistory,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.SystemHistoryWhereUniqueInput,
+        include: Optional[types.SystemHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.SystemHistory,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.SystemHistoryUpdateInput,
+        where: types.SystemHistoryWhereUniqueInput,
+        include: Optional[types.SystemHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.SystemHistory,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.SystemHistoryWhereUniqueInput,
+        data: types.SystemHistoryUpsertInput,
+        include: Optional[types.SystemHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.SystemHistory,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.SystemHistoryUpdateManyMutationInput,
+        where: types.SystemHistoryWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.SystemHistory,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.SystemHistoryWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.SystemHistory,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class GamertagHistoryBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.GamertagHistoryCreateInput,
+        include: Optional[types.GamertagHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.GamertagHistory,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.GamertagHistoryCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.GamertagHistory,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.GamertagHistoryWhereUniqueInput,
+        include: Optional[types.GamertagHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.GamertagHistory,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.GamertagHistoryUpdateInput,
+        where: types.GamertagHistoryWhereUniqueInput,
+        include: Optional[types.GamertagHistoryInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.GamertagHistory,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.GamertagHistoryWhereUniqueInput,
+        data: types.GamertagHistoryUpsertInput,
+        include: Optional[types.GamertagHistoryInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.GamertagHistory,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.GamertagHistoryUpdateManyMutationInput,
+        where: types.GamertagHistoryWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.GamertagHistory,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.GamertagHistoryWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.GamertagHistory,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class NotificationBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.NotificationCreateInput,
+        include: Optional[types.NotificationInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Notification,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.NotificationCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Notification,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.NotificationWhereUniqueInput,
+        include: Optional[types.NotificationInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Notification,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.NotificationUpdateInput,
+        where: types.NotificationWhereUniqueInput,
+        include: Optional[types.NotificationInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Notification,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.NotificationWhereUniqueInput,
+        data: types.NotificationUpsertInput,
+        include: Optional[types.NotificationInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Notification,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.NotificationUpdateManyMutationInput,
+        where: types.NotificationWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Notification,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.NotificationWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Notification,
             arguments={'where': where},
             root_selection=['count'],
         )

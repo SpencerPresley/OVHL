@@ -50,6 +50,40 @@ class VerificationStatus(StrEnum):
     VERIFIED = 'VERIFIED'
     EXPIRED = 'EXPIRED'
     FAILED = 'FAILED'
+    UNKNOWN = 'UNKNOWN'
+
+class UserRole(StrEnum):
+    SUPER_ADMIN = 'SUPER_ADMIN'
+    ADMIN = 'ADMIN'
+    COMMISSIONER = 'COMMISSIONER'
+    BOG = 'BOG'
+    USER = 'USER'
+
+class LeagueType(StrEnum):
+    NHL = 'NHL'
+    AHL = 'AHL'
+    ECHL = 'ECHL'
+    CHL = 'CHL'
+
+class CHLSubLeague(StrEnum):
+    OHL = 'OHL'
+    QMJHL = 'QMJHL'
+    WHL = 'WHL'
+    NAJHL = 'NAJHL'
+
+class PositionGroup(StrEnum):
+    FORWARD = 'FORWARD'
+    DEFENSE = 'DEFENSE'
+    GOALIE = 'GOALIE'
+
+class PlayerPosition(StrEnum):
+    LW = 'LW'
+    C = 'C'
+    RW = 'RW'
+    LD = 'LD'
+    RD = 'RD'
+    G = 'G'
+    ECU = 'ECU'
 
 class BidStatus(StrEnum):
     PENDING = 'PENDING'

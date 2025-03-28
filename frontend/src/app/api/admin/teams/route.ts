@@ -30,17 +30,27 @@ export async function GET() {
     // Get all teams with their current season data
     const teams = await prisma.team.findMany({
       include: {
+        league: true,
+        division: {
+          include: {
+            conference: true,
+          },
+        },
         nhlAffiliate: true,
         ahlAffiliate: true,
         seasons: {
           where: {
-            tier: {
+            leagueSeason: {
               seasonId: season.id,
             },
           },
           include: {
-            tier: true,
-            players: {
+            leagueSeason: {
+              include: {
+                league: true,
+              },
+            },
+            rosterPlayers: {
               include: {
                 playerSeason: {
                   select: {
@@ -57,7 +67,7 @@ export async function GET() {
     // Transform the data to include roster counts
     const transformedTeams = teams.map((team) => {
       const currentSeason = team.seasons[0];
-      const players = currentSeason?.players || [];
+      const players = currentSeason?.rosterPlayers || [];
 
       // Calculate roster counts
       const forwards = players.filter((p) =>
@@ -68,16 +78,22 @@ export async function GET() {
 
       return {
         id: team.id,
-        officialName: team.officialName,
-        teamIdentifier: team.teamIdentifier,
+        fullTeamName: team.fullTeamName,
+        teamAbbreviation: team.teamAbbreviation,
         eaClubId: team.eaClubId,
         eaClubName: team.eaClubName,
+        league: team.league.name,
+        division: team.division?.name,
+        conference: team.division?.conference?.name,
         nhlAffiliate: team.nhlAffiliate,
         ahlAffiliate: team.ahlAffiliate,
+        primaryColor: team.primaryColor,
+        secondaryColor: team.secondaryColor,
+        logoPath: team.logoPath,
         seasons: [
           {
-            tier: {
-              name: currentSeason?.tier.name || '',
+            league: {
+              name: currentSeason?.leagueSeason.league.name || '',
             },
           },
         ],
@@ -85,6 +101,7 @@ export async function GET() {
           forwards,
           defense,
           goalies,
+          total: forwards + defense + goalies,
         },
       };
     });

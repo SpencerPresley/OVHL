@@ -34,7 +34,6 @@ enum CHLSubLeague {
     OHL
     QMJHL
     WHL
-    NAJHL
 }
 
 enum PositionGroup {

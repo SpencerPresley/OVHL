@@ -16,8 +16,9 @@ generator client {
 //   provider = "prisma-client-js"
 // }
 
-// generator python {
-//   provider             = "prisma-client-py"
-//   output               = "../../backend/database_service/prisma/"
-//   recursive_type_depth = -1
-// }
+generator python {
+  provider             = "prisma-client-py"
+  previewFeatures      = ["prismaSchemaFolder"]
+  output               = "../../../backend/services/database_service/prisma/"
+  recursive_type_depth = -1
+}
