@@ -1,4 +1,4 @@
-import { ECHLTeam, ECHLDivision } from './types';
+import { ECHLTeam, ECHLDivision, ECHLConference } from './types';
 
 export const ECHL_TEAMS: ECHLTeam[] = [
   // North Division

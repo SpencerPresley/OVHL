@@ -2,9 +2,10 @@ import { prisma } from '../prisma';
 import { TeamManagementRole } from '@prisma/client';
 
 export class TeamManagementService {
-  static async getTeamManagers(teamId: string) {
+  static async getTeamManagers(teamSeasonId: string) {
+    console.log(`Fetching managers for teamSeasonId: ${teamSeasonId}`);
     return prisma.teamManager.findMany({
-      where: { teamId },
+      where: { teamSeasonId },
       include: {
         user: {
           select: {
@@ -12,17 +13,24 @@ export class TeamManagementService {
             name: true,
             email: true,
             username: true,
-            player: {
-              select: {
-                id: true,
-                gamertags: {
-                  orderBy: { createdAt: 'desc' },
-                  take: 1,
-                },
-              },
-            },
           },
+          include: {
+            gamertags: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+            }
+          }
         },
+        teamSeason: {
+          include: {
+            team: true,
+            leagueSeason: {
+              include: {
+                league: true
+              }
+            }
+          }
+        }
       },
       orderBy: [
         { role: 'asc' }, // OWNER first, then GM, AGM, PAGM
@@ -35,12 +43,21 @@ export class TeamManagementService {
     return prisma.teamManager.findMany({
       where: { userId },
       include: {
-        team: true,
+        teamSeason: {
+          include: {
+            team: true,
+            leagueSeason: {
+              include: {
+                league: true
+              }
+            }
+          }
+        }
       },
     });
   }
 
-  static async addTeamManager(data: { userId: string; teamId: string; role: TeamManagementRole }) {
+  static async addTeamManager(data: { userId: string; teamSeasonId: string; role: TeamManagementRole }) {
     console.log('Starting addTeamManager with data:', data);
 
     // First check if the user exists and has a player profile
@@ -95,45 +112,39 @@ export class TeamManagementService {
     }
 
     // Check if the team exists and get its league
-    const team = await prisma.team.findUnique({
-      where: { id: data.teamId },
+    const teamSeason = await prisma.teamSeason.findUnique({
+      where: { id: data.teamSeasonId },
       include: {
-        seasons: {
-          where: {
-            tier: {
-              seasonId: latestSeason.id,
-            },
-          },
+        leagueSeason: {
           include: {
-            tier: true,
-          },
-          take: 1,
-        },
-      },
+            league: { select: { shortName: true }}
+          }
+        }
+      }
     });
 
-    if (!team) {
-      throw new Error('Team not found');
+    if (!teamSeason) {
+      throw new Error('Team Season not found');
     }
 
-    const league = team.seasons[0]?.tier.name.toUpperCase();
-    if (!league) {
-      throw new Error('Team must be assigned to a league');
+    const leagueShortName = teamSeason.leagueSeason.league.shortName.toUpperCase();
+    if (!leagueShortName) {
+      throw new Error('Team must belong to a league for this season');
     }
 
     // Validate role based on league
-    if (data.role === TeamManagementRole.OWNER && !['NHL', 'CHL'].includes(league)) {
+    if (data.role === TeamManagementRole.OWNER && !['NHL', 'CHL'].includes(leagueShortName)) {
       throw new Error('Only NHL and CHL teams can have owners');
     }
 
-    const currentSeason = user.player.seasons[0];
-    if (!currentSeason) {
+    const currentPlayerSeason = user.player.seasons[0];
+    if (!currentPlayerSeason) {
       throw new Error('Player not found in current season');
     }
 
-    console.log('Current season:', {
-      id: currentSeason.id,
-      hasContract: !!currentSeason.contract,
+    console.log('Current player season:', {
+      id: currentPlayerSeason.id,
+      hasContract: !!currentPlayerSeason.contract,
     });
 
     // Start a transaction to handle both team manager creation and contract update
@@ -144,7 +155,7 @@ export class TeamManagementService {
       const manager = await tx.teamManager.create({
         data: {
           userId: data.userId,
-          teamId: data.teamId,
+          teamSeasonId: data.teamSeasonId,
           role: data.role,
         },
         include: {
@@ -154,17 +165,19 @@ export class TeamManagementService {
               name: true,
               email: true,
               username: true,
-              player: {
-                include: {
-                  gamertags: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 1,
-                  },
-                },
-              },
             },
+            include: {
+              gamertags: {
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              }
+            }
           },
-          team: true,
+          teamSeason: {
+            include: {
+              team: true
+            }
+          }
         },
       });
 
@@ -175,10 +188,10 @@ export class TeamManagementService {
         case TeamManagementRole.OWNER:
         case TeamManagementRole.GM:
         case TeamManagementRole.AGM:
-          if (currentSeason.contract) {
+          if (currentPlayerSeason.contract) {
             console.log('Updating existing contract to 0');
             await tx.contract.update({
-              where: { id: currentSeason.contract.id },
+              where: { id: currentPlayerSeason.contract.id },
               data: { amount: 0 },
             });
           } else {
@@ -187,7 +200,7 @@ export class TeamManagementService {
               data: {
                 playerSeason: {
                   connect: {
-                    id: currentSeason.id,
+                    id: currentPlayerSeason.id,
                   },
                 },
                 amount: 0,
@@ -204,33 +217,33 @@ export class TeamManagementService {
 
   static async removeTeamManager(data: {
     userId: string;
-    teamId: string;
+    teamSeasonId: string;
     role: TeamManagementRole;
   }) {
     return prisma.teamManager.deleteMany({
       where: {
         userId: data.userId,
-        teamId: data.teamId,
+        teamSeasonId: data.teamSeasonId,
         role: data.role,
       },
     });
   }
 
-  static async isTeamManager(userId: string, teamId: string) {
+  static async isTeamManager(userId: string, teamSeasonId: string) {
     const count = await prisma.teamManager.count({
       where: {
         userId,
-        teamId,
+        teamSeasonId,
       },
     });
     return count > 0;
   }
 
-  static async getManagerRole(userId: string, teamId: string) {
+  static async getManagerRole(userId: string, teamSeasonId: string) {
     const manager = await prisma.teamManager.findFirst({
       where: {
         userId,
-        teamId,
+        teamSeasonId,
       },
     });
     return manager?.role || null;

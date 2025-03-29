@@ -39,22 +39,13 @@ model PlayerTeamSeason {
 
     leagueType LeagueType @map("league_type")
 
-    // Relationship references
-    rosterTeamId       String? @map("roster_team_id")
-    trainingCampTeamId String? @map("training_camp_team_id")
-    inactiveTeamId     String? @map("inactive_team_id")
-
     // Status flags
-    isRosterPlayer       Boolean @default(false) @map("is_roster_player")
     isTrainingCampPlayer Boolean @default(false) @map("is_training_camp_player")
-    isInactivePlayer     Boolean @default(false) @map("is_inactive_player")
+    isPlayable           Boolean @default(false) @map("is_playable")
 
     // Relationships
     playerSeason     PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
-    rosterTeam       TeamSeason?  @relation("RosterPlayers", fields: [rosterTeamId], references: [id])
-    trainingCampTeam TeamSeason?  @relation("TrainingCampPlayers", fields: [trainingCampTeamId], references: [id])
-    inactiveTeam     TeamSeason?  @relation("InactivePlayers", fields: [inactiveTeamId], references: [id])
-
+    team             TeamSeason?  @relation("RosterPlayers", fields: [teamSeasonId], references: [id])
     playerMatches PlayerMatch[]
 
     createdAt DateTime @default(now()) @map("created_at")

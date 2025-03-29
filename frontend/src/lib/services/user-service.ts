@@ -5,6 +5,7 @@ import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ForumPostStatus,
   System,
+  PlayerMatch,
 } from '@prisma/client';
 import { prisma } from '../prisma';
 
@@ -19,45 +20,32 @@ export interface CareerStats {
   takeaways: number;
   giveaways: number;
   penaltyMinutes: number;
+  saves?: number;
+  goalsAgainst?: number;
+  shutouts?: number;
 }
 
 export interface PlayerSeason {
   id: string;
   position: string;
-  gamesPlayed: number | null;
-  goals: number | null;
-  assists: number | null;
-  plusMinus: number | null;
-  shots: number | null;
-  hits: number | null;
-  takeaways: number | null;
-  giveaways: number | null;
-  penaltyMinutes: number | null;
-  saves: number | null;
-  goalsAgainst: number | null;
   contract: {
     amount: number;
   } | null;
   teamSeasons: {
     teamSeason: {
+      id: string;
       team: {
         id: string;
         officialName: string;
         teamIdentifier: string;
       };
-      tier: {
-        name: string;
-      };
+      leagueSeason: {
+        league: {
+          name: string;
+          shortName: string;
+        }
+      }
     };
-    gamesPlayed: number | null;
-    goals: number | null;
-    assists: number | null;
-    plusMinus: number | null;
-    shots: number | null;
-    hits: number | null;
-    takeaways: number | null;
-    giveaways: number | null;
-    penaltyMinutes: number | null;
   }[];
 }
 
@@ -66,7 +54,6 @@ export interface Player {
   gamertags: {
     gamertag: string;
     createdAt: Date;
-    playerId: string;
     system: System;
   }[];
   seasons: PlayerSeason[];
@@ -74,7 +61,7 @@ export interface Player {
 
 export type UserWithoutPlayer = Omit<UserProfileResponse, 'player'> & { player: null };
 export type UserWithPlayer = Omit<UserProfileResponse, 'player'> & {
-  player: Player;
+  player: Player | null;
   avatarUrl: string | null;
 };
 
@@ -89,8 +76,8 @@ export interface PlayerProfile {
   currentGamertag: string;
   initials: string;
   system: string;
-  currentContract: number;
-  careerStats: CareerStats;
+  currentContract: number | null;
+  careerStats: CareerStats | null;
 }
 
 export type FormattedUserProfile = NoPlayerProfile | PlayerProfile;
@@ -130,25 +117,21 @@ export class UserService {
     return await prisma.user.findUnique({
       where: { id },
       include: {
-        player: {
+        gamertags: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        activeSeasons: {
           include: {
-            gamertags: {
-              orderBy: { createdAt: 'desc' },
-              take: 1,
-            },
-            seasons: {
+            contract: true,
+            teamSeasons: {
               include: {
-                contract: true,
-                teamSeasons: {
+                team: {
                   include: {
-                    teamSeason: {
+                    team: true,
+                    leagueSeason: {
                       include: {
-                        team: true,
-                        tier: {
-                          select: {
-                            name: true,
-                          },
-                        },
+                        league: true,
                       },
                     },
                   },
@@ -156,6 +139,7 @@ export class UserService {
               },
             },
           },
+          orderBy: { season: { seasonNumber: 'desc' } },
         },
       },
     });
@@ -261,37 +245,6 @@ export class UserService {
     });
   }
 
-  // For type safety in components
-  static readonly UserProfileInclude = {
-    player: {
-      include: {
-        gamertags: {
-          orderBy: { createdAt: 'desc' as const },
-          take: 1,
-        },
-        seasons: {
-          include: {
-            contract: true,
-            teamSeasons: {
-              include: {
-                teamSeason: {
-                  include: {
-                    team: true,
-                    tier: {
-                      select: {
-                        name: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  } as const;
-
   static async createNotification(data: {
     userId: string;
     type: NotificationType;
@@ -366,23 +319,20 @@ export class UserService {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static calculateCareerStats(seasons: any[]): CareerStats {
-    return seasons.reduce(
-      (totals, season) => {
-        totals.gamesPlayed += season.gamesPlayed || 0;
-        totals.goals += season.goals || 0;
-        totals.assists += season.assists || 0;
-        totals.points += (season.goals || 0) + (season.assists || 0);
-        totals.plusMinus += season.plusMinus || 0;
-        totals.shots += season.shots || 0;
-        totals.hits += season.hits || 0;
-        totals.takeaways += season.takeaways || 0;
-        totals.giveaways += season.giveaways || 0;
-        totals.penaltyMinutes += season.penaltyMinutes || 0;
-        return totals;
-      },
-      {
+  static async calculateCareerStats(userId: string): Promise<CareerStats | null> {
+    try {
+      const playerSeasons = await prisma.playerSeason.findMany({
+        where: { userId: userId },
+        include: {
+          playerMatches: true,
+        },
+      });
+
+      if (!playerSeasons || playerSeasons.length === 0) {
+        return null;
+      }
+
+      let totals: CareerStats = {
         gamesPlayed: 0,
         goals: 0,
         assists: 0,
@@ -393,27 +343,108 @@ export class UserService {
         takeaways: 0,
         giveaways: 0,
         penaltyMinutes: 0,
+        saves: 0,
+        goalsAgainst: 0,
+        shutouts: 0,
+      };
+
+      let isGoalie = false;
+
+      for (const season of playerSeasons) {
+        for (const match of season.playerMatches) {
+          totals.gamesPlayed += 1;
+          totals.goals += match.goals ?? 0;
+          totals.assists += match.assists ?? 0;
+          totals.points += (match.goals ?? 0) + (match.assists ?? 0);
+          totals.plusMinus += match.plusMinus ?? 0;
+          totals.shots += match.shots ?? 0;
+          totals.hits += match.hits ?? 0;
+          totals.takeaways += match.takeaways ?? 0;
+          totals.giveaways += match.giveaways ?? 0;
+          totals.penaltyMinutes += match.pim ?? 0;
+
+          if (match.saves !== null || match.goalsAgainst !== null) {
+            isGoalie = true;
+            totals.saves = (totals.saves ?? 0) + (match.saves ?? 0);
+            totals.goalsAgainst = (totals.goalsAgainst ?? 0) + (match.goalsAgainst ?? 0);
+            if (match.goalsAgainst === 0 && (match.timeOnIceSeconds ?? 0) > 0) {
+              totals.shutouts = (totals.shutouts ?? 0) + 1;
+            }
+          }
+        }
       }
-    );
+
+      if (!isGoalie) {
+        delete totals.saves;
+        delete totals.goalsAgainst;
+        delete totals.shutouts;
+      }
+
+      return totals;
+    } catch (error) {
+      console.error(`Failed to calculate career stats for user ${userId}:`, error);
+      return null;
+    }
   }
 
-  static formatUserProfileData(user: UserProfileResponse): FormattedUserProfile {
-    if (!user?.player) {
+  static async formatUserProfileData(userId: string): Promise<FormattedUserProfile | null> {
+    const user = await this.getUserById(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    const hasPlayerData = user.activeSeasons && user.activeSeasons.length > 0;
+
+    if (!hasPlayerData) {
+      const { password, passwordResetToken, passwordResetTokenExpiresAt, ...safeUser } = user;
       return {
         hasPlayer: false,
-        user: { ...user, player: null },
+        user: { ...safeUser, player: null } as UserWithoutPlayer,
       };
     }
 
-    const currentGamertag = user.player.gamertags[0]?.gamertag || 'Unknown Player';
+    const currentGamertagObj = user.gamertags[0];
+    const currentGamertag = currentGamertagObj?.gamertag || 'Unknown Player';
     const initials = currentGamertag.charAt(0).toUpperCase();
-    const system = user.player.gamertags[0]?.system || 'Unknown System';
-    const currentContract = user.player.seasons[0].contract.amount;
-    const careerStats = this.calculateCareerStats(user.player.seasons);
+    const system = currentGamertagObj?.system || 'Unknown System';
+
+    const latestPlayerSeason = user.activeSeasons[0];
+    const currentContract = latestPlayerSeason?.contract?.amount ?? null;
+
+    const careerStats = await this.calculateCareerStats(userId);
+
+    const playerObject: Player | null = {
+      id: userId,
+      gamertags: user.gamertags.map(gt => ({ ...gt, system: gt.system as System })),
+      seasons: user.activeSeasons.map(ps => ({
+        id: ps.id,
+        position: ps.primaryPosition,
+        contract: ps.contract ? { amount: ps.contract.amount } : null,
+        teamSeasons: ps.teamSeasons.map(pts => ({
+          teamSeason: {
+            id: pts.team.id,
+            team: {
+              id: pts.team.team.id,
+              officialName: pts.team.team.fullTeamName,
+              teamIdentifier: pts.team.team.teamAbbreviation,
+            },
+            leagueSeason: {
+              league: {
+                name: pts.team.leagueSeason.league.name,
+                shortName: pts.team.leagueSeason.league.shortName,
+              },
+            },
+          },
+        })),
+      })),
+    };
+
+    const { password, passwordResetToken, passwordResetTokenExpiresAt, ...safeUser } = user;
 
     return {
       hasPlayer: true,
-      user: { ...user, player: user.player! } as UserWithPlayer,
+      user: { ...safeUser, player: playerObject } as UserWithPlayer,
       currentGamertag,
       initials,
       system,
@@ -427,7 +458,6 @@ export class UserService {
       const formData = new FormData();
       formData.append('file', file);
 
-      // First upload to Cloudinary
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',
@@ -441,7 +471,6 @@ export class UserService {
 
       const uploadData = await uploadResponse.json();
 
-      // Then update the user's avatarUrl
       const updateResponse = await fetch(`/api/users/${userId}/avatar`, {
         method: 'PUT',
         credentials: 'include',

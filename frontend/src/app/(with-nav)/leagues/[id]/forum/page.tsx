@@ -1,28 +1,14 @@
 import { notFound } from 'next/navigation';
 import { ForumDisplay } from './forum-display';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { ForumPost, ForumPostStatus } from '@/types/forum';
+import { User } from '@prisma/client'; // Import User type if needed elsewhere, or remove if not
 
 interface League {
   id: string;
   name: string;
   logo: string;
   bannerColor: string;
-}
-
-interface RawForumPost {
-  id: string;
-  title: string;
-  content: string;
-  created_at: Date;
-  updated_at: Date;
-  status: ForumPostStatus;
-  author_id: string;
-  league_id: string;
-  author_name: string | null;
-  author_username: string;
-  comment_count: bigint;
-  reaction_count: bigint;
 }
 
 const POSTS_PER_PAGE = 10;
@@ -72,61 +58,69 @@ export default async function ForumPage({
   }
 
   try {
-    const db = new PrismaClient();
+    // Get total count for pagination using Prisma ORM
+    const total = await prisma.forumPost.count({
+      where: {
+        leagueId: league.id,
+        status: 'PUBLISHED',
+      },
+    });
 
-    // Get total count for pagination
-    const [{ total }] = await db.$queryRaw<[{ total: number }]>`
-      SELECT COUNT(DISTINCT fp.id) as total
-      FROM forum_posts fp
-      WHERE fp.league_id = ${league.id}
-      AND fp.status = 'PUBLISHED'
-    `;
-
-    // Get paginated posts for this league
+    // Get paginated posts for this league using Prisma ORM
     const offset = (page - 1) * POSTS_PER_PAGE;
-    const prismaData = await db.$queryRaw`
-      SELECT 
-        fp.*,
-        u.name as author_name,
-        u.username as author_username,
-        u.id as author_id,
-        COUNT(DISTINCT fc.id) as comment_count,
-        COUNT(DISTINCT fr.id) as reaction_count
-      FROM forum_posts fp
-      LEFT JOIN "User" u ON fp.author_id = u.id
-      LEFT JOIN forum_comments fc ON fc.post_id = fp.id
-      LEFT JOIN forum_reactions fr ON fr.post_id = fp.id
-      WHERE fp.league_id = ${league.id}
-      AND fp.status = 'PUBLISHED'
-      GROUP BY fp.id, u.id
-      ORDER BY fp.created_at DESC
-      LIMIT ${POSTS_PER_PAGE}
-      OFFSET ${offset}
-    `;
+    const prismaPosts = await prisma.forumPost.findMany({
+      where: {
+        leagueId: league.id,
+        status: 'PUBLISHED',
+      },
+      include: {
+        author: { // Include author details
+          select: {
+            id: true,
+            name: true,
+            username: true,
+          },
+        },
+        _count: { // Include counts of relations
+          select: {
+            comments: true,
+            reactions: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: POSTS_PER_PAGE,
+      skip: offset,
+    });
 
-    // Transform Prisma data to match our frontend types
-    const posts = (prismaData as RawForumPost[]).map((post) => ({
+    // console.log(prismaPosts); // Optional: Keep for debugging if needed
+
+    // Transform Prisma data to match our frontend ForumPost type
+    // The structure from findMany is already quite close
+    const posts: ForumPost[] = prismaPosts.map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,
-      gif: null,
-      createdAt: new Date(post.created_at),
-      updatedAt: new Date(post.updated_at),
-      status: post.status as ForumPostStatus,
-      authorId: post.author_id,
-      leagueId: post.league_id,
-      author: {
-        id: post.author_id,
-        name: post.author_name || post.author_username,
-        username: post.author_username,
+      gif: post.gif as ForumPost['gif'], // Cast gif if necessary based on your type
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      status: post.status as ForumPostStatus, // Assert type if needed
+      authorId: post.authorId,
+      leagueId: post.leagueId,
+      author: { // Author data is directly available via include
+        id: post.author.id,
+        name: post.author.name || post.author.username, // Use name or fallback to username
+        username: post.author.username,
       },
-      comments: [], // We don't need comments for the list view
-      reactions: [], // We don't need reactions for the list view
-      _count: {
-        comments: Number(post.comment_count),
-        reactions: Number(post.reaction_count),
+      comments: [], // Still empty for list view
+      reactions: [], // Still empty for list view
+      _count: { // Counts are available via _count include
+        comments: post._count.comments,
+        reactions: post._count.reactions,
       },
-    })) satisfies ForumPost[];
+    }));
 
     return (
       <ForumDisplay

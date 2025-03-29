@@ -1,22 +1,35 @@
 import { NextResponse } from 'next/server';
-import { System } from '@prisma/client';
+import { System, PlayerPosition, PositionGroup, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-// Helper function to generate random gamertag
-function generateGamertag(): string {
-  const prefixes = ['Pro', 'Elite', 'Top', 'Best', 'Epic', 'Super', 'Ultra', 'Mega'];
-  const nouns = ['Player', 'Sniper', 'Dangler', 'Grinder', 'Snipe', 'Celly', 'Sauce', 'Deke'];
-  const numbers = Math.floor(Math.random() * 99)
+// Helper function to generate random gamertag/name
+function generateName(): string {
+  const prefixes = ['Pro', 'Elite', 'Top', 'Best', 'Epic', 'Super', 'Ultra', 'Mega', 'Ace', 'Star'];
+  const nouns = ['Player', 'Sniper', 'Dangler', 'Grinder', 'Scout', 'Rookie', 'Champ', 'Titan', 'Hero', 'Legend'];
+  const numbers = Math.floor(Math.random() * 999)
     .toString()
-    .padStart(2, '0');
+    .padStart(3, '0');
 
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
 
-  return `${prefix}${noun}${numbers}`;
+  // Ensure more uniqueness for username/email generation later
+  return `${prefix}${noun}${numbers}_${Date.now().toString().slice(-4)}`;
+}
+
+// Helper function to get a random Forward position
+function getRandomForwardPosition(): PlayerPosition {
+    const forwardPositions: PlayerPosition[] = [PlayerPosition.C, PlayerPosition.LW, PlayerPosition.RW];
+    return forwardPositions[Math.floor(Math.random() * forwardPositions.length)];
+}
+
+// Helper function to get a random Defense position
+function getRandomDefensePosition(): PlayerPosition {
+    const defensePositions: PlayerPosition[] = [PlayerPosition.LD, PlayerPosition.RD];
+    return defensePositions[Math.floor(Math.random() * defensePositions.length)];
 }
 
 export async function POST() {
@@ -24,111 +37,140 @@ export async function POST() {
     // Get the latest season
     const season = await prisma.season.findFirst({
       where: { isLatest: true },
+      select: { id: true }, // Only need the ID
     });
 
     if (!season) {
       return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
-    const createdPlayers = [];
-    // Calculate minimum needed players plus extra
-    const totalPlayers =
-      32 * 17 + // NHL teams
-      32 * 17 + // AHL teams
-      28 * 17 + // ECHL teams
-      60 * 17 + // CHL teams
-      200; // Extra players for free agency
+    const createdUsersInfo = [];
+    // Define target counts based on calculation (adjust if needed)
+    const targetCounts = {
+      [PositionGroup.FORWARD]: 1535,
+      [PositionGroup.DEFENSE]: 1024,
+      [PositionGroup.GOALIE]: 341,
+    };
+    const totalPlayersToCreate = Object.values(targetCounts).reduce((sum, count) => sum + count, 0);
+    let createdCount = 0;
 
-    // Create players without team assignments
-    for (let i = 0; i < totalPlayers; i++) {
-      const gamertag = generateGamertag();
-      const timestamp = Date.now();
-      const randomNum = Math.floor(Math.random() * 10000);
-      const system = Math.random() > 0.5 ? System.PS : System.XBOX;
+    console.log(`Attempting to create ${totalPlayersToCreate} players...`);
 
-      // Determine position (maintaining same ratio as before)
-      let pos;
-      if (i % 17 < 9) {
-        // First 9 of every 17 are forwards
-        pos = ['C', 'LW', 'RW'][Math.floor(Math.random() * 3)];
-      } else if (i % 17 < 15) {
-        // Next 6 are defense
-        pos = ['LD', 'RD'][Math.floor(Math.random() * 2)];
-      } else {
-        // Last 2 are goalies
-        pos = 'G';
+    // Create players for each position group to ensure distribution
+    for (const [group, count] of Object.entries(targetCounts)) {
+      const positionGroup = group as PositionGroup;
+      console.log(`Creating ${count} ${positionGroup}s...`);
+
+      for (let i = 0; i < count; i++) {
+        const name = generateName();
+        const system = Math.random() > 0.5 ? System.PS : System.XBOX;
+        console.log(`[Debug] Assigned system: ${system}`);
+        const uniqueSuffix = `${name.toLowerCase()}_${createdCount++}`;
+        const email = `${uniqueSuffix}@test.com`;
+        const username = uniqueSuffix;
+        
+        let primaryPosition: PlayerPosition;
+        if (positionGroup === PositionGroup.FORWARD) {
+          primaryPosition = getRandomForwardPosition();
+        } else if (positionGroup === PositionGroup.DEFENSE) {
+          primaryPosition = getRandomDefensePosition();
+        } else { // GOALIE
+          primaryPosition = PlayerPosition.G;
+        }
+
+        try {
+            // Wrap creations for a single player/user in a transaction for safety
+            const userInfo = await prisma.$transaction(async (tx) => {
+            // 1. Create user with more fields initialized
+            const user = await tx.user.create({
+                data: {
+                email: email,
+                username: username,
+                password: await bcrypt.hash('password123', 10),
+                name: name,
+                role: UserRole.USER,
+                activeSystem: system,
+                isSuperAdmin: false,
+                isAdmin: false,
+                isCommissioner: false,
+                isBog: false,
+                isTeamManager: false,
+                },
+            });
+
+            // 2. Create System History entry
+            console.log(`[Debug] Using system for History: ${system}, User ID: ${user.id}`);
+            await tx.systemHistory.create({
+                data: {
+                    userId: user.id,
+                    system: system,
+                }
+            });
+
+            // 3. Create Gamertag History entry (initial)
+            await tx.gamertagHistory.create({
+                data: {
+                    userId: user.id,
+                    system: system,
+                    gamertag: name, 
+                    isVerified: true, 
+                    verifiedAt: new Date(),
+                    verificationStatus: 'VERIFIED'
+                }
+            });
+
+            // 4. Create contract first
+            const contract = await tx.contract.create({
+                data: {
+                amount: 500000, 
+                },
+            });
+
+            // 5. Create player season, linking user, season, and contract
+            const playerSeason = await tx.playerSeason.create({
+                data: {
+                userId: user.id,
+                seasonId: season.id,
+                contractId: contract.id,
+                primaryPosition: primaryPosition,
+                positionGroup: positionGroup,
+                },
+            });
+
+            return {
+                userId: user.id,
+                name: user.name,
+                position: playerSeason.primaryPosition,
+                playerSeasonId: playerSeason.id,
+            };
+            });
+            
+            createdUsersInfo.push(userInfo);
+        } catch(innerError) {
+            // Log error for the specific player creation attempt but continue loop
+             console.error(`Failed to create player ${i + 1} for group ${positionGroup} (Name: ${name}):`, innerError);
+             // Handle potential unique constraint errors specifically if needed
+             if (innerError instanceof Error && (innerError as any).code === 'P2002') {
+                 console.warn(`Skipping player due to duplicate data (email/username likely): ${username}`);
+             } else {
+                // Optionally re-throw if you want the whole process to fail on any single error
+                // throw innerError;
+             }
+        }
       }
-
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          email: `${gamertag.toLowerCase()}_${timestamp}_${randomNum}@test.com`,
-          username: `${gamertag.toLowerCase()}_${timestamp}_${randomNum}`,
-          password: await bcrypt.hash('password123', 10),
-          name: gamertag,
-        },
-      });
-
-      // Create player
-      const player = await prisma.player.create({
-        data: {
-          id: user.id,
-          ea_id: `EA_${gamertag}`,
-          name: gamertag,
-          activeSystem: system,
-        },
-      });
-
-      // Create gamertag history
-      await prisma.gamertagHistory.create({
-        data: {
-          playerId: player.id,
-          system,
-          gamertag,
-        },
-      });
-
-      // Create contract first
-      const contract = await prisma.contract.create({
-        data: {
-          amount: 500000,
-        },
-      });
-
-      // Create player season with contract reference
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const playerSeason = await prisma.playerSeason.create({
-        data: {
-          player: { connect: { id: player.id } },
-          season: { connect: { id: season.id } },
-          contract: { connect: { id: contract.id } },
-          position: pos,
-          gamesPlayed: 0,
-          goals: 0,
-          assists: 0,
-          plusMinus: 0,
-          shots: 0,
-          hits: 0,
-          takeaways: 0,
-          giveaways: 0,
-          penaltyMinutes: 0,
-          ...(pos === 'G' ? { saves: 0, goalsAgainst: 0 } : {}),
-        },
-      });
-
-      createdPlayers.push({
-        name: gamertag,
-        position: pos,
-      });
+      console.log(`Finished creating ${positionGroup}s.`);
     }
 
+    console.log(`Successfully created ${createdUsersInfo.length} out of ${totalPlayersToCreate} attempted players.`);
+
     return NextResponse.json({
-      message: 'Players created successfully for the current season',
-      playersCreated: createdPlayers.length,
-      players: createdPlayers,
+      message: `User, History, and PlayerSeason records created successfully for the latest season. Created ${createdUsersInfo.length} players.`, // Updated message
+      playersCreated: createdUsersInfo.length,
+      // players: createdUsersInfo // Optionally return the list of created players
     });
   } catch (error) {
-    console.error('Failed to create players:', error);
+    // This outer catch handles errors like DB connection issues or issues before the loop
+    console.error('Failed to complete player creation process:', error);
     return NextResponse.json({ error: 'Failed to create players' }, { status: 500 });
   }
 }

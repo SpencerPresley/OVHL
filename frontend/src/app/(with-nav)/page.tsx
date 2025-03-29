@@ -2,12 +2,10 @@ import { Hero } from '@/components/hero';
 import { FeaturesGrid } from '@/components/features_grid';
 import { HomeCTA } from '@/components/home_cta';
 import { Footer } from '@/components/footer';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { News } from '@/components/news';
 import { SeasonSignupCard } from '@/components/season-signup-card';
 import { serverAuth } from '@/lib/auth';
-
-const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 

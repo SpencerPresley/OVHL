@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { PostView } from './post-view';
 import { ForumPostStatus, ReactionType } from '@prisma/client';
 
@@ -159,8 +159,6 @@ function transformComment(comment: PrismaComment, includeQuoted = true): ForumCo
 }
 
 export default async function PostPage({ params }: { params: { id: string; postId: string } }) {
-  const prisma = new PrismaClient();
-
   try {
     // Fix: Create a static copy of params
     const resolvedParams = await params;

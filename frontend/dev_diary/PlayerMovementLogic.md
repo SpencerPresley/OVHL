@@ -155,3 +155,38 @@ When moving a player between leagues (e.g., CHL to AHL call-up):
   - No change needed (CHL teams aren't affected by NHL trades)
 - **Update PlayerLeagueHistory:**
   - No league change, but may want to record team change in metadata
+
+## Idea
+
+TeamSeason
+
+-> Array of roster players
+-> Array of training camp players
+-> Array of inactive players (could probably just be a flag: isPlayable)
+
+User:
+Has array of player season models that represent data from
+each season they've been in
+
+PlayerTeamSeason:
+data specific to a players performance/stats on a particular team during the season
+
+Caps -> PlayerTeamSeason
+Canucks -> PlayerTeamSeason
+
+What if this person gets sent down?
+
+TC player for their nhl team
+but a roster player for their AHL team
+and you'd need playerteamseasons for all:
+
+Caps (ROSTER)
+Canucks (ROSTER)
+--- sent down ---
+AHLCanucks (ROSTER)
+CanucksAsTC (TRAINING CAMP)
+--- AHL TRADES THEM TO MARLIES ---
+Marlies PTS
+Maple Leafs PTS (as a tc)
+(MPL Call them up)
+Maple Leafs PTS (as roster)

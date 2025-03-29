@@ -91,18 +91,26 @@ model GamertagHistory {
     userId               String              @map("user_id")
     system               System
     gamertag             String
+
     createdAt            DateTime            @default(now()) @map("created_at")
     updatedAt            DateTime            @default(now()) @map("updated_at")
+
     // Verification related fields
     verificationCode     String?             @map("verification_code")
+
     codeGeneratedAt      DateTime?           @map("code_generated_at")
+
     verificationStatus   VerificationStatus? @map("verification_status")
     verifiedAt           DateTime?           @map("verified_at")
     verificationAttempts Int?                @default(0) @map("verification_attempts")
+
     lastAttemptAt        DateTime?           @map("last_attempt_at")
     codeExpiresAt        DateTime?           @map("code_expires_at")
+
     isVerified           Boolean             @default(false) @map("is_verified")
+
     verificationMetadata Json?               @map("verification_metadata")
+    
     user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@id([userId, system])

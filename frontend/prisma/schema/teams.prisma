@@ -63,9 +63,7 @@ model TeamSeason {
 
     matches Match[]
 
-    rosterPlayers       PlayerTeamSeason[] @relation("RosterPlayers")
-    trainingCampPlayers PlayerTeamSeason[] @relation("TrainingCampPlayers")
-    inactivePlayers     PlayerTeamSeason[] @relation("InactivePlayers")
+    players       PlayerTeamSeason[] @relation("RosterPlayers")
 
     bids     Bid[]         @relation("TeamSeasonBids")
     managers TeamManager[] // Manager here as managers can change per season

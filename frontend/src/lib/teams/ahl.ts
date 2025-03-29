@@ -1,4 +1,4 @@
-import { AHLTeam, AHLDivision } from './types';
+import { AHLTeam, AHLDivision, AHLConference } from './types';
 
 export const AHL_TEAMS: AHLTeam[] = [
   // Atlantic Division

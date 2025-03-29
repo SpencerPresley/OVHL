@@ -50,7 +50,7 @@ export async function GET() {
                 league: true,
               },
             },
-            rosterPlayers: {
+            players: {
               include: {
                 playerSeason: {
                   select: {
@@ -67,7 +67,7 @@ export async function GET() {
     // Transform the data to include roster counts
     const transformedTeams = teams.map((team) => {
       const currentSeason = team.seasons[0];
-      const players = currentSeason?.rosterPlayers || [];
+      const players = currentSeason?.players || [];
 
       // Calculate roster counts
       const forwards = players.filter((p) =>
@@ -93,8 +93,9 @@ export async function GET() {
         seasons: [
           {
             league: {
-              name: currentSeason?.leagueSeason.league.name || '',
+              name: currentSeason?.leagueSeason.league.name || team.league.name,
             },
+            teamSeasonId: currentSeason?.id,
           },
         ],
         roster: {

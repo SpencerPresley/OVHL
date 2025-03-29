@@ -1,8 +1,11 @@
 import {
   CHLTeam,
   CHLLeague,
+  OHLConference,
   OHLDivision,
+  QMJHLConference,
   QMJHLDivision,
+  WHLConference,
   WHLDivision,
 } from './types';
 

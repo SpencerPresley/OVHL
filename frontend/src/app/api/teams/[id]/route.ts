@@ -27,27 +27,25 @@ export async function GET(request: Request, { params }: { params: { id: string }
         ahlAffiliate: true,
         seasons: {
           where: {
-            tier: {
+            leagueSeason: {
               seasonId: latestSeason.id,
             },
           },
           include: {
-            tier: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 1,
-        },
-        managers: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                username: true,
-                player: {
+            leagueSeason: {
+              include: {
+                league: true,
+              }
+            },
+            managers: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    username: true,
+                  },
                   include: {
                     gamertags: {
                       orderBy: {
@@ -55,14 +53,18 @@ export async function GET(request: Request, { params }: { params: { id: string }
                       },
                       take: 1,
                     },
-                  },
+                  }
                 },
+              },
+              orderBy: {
+                role: 'asc',
               },
             },
           },
           orderBy: {
-            role: 'asc',
+            leagueSeason: { season: { createdAt: 'desc' } },
           },
+          take: 1,
         },
       },
     });

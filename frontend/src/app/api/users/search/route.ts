@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     const teamSeason = await prisma.teamSeason.findFirst({
       where: {
         teamId,
-        tier: {
+        leagueSeason: {
           seasonId: latestSeason.id,
         },
       },
@@ -40,21 +40,19 @@ export async function GET(request: Request) {
           include: {
             playerSeason: {
               include: {
-                player: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    username: true,
+                  },
                   include: {
-                    user: {
-                      select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        username: true,
-                      },
-                    },
                     gamertags: {
                       orderBy: { createdAt: 'desc' },
                       take: 1,
                     },
-                  },
+                  }
                 },
               },
             },
@@ -70,14 +68,11 @@ export async function GET(request: Request) {
     // Transform the data to match the expected format and filter by search query if provided
     const users = teamSeason.players
       .map((playerTeamSeason) => ({
-        id: playerTeamSeason.playerSeason.player.user.id,
-        name: playerTeamSeason.playerSeason.player.user.name,
-        email: playerTeamSeason.playerSeason.player.user.email,
-        username: playerTeamSeason.playerSeason.player.user.username,
-        player: {
-          id: playerTeamSeason.playerSeason.player.id,
-          gamertags: playerTeamSeason.playerSeason.player.gamertags,
-        },
+        id: playerTeamSeason.playerSeason.user.id,
+        name: playerTeamSeason.playerSeason.user.name,
+        email: playerTeamSeason.playerSeason.user.email,
+        username: playerTeamSeason.playerSeason.user.username,
+        gamertags: playerTeamSeason.playerSeason.user.gamertags,
       }))
       .filter((user) => {
         if (!query) return true;
@@ -86,7 +81,7 @@ export async function GET(request: Request) {
           user.name?.toLowerCase().includes(searchStr) ||
           user.email.toLowerCase().includes(searchStr) ||
           user.username?.toLowerCase().includes(searchStr) ||
-          user.player.gamertags[0]?.gamertag.toLowerCase().includes(searchStr)
+          user.gamertags[0]?.gamertag.toLowerCase().includes(searchStr)
         );
       });
 

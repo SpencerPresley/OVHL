@@ -39,19 +39,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid or inactive season' }, { status: 400 });
     }
 
-    // Get player record
+    // Get player record - UPDATED to search by userId
     const player = await prisma.player.findUnique({
-      where: { id: authUser.id },
+      where: { userId: authUser.id }, // Corrected: Use userId from authenticated user
     });
 
     if (!player) {
-      return NextResponse.json({ error: 'Player record not found' }, { status: 400 });
+      // If no player record, we might need to create one depending on application logic
+      // For now, assuming a player record MUST exist before signing up for a season.
+      return NextResponse.json({ error: 'Player record not found for this user' }, { status: 400 });
     }
 
     // Check if player is already signed up for this season
     const existingSignup = await prisma.playerSeason.findFirst({
       where: {
-        playerId: player.id,
+        playerId: player.id, // Use the id from the found player record
         seasonId: season.id,
       },
     });
@@ -67,23 +69,14 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create player season record with contract
+    // Create player season record with contract - UPDATED to use correct player.id and remove stats
     await prisma.playerSeason.create({
       data: {
-        player: { connect: { id: player.id } },
+        player: { connect: { id: player.id } }, // Corrected: Connect using player.id
         season: { connect: { id: season.id } },
         contract: { connect: { id: contract.id } },
-        position: position,
-        gamesPlayed: 0,
-        goals: 0,
-        assists: 0,
-        plusMinus: 0,
-        shots: 0,
-        hits: 0,
-        takeaways: 0,
-        giveaways: 0,
-        penaltyMinutes: 0,
-        ...(position === 'G' ? { saves: 0, goalsAgainst: 0 } : {}),
+        primaryPosition: position, // Renamed field? Assuming 'position' maps to 'primaryPosition'
+        // REMOVED all stats fields (gamesPlayed, goals, assists, etc.)
       },
     });
 

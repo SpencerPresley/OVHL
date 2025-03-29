@@ -1,218 +1,180 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { NHL_TEAMS } from '@/lib/teams/nhl';
-import { AHL_TEAMS } from '@/lib/teams/ahl';
-import { ECHL_TEAMS } from '@/lib/teams/echl';
-import { CHL_TEAMS } from '@/lib/teams/chl';
-import { NHLDivision, AHLDivision, ECHLDivision } from '@/lib/teams/types';
 
 export const dynamic = 'force-dynamic';
 
 interface TeamStats {
-  teamId: string;
+  teamSeasonId: string;
   teamName: string;
-  teamIdentifier: string;
+  teamAbbreviation: string;
+  logoPath: string | null;
   gamesPlayed: number;
   wins: number;
   losses: number;
-  otLosses: number;
   points: number;
   goalsFor: number;
   goalsAgainst: number;
   goalDifferential: number;
-  powerplayGoals: number;
-  powerplayOpportunities: number;
-  powerplayPercentage: number;
-  penaltyKillGoalsAgainst: number;
-  penaltyKillOpportunities: number;
-  penaltyKillPercentage: number;
-}
-
-const LEAGUE_LEVELS: Record<string, number> = {
-  nhl: 1,
-  ahl: 2,
-  echl: 3,
-  chl: 4,
-};
-
-// Helper function to get division for a team
-function getTeamDivision(teamIdentifier: string, leagueId: string) {
-  const teamId = teamIdentifier.toLowerCase();
-  console.log('Looking up division for:', { teamId, leagueId });
-
-  switch (leagueId) {
-    case 'nhl': {
-      const team = NHL_TEAMS.find((t) => t.id === teamId);
-      console.log('Found NHL team:', { team, validDivisions: Object.values(NHLDivision) });
-      // Verify it's an NHL division
-      if (team?.division && Object.values(NHLDivision).includes(team.division)) {
-        return team.division;
-      }
-      return null;
-    }
-    case 'ahl': {
-      const team = AHL_TEAMS.find((t) => t.id === teamId);
-      console.log('Found AHL team:', { team, validDivisions: Object.values(AHLDivision) });
-      // Verify it's an AHL division
-      if (team?.division && Object.values(AHLDivision).includes(team.division)) {
-        return team.division;
-      }
-      return null;
-    }
-    case 'echl': {
-      const team = ECHL_TEAMS.find((t) => t.id === teamId);
-      console.log('Found ECHL team:', { team, validDivisions: Object.values(ECHLDivision) });
-      // Verify it's an ECHL division
-      if (team?.division && Object.values(ECHLDivision).includes(team.division)) {
-        return team.division;
-      }
-      return null;
-    }
-    case 'chl': {
-      const team = CHL_TEAMS.find((t) => t.id === teamId);
-      console.log('Found CHL team:', { team });
-      // For CHL we also check the league property
-      if (team?.division && team.league) {
-        return team.division;
-      }
-      return null;
-    }
-    default:
-      return null;
-  }
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const resolvedParams = await params;
-    const leagueId = resolvedParams.id.toLowerCase();
-    const leagueLevel = LEAGUE_LEVELS[leagueId];
+    const leagueShortName = resolvedParams.id.toLowerCase();
 
-    if (!leagueLevel) {
-      return NextResponse.json({ error: 'Invalid league ID' }, { status: 400 });
+    const league = await prisma.league.findUnique({
+      where: { shortName: leagueShortName },
+    });
+
+    if (!league) {
+      return NextResponse.json(
+        { error: `League with short name '${leagueShortName}' not found` },
+        { status: 404 }
+      );
     }
 
-    // Get the latest season
     const latestSeason = await prisma.season.findFirst({
       where: { isLatest: true },
+      orderBy: { seasonNumber: 'desc' },
     });
 
     if (!latestSeason) {
       return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
-    // Get the tier for this league
-    const tier = await prisma.tier.findFirst({
+    const leagueSeason = await prisma.leagueSeason.findUnique({
       where: {
-        seasonId: latestSeason.id,
-        name: leagueId.toUpperCase(),
+        leagueId_seasonId: {
+          leagueId: league.id,
+          seasonId: latestSeason.id,
+        },
       },
     });
 
-    if (!tier) {
-      return NextResponse.json({ error: 'League tier not found' }, { status: 404 });
+    if (!leagueSeason) {
+      return NextResponse.json(
+        { error: `LeagueSeason not found for ${league.name} in season ${latestSeason.seasonNumber}` },
+        { status: 404 }
+      );
     }
 
-    // Get all team seasons for this tier
-    const teamSeasons = await prisma.teamSeason.findMany({
+    const teamSeasonsWithData = await prisma.teamSeason.findMany({
       where: {
-        tierId: tier.id,
+        leagueSeasonId: leagueSeason.id,
       },
       include: {
-        team: true,
+        team: {
+          include: {
+            division: true,
+          },
+        },
+        matches: {
+          include: {
+            clubAggregateMatchStats: true,
+          },
+        },
       },
     });
 
-    console.log(
-      'Found team seasons:',
-      teamSeasons.map((ts) => ({
-        teamId: ts.teamId,
-        identifier: ts.team.teamIdentifier,
-        name: ts.team.officialName,
-      }))
-    );
+    console.log(`Found ${teamSeasonsWithData.length} TeamSeasons for LeagueSeason ${leagueSeason.id}`);
 
-    // Calculate stats and group teams by division
-    const teamsByDivision = new Map<string, TeamStats[]>();
+    const calculatedStats = new Map<string, TeamStats>();
 
-    teamSeasons.forEach((ts) => {
-      const division = getTeamDivision(ts.team.teamIdentifier, leagueId);
-      if (!division) return;
-
-      // Get the correct team data from the league-specific data
-      let teamData;
-      switch (leagueId) {
-        case 'nhl':
-          teamData = NHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
-          break;
-        case 'ahl':
-          teamData = AHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
-          break;
-        case 'echl':
-          teamData = ECHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
-          break;
-        case 'chl':
-          teamData = CHL_TEAMS.find((t) => t.id === ts.team.teamIdentifier.toLowerCase());
-          break;
-      }
-
-      if (!teamData) return;
-
-      const teamStats = {
-        teamId: ts.teamId,
-        teamName: teamData.name, // Use the name from league data instead of database
-        teamIdentifier: ts.team.teamIdentifier,
-        gamesPlayed: ts.matchesPlayed,
-        wins: ts.wins,
-        losses: ts.losses,
-        otLosses: ts.otLosses,
-        points: ts.wins * 2 + ts.otLosses,
-        goalsFor: ts.goalsFor,
-        goalsAgainst: ts.goalsAgainst,
-        goalDifferential: ts.goalsFor - ts.goalsAgainst,
-        powerplayGoals: ts.powerplayGoals,
-        powerplayOpportunities: ts.powerplayOpportunities,
-        powerplayPercentage:
-          ts.powerplayOpportunities > 0 ? (ts.powerplayGoals / ts.powerplayOpportunities) * 100 : 0,
-        penaltyKillGoalsAgainst: ts.penaltyKillGoalsAgainst,
-        penaltyKillOpportunities: ts.penaltyKillOpportunities,
-        penaltyKillPercentage:
-          ts.penaltyKillOpportunities > 0
-            ? ((ts.penaltyKillOpportunities - ts.penaltyKillGoalsAgainst) /
-                ts.penaltyKillOpportunities) *
-              100
-            : 0,
+    for (const ts of teamSeasonsWithData) {
+      let stats: TeamStats = {
+        teamSeasonId: ts.id,
+        teamName: ts.team.fullTeamName,
+        teamAbbreviation: ts.team.teamAbbreviation,
+        logoPath: ts.team.logoPath ?? null,
+        gamesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        points: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifferential: 0,
       };
 
-      if (!teamsByDivision.has(division)) {
-        teamsByDivision.set(division, []);
+      for (const match of ts.matches) {
+        if (match.clubAggregateMatchStats.length !== 2) {
+          console.warn(`Match ${match.id} does not have exactly 2 ClubAggregateMatchStats records. Skipping.`);
+          continue;
+        }
+
+        const teamEAIdentifier = ts.team.eaClubId;
+        if (!teamEAIdentifier) {
+          console.warn(`TeamSeason ${ts.id} missing EA identifier (e.g., eaClubId) needed for matching. Skipping matches for this team.`);
+          break;
+        }
+
+        const teamAggStat = match.clubAggregateMatchStats.find(
+          (aggStat) => aggStat.eaTeamId.toString() === teamEAIdentifier
+        );
+
+        if (!teamAggStat) {
+          console.warn(`Could not find ClubAggregateMatchStats for team EA ID ${teamEAIdentifier} in Match ${match.id}`);
+          continue;
+        }
+
+        stats.gamesPlayed++;
+        const goalsFor = teamAggStat.score;
+        const goalsAgainst = teamAggStat.opponentScore;
+
+        if (goalsFor > goalsAgainst) {
+          stats.wins++;
+          stats.points += 2;
+        } else if (goalsFor < goalsAgainst) {
+          stats.losses++;
+        } else {
+          console.warn(`Match ${match.id} resulted in a tie (${goalsFor}-${goalsAgainst}). Points logic might need adjustment.`);
+        }
+
+        stats.goalsFor += goalsFor;
+        stats.goalsAgainst += goalsAgainst;
       }
-      teamsByDivision.get(division)?.push(teamStats);
+
+      stats.points = stats.wins * 2;
+      stats.goalDifferential = stats.goalsFor - stats.goalsAgainst;
+
+      calculatedStats.set(ts.id, stats);
+    }
+
+    const teamsByDivision = new Map<string, TeamStats[]>();
+
+    calculatedStats.forEach((stats, teamSeasonId) => {
+      const teamSeasonData = teamSeasonsWithData.find(ts => ts.id === teamSeasonId);
+      const divisionName = teamSeasonData?.team?.division?.name ?? 'Unknown Division';
+
+      if (!teamsByDivision.has(divisionName)) {
+        teamsByDivision.set(divisionName, []);
+      }
+      teamsByDivision.get(divisionName)?.push(stats);
     });
 
-    // Sort teams within each division by points
     teamsByDivision.forEach((teams) => {
       teams.sort((a, b) => {
-        // Sort by points first
-        if (b.points !== a.points) {
-          return b.points - a.points;
-        }
-        // If points are tied, sort by team name
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        if (b.goalDifferential !== a.goalDifferential) return b.goalDifferential - a.goalDifferential;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
         return a.teamName.localeCompare(b.teamName);
       });
     });
 
-    // Convert Map to array of divisions
     const standings = Array.from(teamsByDivision.entries()).map(([division, teams]) => ({
       division,
       teams,
     }));
+
+    standings.sort((a, b) => a.division.localeCompare(b.division));
 
     return NextResponse.json({
       standings,
     });
   } catch (error) {
     console.error('Failed to fetch standings:', error);
-    return NextResponse.json({ error: 'Failed to fetch standings' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch standings';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+

@@ -35,8 +35,8 @@ export default function LeagueManagementPage() {
           // Filter teams based on league
           const filteredTeams = data.teams.filter((team: Team) => {
             // Get the team's current league from its most recent season
-            const currentLeague = team.seasons[0]?.tier.name;
-            return currentLeague === leagueName;
+            const currentLeagueShortName = team.seasons[0]?.leagueSeason?.league?.shortName;
+            return currentLeagueShortName === leagueName;
           });
           setTeams(filteredTeams);
         }
