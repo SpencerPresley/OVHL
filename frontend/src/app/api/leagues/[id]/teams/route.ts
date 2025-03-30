@@ -77,77 +77,111 @@ function getTeamDivision(teamIdentifier: string, teamName: string, leagueId: str
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { searchParams } = new URL(request.url);
-    const tier = searchParams.get('tier');
+    // We don't need the 'tier' search param anymore
+    // const { searchParams } = new URL(request.url);
+    // const tier = searchParams.get('tier');
     const resolvedParams = await params;
-    const leagueId = resolvedParams.id.toLowerCase();
+    const leagueShortName = resolvedParams.id.toLowerCase(); // Use league short name like 'nhl', 'ahl'
 
-    console.log('Fetching teams for:', { tier, leagueId });
+    console.log('Fetching teams for league:', { leagueShortName });
 
-    if (!tier) {
-      return NextResponse.json({ error: 'Tier parameter is required' }, { status: 400 });
+    // Find the League ID based on the shortName (case-insensitive)
+    const league = await prisma.league.findFirst({
+      where: {
+         shortName: {
+           equals: leagueShortName,
+           mode: 'insensitive', // Add case-insensitive mode
+         }
+       },
+      select: { id: true },
+    });
+
+    if (!league) {
+      console.error('League not found for shortName:', leagueShortName);
+      return NextResponse.json({ error: 'League not found' }, { status: 404 });
     }
+    const leagueId = league.id;
 
     // Get the latest season
     const season = await prisma.season.findFirst({
       where: { isLatest: true },
+      select: { id: true }, // Only select ID
     });
 
-    console.log('Found season:', season);
+    console.log('Found latest season:', season);
 
     if (!season) {
       return NextResponse.json({ error: 'No active season found' }, { status: 404 });
     }
 
-    // Get all teams in this league
-    const tierData = await prisma.tier.findFirst({
+    // Get the LeagueSeason which links the league and the latest season
+    const leagueSeason = await prisma.leagueSeason.findUnique({
       where: {
-        seasonId: season.id,
-        name: tier,
+        leagueId_seasonId: { // Use the @@unique compound index
+          leagueId: leagueId,
+          seasonId: season.id,
+        },
       },
       include: {
-        teams: {
+        teams: { // Include TeamSeason records linked to this LeagueSeason
           include: {
+            // Include the base Team details
             team: {
               include: {
-                managers: {
+                // Include division if needed later, might be useful
+                division: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            // Include TeamManagers for this season
+            managers: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    username: true,
+                    // Include player/gamertag info for manager if needed
+                    // player: { include: { gamertags: { orderBy: { createdAt: 'desc' }, take: 1 } } },
+                  },
+                },
+              },
+            },
+            // Include players on the roster for this TeamSeason
+            players: { // This is PlayerTeamSeason
+              include: {
+                playerSeason: { // Include the related PlayerSeason
                   include: {
+                    // Include the User details directly from PlayerSeason
                     user: {
                       select: {
                         id: true,
-                        name: true,
-                        email: true,
-                        username: true,
-                        player: {
-                          include: {
-                            gamertags: {
-                              orderBy: { createdAt: 'desc' },
-                              take: 1,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            players: {
-              include: {
-                playerSeason: {
-                  include: {
-                    player: {
-                      include: {
-                        user: true,
+                        name: true, // Assuming name is on the User model
+                        // Include gamertags relation *from the User*
                         gamertags: {
                           orderBy: { createdAt: 'desc' },
                           take: 1,
-                        },
-                      },
+                          select: { gamertag: true, system: true },
+                        }
+                      }
                     },
-                    contract: true,
+                    contract: true, // Include contract details
+                    // Also include position fields if needed by frontend
+                    // primaryPosition: true,
+                    // positionGroup: true,
                   },
                 },
+                // Include stats from PlayerTeamSeason (Assuming these exist)
+                // If not, they need to be added to the schema or fetched differently
+                // For example:
+                // gamesPlayed: true,
+                // goals: true,
+                // assists: true,
               },
             },
           },
@@ -155,117 +189,112 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
     });
 
-    console.log('Found tier:', {
-      id: tierData?.id,
-      name: tierData?.name,
-      teamCount: tierData?.teams.length,
-      teams: tierData?.teams.map((t) => ({
-        id: t.team.id,
-        name: t.team.officialName,
-        identifier: t.team.teamIdentifier,
-      })),
+    console.log('Found LeagueSeason:', {
+      id: leagueSeason?.id,
+      leagueId: leagueSeason?.leagueId,
+      seasonId: leagueSeason?.seasonId,
+      teamCount: leagueSeason?.teams?.length,
     });
 
-    if (!tierData) {
-      return NextResponse.json({ error: 'League tier not found' }, { status: 404 });
+    if (!leagueSeason) {
+      return NextResponse.json({ error: 'League season data not found' }, { status: 404 });
     }
 
-    // Filter teams based on league-specific data BEFORE transforming
-    console.log('About to filter teams. Total teams before filter:', tierData.teams.length);
+    // No need to filter with hardcoded lists anymore.
+    // The query fetches teams directly associated with the LeagueSeason.
+    // Team names come from `team.fullTeamName`.
 
-    const validTeams = tierData.teams
-      .map((teamSeason) => {
-        const teamId = teamSeason.team.teamIdentifier.toLowerCase();
-        let leagueTeam;
-
-        switch (leagueId) {
-          case 'nhl':
-            leagueTeam = NHL_TEAMS.find((t) => t.id === teamId);
-            break;
-          case 'ahl':
-            leagueTeam = AHL_TEAMS.find((t) => t.id === teamId);
-            break;
-          case 'echl':
-            leagueTeam = ECHL_TEAMS.find((t) => t.id === teamId);
-            break;
-          case 'chl':
-            leagueTeam = CHL_TEAMS.find((t) => t.id === teamId);
-            break;
-          default:
-            leagueTeam = null;
-        }
-
-        console.log('Team check:', {
-          teamId: teamSeason.team.teamIdentifier,
-          dbName: teamSeason.team.officialName,
-          leagueTeamName: leagueTeam?.name,
-          valid: !!leagueTeam,
-        });
-
-        if (!leagueTeam) return null;
-
-        // Return a new object with the CORRECT name from our league data
-        return {
-          ...teamSeason,
-          team: {
-            ...teamSeason.team,
-            officialName: leagueTeam.name, // Use the name from our league data
-          },
-        };
-      })
-      .filter(Boolean) as typeof tierData.teams; // Filter out nulls and cast back to correct type
-
-    console.log('Teams after filter:', validTeams.length);
-    console.log(
-      'Valid teams:',
-      validTeams.map((t) => ({
-        id: t.team.teamIdentifier,
-        name: t.team.officialName,
-      }))
-    );
-
-    // Transform ONLY the valid teams
-    const teams = validTeams.map((teamSeason) => ({
-      team: {
-        id: teamSeason.team.id,
-        officialName: teamSeason.team.officialName,
-        teamIdentifier: teamSeason.team.teamIdentifier,
-        managers: teamSeason.team.managers,
-      },
-      tier: {
-        salaryCap: tierData.salaryCap,
-      },
+    // Transform the fetched TeamSeason data
+    const teams = leagueSeason.teams.map((teamSeason) => ({
+      // TeamSeason basic stats (Assuming these fields exist on TeamSeason model)
+      // If not, they need to be added to the schema or calculated differently
+      id: teamSeason.id, // Add TeamSeason ID if needed
       wins: teamSeason.wins || 0,
       losses: teamSeason.losses || 0,
       otLosses: teamSeason.otLosses || 0,
-      players: teamSeason.players.map((player) => ({
+      forwardCount: teamSeason.forwardCount,
+      defenseCount: teamSeason.defenseCount,
+      goalieCount: teamSeason.goalieCount,
+
+      // Include salary cap from LeagueSeason
+      salaryCap: leagueSeason.salaryCap,
+
+      // Team details from related Team model
+      team: {
+        id: teamSeason.team.id,
+        fullTeamName: teamSeason.team.fullTeamName, // Use fullTeamName from DB
+        teamAbbreviation: teamSeason.team.teamAbbreviation,
+        logoPath: teamSeason.team.logoPath,
+        primaryColor: teamSeason.team.primaryColor,
+        secondaryColor: teamSeason.team.secondaryColor,
+        division: teamSeason.team.division ? {
+          id: teamSeason.team.division.id,
+          name: teamSeason.team.division.name,
+        } : null,
+        // We don't include managers here as they are per-season now
+      },
+
+      // Map managers for this season
+      managers: teamSeason.managers.map(manager => ({
+        role: manager.role,
+        user: {
+          id: manager.user.id,
+          name: manager.user.name,
+          username: manager.user.username,
+          email: manager.user.email,
+          // gamertag: manager.user.player?.gamertags[0]?.gamertag // Example if manager gamertag needed
+        }
+      })),
+
+      // Map players (PlayerTeamSeason records)
+      players: teamSeason.players.map((playerTeamSeason) => ({
+        // Include stats from PlayerTeamSeason
+        gamesPlayed: playerTeamSeason.gamesPlayed || 0,
+        goals: playerTeamSeason.goals || 0,
+        assists: playerTeamSeason.assists || 0,
+        points: (playerTeamSeason.goals || 0) + (playerTeamSeason.assists || 0),
+        plusMinus: playerTeamSeason.plusMinus || 0,
+        goalsAgainst: playerTeamSeason.goalsAgainst || 0,
+        saves: playerTeamSeason.saves || 0,
+
+        // Include details from the related PlayerSeason
         playerSeason: {
-          player: {
-            id: player.playerSeason.player.id,
-            name: player.playerSeason.player.name,
-            user: {
-              id: player.playerSeason.player.user.id,
-            },
-            gamertags: player.playerSeason.player.gamertags.map((gt) => ({
-              gamertag: gt.gamertag,
-              system: gt.system,
-            })),
+          id: playerTeamSeason.playerSeason.id,
+          position: playerTeamSeason.playerSeason.primaryPosition, // Use position from PlayerSeason
+          contract: playerTeamSeason.playerSeason.contract
+            ? {
+                id: playerTeamSeason.playerSeason.contract.id,
+                amount: playerTeamSeason.playerSeason.contract.amount,
+              }
+            : null,
+          // User details (associated with this PlayerSeason)
+          // Renaming the 'player' key to 'user' for clarity
+          user: {
+            id: playerTeamSeason.playerSeason.user.id, // User ID
+            name: playerTeamSeason.playerSeason.user.name, // User name
+            gamertag: playerTeamSeason.playerSeason.user.gamertags[0]
+              ? {
+                  gamertag: playerTeamSeason.playerSeason.user.gamertags[0].gamertag,
+                  system: playerTeamSeason.playerSeason.user.gamertags[0].system,
+                }
+              : null,
           },
-          position: player.playerSeason.position,
-          contract: player.playerSeason.contract,
         },
-        gamesPlayed: player.gamesPlayed,
-        goals: player.goals,
-        assists: player.assists,
-        plusMinus: player.plusMinus,
-        goalsAgainst: player.goalsAgainst,
-        saves: player.saves,
       })),
     }));
 
     return NextResponse.json({ teams });
   } catch (error) {
     console.error('Failed to fetch league teams:', error);
-    return NextResponse.json({ error: 'Failed to fetch league teams' }, { status: 500 });
+    // Check for Prisma-specific errors if needed
+    // if (error instanceof Prisma.PrismaClientKnownRequestError) { ... }
+    return NextResponse.json(
+      { error: 'Failed to fetch league teams', details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
+
+// Ensure prisma instance is correctly imported
+// import { prisma } from '@/lib/prisma'; should be correct
+// Ensure all referenced models and fields exist in your combined schema.

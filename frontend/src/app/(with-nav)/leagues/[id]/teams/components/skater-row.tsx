@@ -9,11 +9,11 @@ export function SkaterRow({ player }: PlayerRowProps) {
   return (
     <div className="mb-2 flex justify-between items-center last:mb-0">
       <div className="flex items-center gap-2">
-        <Link href={`/users/${player.playerSeason.player.id}`} className="hover:text-blue-400">
-          {player.playerSeason.player.gamertags[0]?.gamertag || player.playerSeason.player.name}
+        <Link href={`/users/${player.playerSeason.user.id}`} className="hover:text-blue-400">
+          {player.playerSeason.user.gamertag?.gamertag || player.playerSeason.user.name}
         </Link>
         <span className="text-xs text-gray-400">
-          ${player.playerSeason.contract.amount.toLocaleString()}
+          ${(player.playerSeason.contract?.amount ?? 0).toLocaleString()}
         </span>
       </div>
       <span

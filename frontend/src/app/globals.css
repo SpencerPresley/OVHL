@@ -147,3 +147,51 @@ body {
   position: relative;
   z-index: 10;
 }
+
+/* --- Flash/Shimmer Effect --- */
+
+/* Animation 1: Shimmer Gradient Movement */
+@keyframes flash-shimmer {
+  to {
+    background-position: -50% 0;
+  }
+}
+
+/* Animation 2: Fade Out */
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.flash-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.flash-effect::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 1; /* Start visible */
+  /* Shimmer gradient */
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  background-size: 200% 100%;
+  background-position: 150% 0;
+  z-index: 1;
+  pointer-events: none;
+
+  /* Apply chained animations */
+  /* 1. Shimmer for 1.5s */
+  /* 2. Fade out for 0.3s, starting after 1.2s */
+  animation:
+    flash-shimmer 1.5s ease-out forwards,
+    fade-out 0.9s ease-out 1.2s forwards;
+}
+
+/* --- End Flash/Shimmer Effect --- */

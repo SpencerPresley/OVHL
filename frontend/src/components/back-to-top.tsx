@@ -22,12 +22,12 @@ export function BackToTop() {
     <button
       onClick={scrollToTop}
       aria-label="Scroll back to top"
-      className="fixed bottom-8 right-8 p-3 bg-white text-black rounded-full shadow-lg"
+      className="fixed bottom-8 right-8 p-3 bg-white/50 backdrop-blur-sm hover:bg-white/75 transition-all text-black rounded-full shadow-lg"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

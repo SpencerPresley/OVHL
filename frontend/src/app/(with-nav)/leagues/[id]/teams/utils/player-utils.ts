@@ -9,7 +9,7 @@ import { TeamSeasonPlayer } from '../types/team-season-player';
 function getPositionPlayers(players: TeamSeasonPlayer[], positions: string[]): TeamSeasonPlayer[] {
   return players
     .filter((p) => positions.includes(p.playerSeason.position))
-    .sort((a, b) => a.playerSeason.player.name.localeCompare(b.playerSeason.player.name));
+    .sort((a, b) => a.playerSeason.user.name.localeCompare(b.playerSeason.user.name));
 }
 
 export { getPositionPlayers };

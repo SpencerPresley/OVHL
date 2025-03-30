@@ -45,7 +45,7 @@ export default async function TeamsPage({ params }: { params: { id: string } }) 
 
   // Fetch teams data from the API
   const url = new URL(`/api/leagues/${league.id}/teams`, getApiUrl());
-  url.searchParams.append('tier', league.id.toUpperCase());
+  // url.searchParams.append('tier', league.id.toUpperCase()); // No longer needed
   const response = await fetch(url, { cache: 'no-store' });
 
   if (!response.ok) {

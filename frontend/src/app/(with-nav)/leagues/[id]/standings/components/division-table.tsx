@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Table,
   TableBody,
@@ -21,15 +22,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { NHL_TEAMS } from '@/lib/teams/nhl';
-import { AHL_TEAMS } from '@/lib/teams/ahl';
-import { ECHL_TEAMS } from '@/lib/teams/echl';
-import { CHL_TEAMS } from '@/lib/teams/chl';
 
 interface TeamStats {
   teamId: string;
+  teamSeasonId: string;
   teamName: string;
-  teamIdentifier: string;
+  teamAbbreviation: string;
+  logoPath: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
   gamesPlayed: number;
   wins: number;
   losses: number;
@@ -55,31 +56,37 @@ interface DivisionTableProps {
 export function DivisionTable({ division, teams, leagueId }: DivisionTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // Create a map of team identifiers to colors based on league
-  const teamColorsMap = new Map(
-    leagueId === 'nhl'
-      ? NHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
-      : leagueId === 'ahl'
-        ? AHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
-        : leagueId === 'echl'
-          ? ECHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
-          : leagueId === 'chl'
-            ? CHL_TEAMS.map((team) => [team.id.toUpperCase(), team.colors])
-            : []
-  );
-
   const columns: ColumnDef<TeamStats>[] = [
     {
-      accessorKey: 'teamIdentifier',
+      accessorKey: 'teamName',
       header: 'Team',
       cell: ({ row }) => (
         <Link
-          href={`/leagues/${leagueId}/teams/${row.original.teamIdentifier}`}
-          className="hover:opacity-75"
+          href={`/leagues/${leagueId}/teams/${row.original.teamAbbreviation}`}
+          className="hover:opacity-75 flex items-center gap-2 group"
         >
-          <div className="text-left">
-            <span className="font-bold">{row.original.teamIdentifier}</span>
-            <span className="text-sm text-gray-400 ml-2">{row.original.teamName}</span>
+          {row.original.logoPath ? (
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                position: "relative",
+              }}>
+            <Image
+              src={row.original.logoPath}
+              alt={row.original.teamName}
+              layout="fill"
+              objectFit="contain"
+            />
+            </div>
+
+           ) : (
+              <div className="w-6 h-6 bg-gray-700 rounded-sm flex-shrink-0"></div>
+           )}
+
+          <div className="text-left overflow-hidden whitespace-nowrap">
+             <span className="font-bold inline lg:hidden group-hover:text-blue-400 transition-colors">{row.original.teamAbbreviation}</span>
+            <span className="font-bold hidden lg:inline group-hover:text-blue-400 transition-colors">{row.original.teamName}</span>
           </div>
         </Link>
       ),
@@ -87,56 +94,42 @@ export function DivisionTable({ division, teams, leagueId }: DivisionTableProps)
     {
       accessorKey: 'gamesPlayed',
       header: 'GP',
-      cell: ({ row }) => <div className="text-right">{row.original.gamesPlayed}</div>,
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.gamesPlayed}</div>,
     },
     {
       accessorKey: 'wins',
       header: 'W',
-      cell: ({ row }) => <div className="text-right">{row.original.wins}</div>,
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.wins}</div>,
     },
     {
       accessorKey: 'losses',
       header: 'L',
-      cell: ({ row }) => <div className="text-right">{row.original.losses}</div>,
-    },
-    {
-      accessorKey: 'otLosses',
-      header: 'OTL',
-      cell: ({ row }) => <div className="text-right">{row.original.otLosses}</div>,
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.losses}</div>,
     },
     {
       accessorKey: 'points',
       header: 'PTS',
-      cell: ({ row }) => <div className="text-right font-bold">{row.original.points}</div>,
+      cell: ({ row }) => <div className="text-right font-bold tabular-nums">{row.original.points}</div>,
     },
     {
       accessorKey: 'goalsFor',
       header: 'GF',
-      cell: ({ row }) => <div className="text-right">{row.original.goalsFor}</div>,
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.goalsFor}</div>,
     },
     {
       accessorKey: 'goalsAgainst',
       header: 'GA',
-      cell: ({ row }) => <div className="text-right">{row.original.goalsAgainst}</div>,
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.goalsAgainst}</div>,
     },
     {
       accessorKey: 'goalDifferential',
       header: 'DIFF',
-      cell: ({ row }) => <div className="text-right">{row.original.goalDifferential}</div>,
-    },
-    {
-      accessorKey: 'powerplayPercentage',
-      header: 'PP%',
-      cell: ({ row }) => (
-        <div className="text-right">{row.original.powerplayPercentage.toFixed(1)}%</div>
-      ),
-    },
-    {
-      accessorKey: 'penaltyKillPercentage',
-      header: 'PK%',
-      cell: ({ row }) => (
-        <div className="text-right">{row.original.penaltyKillPercentage.toFixed(1)}%</div>
-      ),
+       cell: ({ row }) => {
+         const diff = row.original.goalDifferential;
+         const diffText = diff > 0 ? `+${diff}` : diff.toString();
+         const diffColor = diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-gray-400';
+         return <div className={cn("text-right font-medium tabular-nums", diffColor)}>{diffText}</div>;
+       },
     },
   ];
 
@@ -153,33 +146,33 @@ export function DivisionTable({ division, teams, leagueId }: DivisionTableProps)
 
   return (
     <div className="mb-10">
-      <h2 className="text-2xl font-bold mb-4">{division} Division</h2>
-      <div className="rounded-md border">
+      <h2 className="text-2xl font-bold mb-4 tracking-tight text-gray-200">{division} Division</h2>
+      <div className="rounded-md border border-gray-700/50 overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-800/60">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-gray-700">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="text-gray-400 font-semibold">
                     {header.isPlaceholder ? null : (
                       <Button
                         variant="ghost"
                         onClick={header.column.getToggleSortingHandler()}
                         className={cn(
-                          'h-8 flex items-center gap-2 w-full px-0',
+                          'h-8 flex items-center gap-1 w-full px-2 hover:bg-gray-700/50',
                           header.column.getCanSort() ? 'cursor-pointer select-none' : '',
-                          header.column.id === 'teamIdentifier'
+                          header.column.id === 'teamName'
                             ? 'justify-start text-left'
                             : 'justify-end text-right'
                         )}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
-                          asc: <ArrowUp className="h-4 w-4 shrink-0" />,
-                          desc: <ArrowDown className="h-4 w-4 shrink-0" />,
+                          asc: <ArrowUp className="h-3 w-3 shrink-0" />,
+                          desc: <ArrowDown className="h-3 w-3 shrink-0" />,
                         }[header.column.getIsSorted() as string] ??
                           (header.column.getCanSort() ? (
-                            <ChevronsUpDown className="h-4 w-4 shrink-0" />
+                            <ChevronsUpDown className="h-3 w-3 shrink-0 text-gray-500" />
                           ) : null)}
                       </Button>
                     )}
@@ -190,19 +183,24 @@ export function DivisionTable({ division, teams, leagueId }: DivisionTableProps)
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const teamColors = teamColorsMap.get(row.original.teamIdentifier);
-                const style = teamColors
-                  ? {
-                      background: `linear-gradient(to right, ${teamColors.primary}50, ${teamColors.secondary}60)`,
-                      borderLeft: `4px solid ${teamColors.primary}`,
-                    }
-                  : {};
+              table.getRowModel().rows.map((row, index) => {
+                const primaryColor = row.original.primaryColor || '#374151';
+                const secondaryColor = row.original.secondaryColor || '#4b5563';
+
+                const style = {
+                  background: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}30)`,
+                  borderLeft: `3px solid ${primaryColor}`,
+                };
 
                 return (
-                  <TableRow key={row.id} style={style}>
+                  <TableRow
+                     key={row.id}
+                     style={style}
+                     className="border-gray-700/50 hover:bg-gray-700/30"
+                     data-state={row.getIsSelected() && 'selected'}
+                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="py-2 px-2 text-sm text-gray-200">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -210,9 +208,9 @@ export function DivisionTable({ division, teams, leagueId }: DivisionTableProps)
                 );
               })
             ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+              <TableRow className="border-gray-700/50">
+                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                  No standings data available for this division.
                 </TableCell>
               </TableRow>
             )}

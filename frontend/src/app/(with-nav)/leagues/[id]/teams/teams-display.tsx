@@ -29,16 +29,18 @@ type LeagueTeam = NHLTeam | AHLTeam | ECHLTeam | CHLTeam;
 export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
   const USE_DEBUG = false;
 
-  // Sort teams alphabetically by name and filter by league-specific teams
+  // Sort teams alphabetically by name using fullTeamName
   const sortedTeams = [...teams].sort((a, b) =>
-    a.team.officialName.localeCompare(b.team.officialName)
+    a.team.fullTeamName.localeCompare(b.team.fullTeamName)
   );
 
   if (USE_DEBUG) {
     teams.forEach((teamSeason) => {
       console.log('Team Season Debug:', {
-        teamName: teamSeason.team.officialName,
+        teamName: teamSeason.team.fullTeamName, // Use fullTeamName
         players: teamSeason.players.length,
+        salaryCap: teamSeason.salaryCap, // Log the cap
+        managers: teamSeason.managers, // Log managers
       });
     });
   }
@@ -54,15 +56,26 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {sortedTeams.map((teamSeason) => {
+            // calculateTeamSalary now gets cap from teamSeason
             const { totalSalary, salaryCap, salaryColor } = calculateTeamSalary(teamSeason);
+
+            // Extract colors for gradient
+            const primaryColor = teamSeason.team.primaryColor || '#4b5563'; // Fallback gray-600
+            const secondaryColor = teamSeason.team.secondaryColor || '#374151'; // Fallback gray-700
+
+            const headerStyle = {
+              background: `linear-gradient(to right, ${primaryColor}30, ${secondaryColor}40)`, // Adjusted opacity
+              borderLeft: `4px solid ${primaryColor}`,
+              borderBottom: '1px solid var(--border)', // Re-apply border-bottom using CSS variable or explicit color
+            };
 
             // Debug log for team salary data
             if (USE_DEBUG) {
               console.log('Team Salary Data:', {
-                teamName: teamSeason.team.officialName,
+                teamName: teamSeason.team.fullTeamName, // Use fullTeamName
                 totalSalary,
                 salaryCap,
-                tier: teamSeason.tier,
+                colors: { primaryColor, secondaryColor }
               });
             }
 
@@ -72,7 +85,7 @@ export function TeamsDisplay({ league, teams }: TeamsDisplayProps) {
                 id={teamSeason.team.id}
                 className="card-gradient card-hover overflow-hidden"
               >
-                <CardHeader className="border-b border-border">
+                <CardHeader style={headerStyle} className="p-4">
                   <CardTitle className="flex flex-col">
                     <TeamsCardTitleContent
                       teamSeason={teamSeason}

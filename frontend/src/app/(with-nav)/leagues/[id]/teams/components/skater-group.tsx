@@ -22,7 +22,7 @@ export function SkaterGroup({ title, players, positions }: SkaterGroupProps) {
       </div>
       <div className="flex-1">
         {positionPlayers.map((player) => (
-          <SkaterRow key={player.playerSeason.player.id} player={player} />
+          <SkaterRow key={player.playerSeason.user.id} player={player} />
         ))}
       </div>
     </div>

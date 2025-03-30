@@ -9,9 +9,10 @@ interface TeamsCardContentProps {
 }
 
 export function TeamsCardContent({ teamSeason }: TeamsCardContentProps) {
+
   return (
     <>
-      <TeamsManagement managers={teamSeason.team.managers} />
+      <TeamsManagement managers={teamSeason.managers} />
       <ForwardsSection players={teamSeason.players} />
       <DefenseSection players={teamSeason.players} />
       <GoaliesSection players={teamSeason.players} />

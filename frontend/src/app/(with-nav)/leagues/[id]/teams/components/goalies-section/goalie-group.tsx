@@ -22,7 +22,7 @@ export function GoalieGroup({ title, players, positions }: GoalieGroupProps) {
       </div>
       <div className="flex-1">
         {positionPlayers.map((player) => (
-          <GoalieRow key={player.playerSeason.player.id} player={player} />
+          <GoalieRow key={player.playerSeason.user.id} player={player} />
         ))}
       </div>
     </div>
